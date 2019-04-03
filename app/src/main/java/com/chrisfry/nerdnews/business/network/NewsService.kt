@@ -69,4 +69,18 @@ interface NewsService {
      */
     @GET("top-headlines")
     fun getTopHeadlines(@QueryMap options: Map<String, String>): Call<ArticleResponse>
+
+    /**
+     * Retrieves all articles depending on options provided
+     * (see https://newsapi.org/docs/endpoints/everything for request parameters)
+     *
+     * @param options: Map containing request parameters
+     */
+    @GET("everything")
+    fun getEverything(@QueryMap options: Map<String, String>): Call<ArticleResponse>
+
+    // TODO: Currently don't need to get sources, in order to use will need to write SourcesResponse
+    // When writing SourcesResponse see https://newsapi.org/docs/endpoints/sources
+//    @GET("sources")
+//    fun getSources(@QueryMap options: Map<String, String>): Call<SourcesResponse>
 }
