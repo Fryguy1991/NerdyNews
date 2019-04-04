@@ -14,7 +14,7 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity(), NewsPagerFragment.TabsProvider {
     companion object {
-        private val TAG = this::class.java.name
+        private val TAG = MainActivity::class.java.name
     }
 
     // UI ELEMENTS
