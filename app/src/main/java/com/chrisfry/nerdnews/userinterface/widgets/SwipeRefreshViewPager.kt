@@ -20,6 +20,7 @@ class SwipeRefreshViewPager : ViewPager {
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         // Only intercept touch events if ViewPager is enabled and will handle them
+        // TODO: Ensure this plays nice with contained recycler views
         return pagingEnabled && super.onTouchEvent(ev)
     }
 }
