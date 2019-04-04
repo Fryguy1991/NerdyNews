@@ -59,10 +59,4 @@ class MainActivity : AppCompatActivity(), NewsPagerFragment.TabsProvider {
         Log.d(TAG, "Setting up tabs with fragment view pager")
         tabLayout.setupWithViewPager(viewPager)
     }
-
-    override fun setTabbingEnabled(enabledFlag: Boolean) {
-        Log.d(TAG, "Setting tabbing enabled to: $enabledFlag")
-
-        // TODO: enable/disable tabs
-    }
 }

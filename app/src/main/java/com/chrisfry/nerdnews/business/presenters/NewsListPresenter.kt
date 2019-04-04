@@ -27,6 +27,10 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
     lateinit var newsService: NewsService
     // Current type of article being displayed
     private var currentArticleType = ArticleDisplayType.TECH
+    // Flags indicating if individual refreshes are complete (used to determine if full refresh is complete)
+    private var isTechRefreshInProgress = false
+    private var isScienceRefreshInProgress = false
+    private var isGamingRefreshInProgress = false
 
     // References to our 3 different article lists
     private val scienceArticles = mutableListOf<Article>()
@@ -42,15 +46,27 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
 
         Log.d(TAG, "NewsListPresenter is attaching to view")
 
+        refreshAllArticleTypes()
+    }
+
+    private fun refreshAllArticleTypes() {
+        Log.d(TAG, "Refreshing all article types")
+
+        // Flag all refreshes as in progress
+        isTechRefreshInProgress = true
+        isScienceRefreshInProgress = true
+        // TODO: uncomment this when gaming articles are implemented
+//        isGamingRefreshInProgress = true
+
         getView()?.displayRefreshing()
 
-        // Request technology articles
+        // Request technology article refresh
         val params = getDefaultQueryParams()
         params[NewsService.KEY_CATEGORY] = NewsService.TECH_CATEGORY
         var call = newsService.getTopHeadlines(params)
         call.enqueue(techRefreshArticleCallback)
 
-        // Request science articles
+        // Request science article refresh
         params[NewsService.KEY_CATEGORY] = NewsService.SCIENCE_CATEGORY
         call = newsService.getTopHeadlines(params)
         call.enqueue(scienceRefreshArticleCallback)
@@ -81,11 +97,31 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
     }
 
     override fun requestArticleRefresh() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Log.d(TAG, "View requested article refresh")
+
+        if (!isRefreshInProgress()) {
+            refreshAllArticleTypes()
+        }
     }
 
     override fun requestMoreArticles() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun isRefreshInProgress(): Boolean {
+        return isTechRefreshInProgress || isScienceRefreshInProgress || isGamingRefreshInProgress
+    }
+
+    private fun articleRefreshTypeComplete(articleType: ArticleDisplayType) {
+        when (articleType) {
+            ArticleDisplayType.TECH -> isTechRefreshInProgress = false
+            ArticleDisplayType.SCIENCE -> isScienceRefreshInProgress = false
+            ArticleDisplayType.GAMING -> isGamingRefreshInProgress = false
+        }
+
+        if (!isRefreshInProgress()) {
+            getView()?.refreshingComplete()
+        }
     }
 
     // CALLBACK OBJECTS
@@ -99,6 +135,8 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
             techArticles.addAll(response.articles)
 
             this@NewsListPresenter.getView()?.refreshArticles(ArticleDisplayType.TECH, techArticles)
+
+            articleRefreshTypeComplete(ArticleDisplayType.TECH)
         }
 
         override fun onFailure(error: ResponseError) {
@@ -119,6 +157,8 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
             scienceArticles.addAll(response.articles)
 
             this@NewsListPresenter.getView()?.refreshArticles(ArticleDisplayType.SCIENCE, scienceArticles)
+
+            articleRefreshTypeComplete(ArticleDisplayType.SCIENCE)
         }
 
         override fun onFailure(error: ResponseError) {
@@ -154,6 +194,11 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
          * View should be in a "refreshing" state where it will display it is refreshing to the user and handle less input
          */
         fun displayRefreshing()
+
+        /**
+         * View should no longer display that it is refreshing
+         */
+        fun refreshingComplete()
 
         /**
          * View should indicate that there are no more articles available (reached bottom of possible list)

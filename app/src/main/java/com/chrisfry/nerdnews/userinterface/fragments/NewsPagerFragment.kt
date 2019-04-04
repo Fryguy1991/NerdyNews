@@ -2,12 +2,14 @@ package com.chrisfry.nerdnews.userinterface.fragments
 
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
@@ -33,6 +35,8 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
     private lateinit var newsPagerAdapter: NewsPagerAdapter
     // Reference responsible for providing tabs to the ViewPager
     private var tabsProvider: TabsProvider? = null
+    // Swipe refresh layout containing ViewPager
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -65,11 +69,25 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Setup view pager
+        // Retrieve UI elements
         newsListViewPager = view.findViewById(R.id.view_pager_news)
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_news_pager)
 
-        val fragManager = fragmentManager
+        // Set swipe refresh color
         val currentContext = context
+        val colorResoureId: Int
+        colorResoureId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentContext != null) {
+            resources.getColor(R.color.colorAccent, currentContext.theme)
+        } else {
+            resources.getColor(R.color.colorAccent)
+        }
+        swipeRefreshLayout.setColorSchemeColors(colorResoureId)
+        swipeRefreshLayout.setOnRefreshListener {
+            presenter?.requestArticleRefresh()
+        }
+
+        // Setup view pager
+        val fragManager = fragmentManager
         if (fragManager != null && currentContext != null) {
             newsPagerAdapter = NewsPagerAdapter(fragManager, currentContext)
             newsListViewPager.adapter = newsPagerAdapter
@@ -96,7 +114,8 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
 
     // PAGE CHANGE LISTENER METHODS
     override fun onPageScrollStateChanged(state: Int) {
-        // Not currently handling page scroll state change
+        // Don't allow swipe to refresh if paging
+        swipeRefreshLayout.isEnabled = state == ViewPager.SCROLL_STATE_IDLE
     }
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
@@ -118,9 +137,11 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
     }
 
     override fun displayRefreshing() {
-        Log.d(TAG, "TODO: Display view as refreshing")
+        swipeRefreshLayout.isRefreshing = true
+    }
 
-        tabsProvider?.setTabbingEnabled(false)
+    override fun refreshingComplete() {
+        swipeRefreshLayout.isRefreshing = false
     }
 
     override fun noMoreArticlesAvailable() {
@@ -137,12 +158,5 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
          * @param viewPager: ViewPager for tab provider to setup with
          */
         fun setupTabs(viewPager: ViewPager)
-
-        /**
-         * Instructs the tab provider to enbale/disable the tabs
-         *
-         * @param enabledFlag: Flag to enable/disable the tabs
-         */
-        fun setTabbingEnabled(enabledFlag: Boolean)
     }
 }

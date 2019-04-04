@@ -7,8 +7,14 @@
         android:layout_height="match_parent"
         tools:context=".userinterface.fragments.NewsPagerFragment">
 
-    <androidx.viewpager.widget.ViewPager
-            android:id="@+id/view_pager_news"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_news_pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
+
+        <com.chrisfry.nerdnews.userinterface.widgets.SwipeRefreshViewPager
+                android:id="@+id/view_pager_news"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>
