@@ -1,6 +1,5 @@
 package com.chrisfry.nerdnews.business.presenters.interfaces
 
-import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.NewsListPresenter
 
 /**
@@ -9,11 +8,11 @@ import com.chrisfry.nerdnews.business.presenters.NewsListPresenter
 interface INewsListPresenter : IBasePresenter<NewsListPresenter.INewsListView> {
 
     /**
-     * Attached view has requested to see articles of the provided type
+     * Attached view has moved to page with provided index
      *
-     * @param articleType: Type of article the view is requesting (see ArticleDisplayType for possible values)
+     * @param pageIndex: Index of the page the view has moved to
      */
-    fun requestArticleType(articleType: ArticleDisplayType)
+    fun movedToPage(pageIndex: Int)
 
     /**
      * Attached view has requested that the article list be refreshed

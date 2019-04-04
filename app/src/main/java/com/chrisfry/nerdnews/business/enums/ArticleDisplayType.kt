@@ -1,7 +1,9 @@
 package com.chrisfry.nerdnews.business.enums
 
-enum class ArticleDisplayType {
-    TECH,
-    SCIENCE,
-    GAMING
+import com.chrisfry.nerdnews.R
+
+enum class ArticleDisplayType(val stringResourceId: Int) {
+    TECH(R.string.tab_tech),
+    SCIENCE(R.string.tab_science),
+    GAMING(R.string.tab_gaming)
 }

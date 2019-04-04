@@ -11,10 +11,12 @@ import com.chrisfry.nerdnews.model.Article
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
+import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
 
-class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresenter.INewsListView>(), INewsListPresenter {
+class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresenter.INewsListView>(),
+    INewsListPresenter {
     companion object {
         private val TAG = this::class.java.name
     }
@@ -62,6 +64,31 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
         super.detach()
     }
 
+    private fun getDefaultQueryParams(): HashMap<String, String> {
+        val queryParameters = HashMap<String, String>()
+        queryParameters[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
+        // TODO: Do we want to limit articles to user's country?
+        return queryParameters
+    }
+
+    override fun movedToPage(pageIndex: Int) {
+        if (pageIndex < 0 || pageIndex >= ArticleDisplayType.values().size) {
+            throw Exception("$TAG: Invalid position received from onPageSelected")
+        } else {
+            currentArticleType = ArticleDisplayType.values()[pageIndex]
+            Log.d(TAG, "Moved to $currentArticleType articles")
+        }
+    }
+
+    override fun requestArticleRefresh() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun requestMoreArticles() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    // CALLBACK OBJECTS
     // Callback for refreshing tech articles
     private val techRefreshArticleCallback = object : NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
@@ -71,9 +98,7 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
             // Add newly retrieved articles
             techArticles.addAll(response.articles)
 
-            if (currentArticleType == ArticleDisplayType.TECH) {
-                this@NewsListPresenter.getView()?.refreshArticles(techArticles)
-            }
+            this@NewsListPresenter.getView()?.refreshArticles(ArticleDisplayType.TECH, techArticles)
         }
 
         override fun onFailure(error: ResponseError) {
@@ -93,9 +118,7 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
             // Add newly retrieved articles
             scienceArticles.addAll(response.articles)
 
-            if (currentArticleType == ArticleDisplayType.SCIENCE) {
-                this@NewsListPresenter.getView()?.refreshArticles(scienceArticles)
-            }
+            this@NewsListPresenter.getView()?.refreshArticles(ArticleDisplayType.SCIENCE, scienceArticles)
         }
 
         override fun onFailure(error: ResponseError) {
@@ -106,26 +129,6 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
         }
     }
 
-
-    private fun getDefaultQueryParams(): HashMap<String, String> {
-        val queryParameters = HashMap<String, String>()
-        queryParameters[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
-        // TODO: Do we want to limit articles to user's country?
-        return queryParameters
-    }
-
-    override fun requestArticleType(articleType: ArticleDisplayType) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun requestArticleRefresh() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun requestMoreArticles() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     /**
      * View interface for a view that will display a list of articles
      */
@@ -134,16 +137,18 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
         /**
          * Provides the view with a refreshed list of articles
          *
+         * @param articleType: Type of article that should be refreshed
          * @param articles: List of articles to refresh the view with
          */
-        fun refreshArticles(articles: List<Article>)
+        fun refreshArticles(articleType: ArticleDisplayType, articles: List<Article>)
 
         /**
          * Provides an updated article list (more articles) to display
          *
+         * @param articleType: Type of article that should be updated
          * @param articles: List of articles to update the view with
          */
-        fun updateArticleList(articles: List<Article>)
+        fun updateArticleList(articleType: ArticleDisplayType, articles: List<Article>)
 
         /**
          * View should be in a "refreshing" state where it will display it is refreshing to the user and handle less input
