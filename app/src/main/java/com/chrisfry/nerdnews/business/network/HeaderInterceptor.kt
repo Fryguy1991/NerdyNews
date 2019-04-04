@@ -5,7 +5,7 @@ import okhttp3.Response
 
 class HeaderInterceptor : Interceptor {
     companion object {
-        private val TAG = this::class.java.name
+        private val TAG = HeaderInterceptor::class.java.name
         private const val AUTHORIZATION_HEADER = "Authorization"
         private const val NERDY_NEWS_API_KEY = "7e9db9621b514351863841ea59dc84e4"
     }

@@ -5,14 +5,14 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.chrisfry.nerdnews.business.InvalidPositionException
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.model.Article
 import com.chrisfry.nerdnews.userinterface.fragments.NewsListFragment
-import java.lang.Exception
 
 class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
     companion object {
-        private val TAG = this::class.java.name
+        private val TAG = NewsPagerAdapter::class.java.name
     }
 
     // List of fragments handled by this adapter (Tech, Science, Gaming)
@@ -28,9 +28,7 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
     override fun getItem(position: Int): Fragment {
 
         if (position < 0 || position >= ArticleDisplayType.values().size) {
-            Log.d(TAG, "Error, invalid position value")
-            val exception = Exception("Error, invalid position value")
-            throw exception
+            throw InvalidPositionException("$TAG: Invalid position in getItem")
         } else {
             return fragmentList[position]
         }
@@ -74,9 +72,7 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
 
     override fun getPageTitle(position: Int): CharSequence? {
         if (position < 0 || position >= ArticleDisplayType.values().size) {
-            Log.d(TAG, "Error, invalid position value")
-            val exception = Exception("Error, invalid position value")
-            throw exception
+            throw InvalidPositionException("$TAG: Invalid position in getPageTitle")
         } else {
             return context.getString(ArticleDisplayType.values()[position].stringResourceId)
         }

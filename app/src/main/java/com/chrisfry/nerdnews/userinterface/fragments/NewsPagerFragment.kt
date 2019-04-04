@@ -25,7 +25,7 @@ import java.lang.Exception
  */
 class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager.OnPageChangeListener {
     companion object {
-        private val TAG = this::class.java.name
+        private val TAG = NewsPagerFragment::class.java.name
     }
 
     // Presenter that provides list of news articles
@@ -127,8 +127,6 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
     }
 
     override fun refreshArticles(articleType: ArticleDisplayType, articles: List<Article>) {
-        Log.d(TAG, "TODO: Display refreshed articles")
-
         newsPagerAdapter.refreshFragment(articleType, articles)
     }
 

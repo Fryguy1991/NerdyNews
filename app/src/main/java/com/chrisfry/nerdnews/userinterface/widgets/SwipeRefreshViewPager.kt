@@ -6,7 +6,7 @@ import android.view.MotionEvent
 import androidx.viewpager.widget.ViewPager
 
 /**
- * ViewPager subclass which allows paging to be disabled and plays nice with swipe refresh layout
+ * ViewPager subclass which allows paging to be disabled
  */
 class SwipeRefreshViewPager : ViewPager {
     constructor(context: Context) : this(context, null)
@@ -15,12 +15,12 @@ class SwipeRefreshViewPager : ViewPager {
     var pagingEnabled = true
 
     override fun onTouchEvent(ev: MotionEvent?): Boolean {
+        // Only handle touch events if ViewPager is enabled
         return pagingEnabled && super.onTouchEvent(ev)
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        // Only intercept touch events if ViewPager is enabled and will handle them
-        // TODO: Ensure this plays nice with contained recycler views
-        return pagingEnabled && super.onTouchEvent(ev)
+        // Only intercept touch events if ViewPager is enabled
+        return pagingEnabled && super.onInterceptTouchEvent(ev)
     }
 }

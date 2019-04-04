@@ -9,13 +9,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.model.Article
+import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
+import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 
 class NewsListFragment : Fragment(){
     companion object {
-        private val TAG = this::class.java.name
+        private val TAG = NewsListFragment::class.java.name
     }
 
+    // RecyclerView elements
     private lateinit var newsRecyclerView: RecyclerView
+    private val articleAdapter = ArticleRecyclerViewAdapter(this)
+    private lateinit var linearLayoutManager: LinearLayoutManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -24,16 +29,18 @@ class NewsListFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         newsRecyclerView = view.findViewById(R.id.recycler_view_news_list)
-        // TODO: Add adapter for recycler view
+        newsRecyclerView.adapter = articleAdapter
 
         val currentContext = context
         if (currentContext != null) {
-            newsRecyclerView.layoutManager = LinearLayoutManager(currentContext)
+            linearLayoutManager = LinearLayoutManager(currentContext, RecyclerView.VERTICAL, false)
+            newsRecyclerView.layoutManager = linearLayoutManager
+            newsRecyclerView.addItemDecoration(LinearLayoutDecorator(currentContext))
         }
     }
 
     fun refreshList(articles: List<Article>) {
-        // TODO: Refresh recyclerview adapter
+        articleAdapter.updateAdapter(articles)
     }
 
     fun updateList(articles: List<Article>) {
