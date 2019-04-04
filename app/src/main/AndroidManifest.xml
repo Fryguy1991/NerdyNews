@@ -13,9 +13,10 @@
             android:theme="@style/AppTheme">
 
         <!-- Main Activity For Application -->
+        <!-- TODO: Handle landscape orientation -->
         <activity android:name=".userinterface.activities.MainActivity"
-                  android:screenOrientation="portrait"
-                  android:launchMode="singleTop">
+                  android:launchMode="singleTop"
+                  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

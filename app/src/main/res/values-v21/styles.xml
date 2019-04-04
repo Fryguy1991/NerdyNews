@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TabLayoutStyle" parent="Widget.MaterialComponents.TabLayout.Colored">
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:elevation">@dimen/toolbar_elevation</item>
+    </style>
+</resources>

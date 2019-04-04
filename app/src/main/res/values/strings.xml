@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Nerdy News</string>
+
+    <!-- Tab Text Value -->
+    <string name="tab_tech">Tech</string>
+    <string name="tab_science">Science</string>
+    <string name="tab_gaming">Gaming</string>
 </resources>
