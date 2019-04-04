@@ -3,6 +3,7 @@ package com.chrisfry.nerdnews.business.presenters
 import android.util.Log
 import com.chrisfry.nerdnews.business.dagger.components.NewsComponent
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
+import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
 import com.chrisfry.nerdnews.business.network.NewsCallback
 import com.chrisfry.nerdnews.business.network.NewsService
@@ -18,7 +19,7 @@ import javax.inject.Inject
 class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresenter.INewsListView>(),
     INewsListPresenter {
     companion object {
-        private val TAG = this::class.java.name
+        private val TAG = NewsListPresenter::class.java.name
     }
 
     // NEWS SERVICE ELEMENTS
@@ -83,7 +84,7 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
     private fun getDefaultQueryParams(): HashMap<String, String> {
         val queryParameters = HashMap<String, String>()
         queryParameters[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
-        // TODO: Do we want to limit articles to user's country?
+        queryParameters[NewsService.KEY_COUNTRY] = NewsApiCountrys.getCountry(Locale.getDefault().country).code
         return queryParameters
     }
 
