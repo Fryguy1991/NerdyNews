@@ -7,7 +7,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.chrisfry.nerdnews.business.InvalidPositionException
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.model.Article
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.fragments.NewsListFragment
 
 class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
@@ -44,7 +44,7 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
      * @param articleType: Article type of the list to be updated
      * @param articles: Updated article list
      */
-    fun updateFragment(articleType: ArticleDisplayType, articles: List<Article>) {
+    fun updateFragment(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
         val articleTypeIndex = ArticleDisplayType.values().indexOf(articleType)
 
         if (articleTypeIndex < 0 || articleTypeIndex >= fragmentList.size){
@@ -60,7 +60,7 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
      * @param articleType: Article type of the list to be refreshed
      * @param articles: New article list
      */
-    fun refreshFragment(articleType: ArticleDisplayType, articles: List<Article>) {
+    fun refreshFragment(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
         val articleTypeIndex = ArticleDisplayType.values().indexOf(articleType)
 
         if (articleTypeIndex < 0 || articleTypeIndex >= fragmentList.size){

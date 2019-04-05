@@ -15,7 +15,7 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.NewsListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsListPresenter
-import com.chrisfry.nerdnews.model.Article
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
 import java.lang.Exception
@@ -126,11 +126,11 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
         presenter?.movedToPage(position)
     }
 
-    override fun refreshArticles(articleType: ArticleDisplayType, articles: List<Article>) {
+    override fun refreshArticles(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
         newsPagerAdapter.refreshFragment(articleType, articles)
     }
 
-    override fun updateArticleList(articleType: ArticleDisplayType, articles: List<Article>) {
+    override fun updateArticleList(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
         newsPagerAdapter.updateFragment(articleType, articles)
     }
 

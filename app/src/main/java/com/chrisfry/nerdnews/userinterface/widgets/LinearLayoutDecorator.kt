@@ -1,51 +1,41 @@
 package com.chrisfry.nerdnews.userinterface.widgets
 
-import android.content.Context
-import android.graphics.Canvas
-import android.graphics.drawable.Drawable
-import androidx.core.content.ContextCompat
+import android.graphics.Rect
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.chrisfry.nerdnews.R
-import java.lang.Exception
 
-class LinearLayoutDecorator(context: Context) : RecyclerView.ItemDecoration() {
+class LinearLayoutDecorator : RecyclerView.ItemDecoration() {
     companion object {
         private val TAG = LinearLayoutDecorator::class.java.name
     }
-    // Drawable for divider
-    private val mDividerDrawable: Drawable
 
-    init {
-        val drawable = ContextCompat.getDrawable(context, R.drawable.decorator_linear_layout)
-        if (drawable != null) {
-            mDividerDrawable = drawable
-            mDividerDrawable.alpha = 255 / 4
-        } else {
-            throw Exception("$TAG: Failed to retrieve divider drawable")
-        }
-    }
+    override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+        val parentResources = parent.resources
+        if (parentResources != null) {
+            val halfDefaultMarginPixels = parentResources.getDimensionPixelOffset(R.dimen.half_default_margin)
+            val defaultMarginPixels = parentResources.getDimensionPixelOffset(R.dimen.default_margin)
 
-    override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
-        val context = parent.context
+            val childIndex = parent.getChildAdapterPosition(view)
 
-        // Retrieve side margin value from resources
-        var sideMargin = 0
-        if (context != null) {
-            sideMargin = context.resources.getDimensionPixelOffset(R.dimen.default_margin)
-        }
+            // Retrieve item count from recyclerview adapter
+            var totalChildCount = -1
+            val parentAdapter = parent.adapter
+            if (parentAdapter != null) {
+                totalChildCount = parentAdapter.itemCount
+            }
 
-        val leftBound = parent.paddingLeft + sideMargin
-        val rightBound = parent.width - parent.paddingRight - sideMargin
+            // Use default margin for top when first item in the adapter, else use half default margin
+            outRect.top = when (childIndex) {
+                0 -> defaultMarginPixels
+                else -> halfDefaultMarginPixels
+            }
 
-        val childCount = parent.childCount
-        for (i in 0 until childCount - 1) {
-            val child = parent.getChildAt(i)
-            val params = child.layoutParams as RecyclerView.LayoutParams
-            val topBound = child.bottom + params.bottomMargin
-            val bottomBound = topBound + mDividerDrawable.intrinsicHeight
-
-            mDividerDrawable.setBounds(leftBound, topBound, rightBound, bottomBound)
-            mDividerDrawable.draw(canvas)
+            // Use default margin for bottom when last item in the adapter, else use half default margin
+            outRect.bottom = when {
+                totalChildCount > 0 && childIndex == totalChildCount - 1 -> defaultMarginPixels
+                else -> halfDefaultMarginPixels
+            }
         }
     }
 }

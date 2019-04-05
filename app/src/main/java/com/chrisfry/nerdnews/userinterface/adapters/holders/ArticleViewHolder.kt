@@ -17,16 +17,15 @@ class ArticleViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
     private val titleText = itemView.findViewById<TextView>(R.id.tv_article_title_text)
     private val sourceText = itemView.findViewById<TextView>(R.id.tv_source_text)
 
-    fun setImageUrl(fragment: Fragment, url: String?) {
-        if (url == null) {
+    fun setImageUrl(fragment: Fragment, url: String) {
+        if (url.isEmpty()) {
             articleImage.visibility = View.GONE
         } else {
             val options = RequestOptions()
-            options.centerCrop()
 
             Glide.with(fragment)
                 .load(url)
-                .apply(options)
+                .apply(options.centerCrop())
                 .into(articleImage)
         }
     }
@@ -35,8 +34,8 @@ class ArticleViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         titleText.text = title
     }
 
-    fun setSourceName(sourceName: String?) {
-        if (sourceName == null) {
+    fun setSourceName(sourceName: String) {
+        if (sourceName.isEmpty()) {
             sourceText.visibility = View.GONE
         } else {
             sourceText.text = sourceName
