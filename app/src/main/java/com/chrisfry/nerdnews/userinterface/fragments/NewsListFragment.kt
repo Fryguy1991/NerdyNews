@@ -35,7 +35,7 @@ class NewsListFragment : Fragment(){
         if (currentContext != null) {
             linearLayoutManager = LinearLayoutManager(currentContext, RecyclerView.VERTICAL, false)
             newsRecyclerView.layoutManager = linearLayoutManager
-            newsRecyclerView.addItemDecoration(LinearLayoutDecorator(currentContext))
+            newsRecyclerView.addItemDecoration(LinearLayoutDecorator())
         }
     }
 

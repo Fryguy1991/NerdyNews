@@ -17,4 +17,5 @@
 
     <!-- Article View Holder Dimens -->
     <dimen name="article_view_holder_image_size">100dp</dimen>
+    <dimen name="card_corner_radius">5dp</dimen>
 </resources>

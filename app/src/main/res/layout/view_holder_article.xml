@@ -1,50 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.cardview.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/half_default_margin"
-        android:layout_marginBottom="@dimen/half_default_margin"
-        android:minHeight="@dimen/article_view_holder_image_size">
+        android:layout_marginStart="@dimen/default_margin"
+        android:layout_marginEnd="@dimen/default_margin"
+        android:minHeight="@dimen/article_view_holder_image_size"
+        app:cardCornerRadius="@dimen/card_corner_radius">
 
-    <!-- TODO: Make this a fancy card layout -->
-    <TextView
-            android:id="@+id/tv_article_title_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Streaming Services, Virtual Reality and the Future of Gaming"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/iv_article_image"
-            android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginEnd="@dimen/default_margin"
-            android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginRight="@dimen/default_margin"
-            android:textSize="@dimen/medium_text_2"
-            android:textStyle="bold"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/half_default_margin">
 
-    <TextView
-            android:id="@+id/tv_source_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Chicago Tribune"
-            app:layout_constraintTop_toBottomOf="@id/tv_article_title_text"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/iv_article_image"
-            android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginEnd="@dimen/default_margin"
-            android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginRight="@dimen/default_margin"
-            android:textStyle="italic"
-            android:layout_marginBottom="@dimen/half_default_margin"/>
+        <TextView
+                android:id="@+id/tv_article_title_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Streaming Services, Virtual Reality and the Future of Gaming"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/iv_article_image"
+                android:layout_marginEnd="@dimen/default_margin"
+                android:layout_marginRight="@dimen/default_margin"
+                android:textSize="@dimen/medium_text_2"
+                android:textStyle="bold"/>
 
-    <ImageView
-            android:id="@+id/iv_article_image"
-            android:layout_width="@dimen/article_view_holder_image_size"
-            android:layout_height="@dimen/article_view_holder_image_size"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="@dimen/default_margin"
-            android:layout_marginRight="@dimen/default_margin"/>
+        <TextView
+                android:id="@+id/tv_source_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Chicago Tribune"
+                app:layout_constraintTop_toBottomOf="@id/tv_article_title_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/iv_article_image"
+                android:layout_marginEnd="@dimen/default_margin"
+                android:layout_marginRight="@dimen/default_margin"
+                android:textStyle="italic"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+                android:id="@+id/iv_article_image"
+                android:layout_width="@dimen/article_view_holder_image_size"
+                android:layout_height="@dimen/article_view_holder_image_size"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
