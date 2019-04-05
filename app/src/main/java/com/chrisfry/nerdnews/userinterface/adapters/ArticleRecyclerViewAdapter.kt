@@ -4,14 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.InvalidPositionException
-import com.chrisfry.nerdnews.model.Article
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.adapters.holders.ArticleViewHolder
 import com.chrisfry.nerdnews.userinterface.fragments.NewsListFragment
 
 /**
  * Adapter for displaying Article objects in a recycler view
  */
-class ArticleRecyclerViewAdapter(private val fragment: NewsListFragment) : BaseRecyclerViewAdapter<Article, ArticleViewHolder>() {
+class ArticleRecyclerViewAdapter(private val fragment: NewsListFragment) : BaseRecyclerViewAdapter<ArticleDisplayModel, ArticleViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
         return ArticleViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_holder_article, parent, false))
     }
@@ -22,10 +22,10 @@ class ArticleRecyclerViewAdapter(private val fragment: NewsListFragment) : BaseR
         } else {
             val articleToDisplay = itemList[position]
 
-            holder.setImageUrl(fragment, articleToDisplay.urlToImage)
-            holder.setSourceName(articleToDisplay.source.name)
+            holder.setImageUrl(fragment, articleToDisplay.imageUrl)
+            holder.setSourceName(articleToDisplay.sourceName)
 
-            if (articleToDisplay.title == null) {
+            if (articleToDisplay.title.isEmpty()) {
                 holder.setArticleTitle(fragment.getString(R.string.no_title_string))
             } else {
                 holder.setArticleTitle(articleToDisplay.title)

@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chrisfry.nerdnews.R
-import com.chrisfry.nerdnews.model.Article
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 
@@ -39,11 +39,11 @@ class NewsListFragment : Fragment(){
         }
     }
 
-    fun refreshList(articles: List<Article>) {
+    fun refreshList(articles: List<ArticleDisplayModel>) {
         articleAdapter.updateAdapter(articles)
     }
 
-    fun updateList(articles: List<Article>) {
+    fun updateList(articles: List<ArticleDisplayModel>) {
         // TODO: update recyclerview adapter (maintain list position)
     }
 }
