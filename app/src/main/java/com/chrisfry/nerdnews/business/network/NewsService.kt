@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
+import javax.inject.Inject
 
 interface NewsService {
     companion object {
@@ -14,6 +15,7 @@ interface NewsService {
 
         @Volatile private var instance: NewsService? = null
 
+        @Inject
         @Synchronized
         fun getInstance(): NewsService {
             return instance ?: synchronized(this) {
@@ -25,8 +27,8 @@ interface NewsService {
                     .baseUrl(NEWS_WEB_API_ENDPOINT)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
-                instance
-                    ?: retrofit.create(NewsService::class.java)
+
+                instance ?: retrofit.create(NewsService::class.java)
             }
         }
 

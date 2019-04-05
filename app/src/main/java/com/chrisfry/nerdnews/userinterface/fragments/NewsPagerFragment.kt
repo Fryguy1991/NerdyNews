@@ -4,7 +4,6 @@ package com.chrisfry.nerdnews.userinterface.fragments
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +18,7 @@ import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
 import java.lang.Exception
+import javax.inject.Inject
 
 /**
  * Fragment class for displaying news article lists in a view pager
@@ -29,7 +29,8 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
     }
 
     // Presenter that provides list of news articles
-    private var presenter: INewsListPresenter? = null
+    @Inject
+    lateinit var presenter: INewsListPresenter
     // ViewPager elements
     private lateinit var newsListViewPager: ViewPager
     private lateinit var newsPagerAdapter: NewsPagerAdapter
@@ -46,20 +47,11 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
         if (parentActivity == null || parentActivity !is TabsProvider) {
             throw Exception("Error invalid activity provided")
         } else {
+            // Inject presenter from presenter component
+            val presenterComponent = (parentActivity.application as App).presenterComponent
+            presenterComponent.inject(this)
+
             tabsProvider = parentActivity
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val parentActivity = activity
-        if (parentActivity != null) {
-            // Create presenter and provide it with news component for dagger injection
-            val newsComponent = (parentActivity.application as App).newsComponent
-            presenter = NewsListPresenter(newsComponent)
-        } else {
-            Log.e(TAG, "Error: Activity was null in onCreate")
         }
     }
 
@@ -108,6 +100,8 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
 
     override fun onDestroy() {
         tabsProvider = null
+
+        presenter?.detach()
 
         super.onDestroy()
     }

@@ -23,13 +23,23 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.collections.HashMap
 
-class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresenter.INewsListView>(),
+class NewsListPresenter private constructor(newsComponent: NewsComponent): BasePresenter<NewsListPresenter.INewsListView>(),
     INewsListPresenter {
     companion object {
         private val TAG = NewsListPresenter::class.java.name
 
         private val GAMING_DOMAINS = listOf("ign.com", "polygon.com", "kotaku.com", "gamesspot.com", "gamesradar.com", "gamerant.com")
         private val GAMING_DOMAINS_EXCLUDE = listOf("mashable.com")
+
+        @Volatile
+        private var instance: NewsListPresenter? = null
+
+        @Synchronized
+        fun getInstance(newsComponent: NewsComponent): NewsListPresenter {
+            return instance ?: synchronized(this) {
+                instance ?: NewsListPresenter(newsComponent)
+            }
+        }
     }
 
     // NEWS SERVICE ELEMENTS
@@ -49,7 +59,7 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
     private val gamingArticles = mutableListOf<Article>()
 
     init {
-        component.inject(this)
+        newsComponent.inject(this)
     }
 
     override fun attach(view: INewsListView) {

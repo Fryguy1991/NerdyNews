@@ -2,16 +2,21 @@ package com.chrisfry.nerdnews.userinterface
 
 import android.app.Application
 import com.chrisfry.nerdnews.business.dagger.components.DaggerNewsComponent
+import com.chrisfry.nerdnews.business.dagger.components.DaggerPresenterComponent
 import com.chrisfry.nerdnews.business.dagger.components.NewsComponent
+import com.chrisfry.nerdnews.business.dagger.components.PresenterComponent
 import com.chrisfry.nerdnews.business.dagger.modules.NewsModule
+import com.chrisfry.nerdnews.business.dagger.modules.PresenterModule
 
 class App : Application() {
 
-    lateinit var newsComponent: NewsComponent
+    private lateinit var newsComponent: NewsComponent
+    lateinit var presenterComponent: PresenterComponent
 
     override fun onCreate() {
         super.onCreate()
 
         newsComponent = DaggerNewsComponent.builder().newsModule(NewsModule()).build()
+        presenterComponent = DaggerPresenterComponent.builder().presenterModule(PresenterModule(newsComponent)).build()
     }
 }
