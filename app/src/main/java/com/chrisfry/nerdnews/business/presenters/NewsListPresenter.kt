@@ -1,5 +1,6 @@
 package com.chrisfry.nerdnews.business.presenters
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.dagger.components.NewsComponent
@@ -16,8 +17,8 @@ import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.AppUtils
 import java.lang.Exception
-import java.text.DateFormat
 import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.HashMap
@@ -155,7 +156,11 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
 
             var publishedAt: Date? = null
             try {
-                publishedAt = DateFormat.getInstance().parse(article.publishedAt)
+                // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
+                @SuppressLint("SimpleDateFormat")
+                val dateFormat = SimpleDateFormat(AppConstants.PUBLISHED_AT_TIME_FORMAT)
+
+                publishedAt = dateFormat.parse(article.publishedAt)
             } catch (exception: ParseException) {
                 Log.e(TAG, "Failed to parse published at date")
             }
