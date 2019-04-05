@@ -81,8 +81,8 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
         val scienceCall = newsService.getTopHeadlines(params)
         scienceCall.enqueue(scienceRefreshArticleCallback)
 
-        // Request gaming article refresh, gaming does not have a category so we'll request all articles from
-        // domains that generally provide gaming news (see GAMING_DOMAINS)
+        // Request gaming article refresh, gaming does not have a category so we cannot use top headlines. Instead
+        // we'll request all articles from domains that generally provide gaming news (see GAMING_DOMAINS)
         val gamingParams = HashMap<String, String>()
         gamingParams[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
         gamingParams[NewsService.KEY_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS)
@@ -142,6 +142,9 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
 
     /**
      * Converts a list of Article objects into a simpler model for display
+     *
+     * @param articlesToConvert: List of Article models to convert to ArticleDisplayModel
+     * @return: List of ArticleDisplayModel based on provided Article list
      */
     private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModel> {
 
@@ -179,7 +182,7 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
 
 
     /**
-     * Attempts to trip the source from the article title (if it's located at the end of the title)
+     * Attempts to trim the source from the article title (if it's located at the end of the title)
      *
      * @param title: Article title
      * @param source: Name of the article source
@@ -233,7 +236,6 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
         }
         return sourceDashIndex
     }
-
 
     // CALLBACK OBJECTS
     // Callback for refreshing tech articles
