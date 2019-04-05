@@ -14,6 +14,7 @@ import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
+import com.chrisfry.nerdnews.utils.AppUtils
 import java.lang.Exception
 import java.text.DateFormat
 import java.text.ParseException
@@ -26,7 +27,8 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
     companion object {
         private val TAG = NewsListPresenter::class.java.name
 
-        private val GAMING_SOURCES = listOf("ign.com","polygon.com", "kotaku.com", "gamesspot.com", "gamesradar.com", "gamerant.com")
+        private val GAMING_DOMAINS = listOf("ign.com", "polygon.com", "kotaku.com", "gamesspot.com", "gamesradar.com", "gamerant.com")
+        private val GAMING_DOMAINS_EXCLUDE = listOf("mashable.com")
     }
 
     // NEWS SERVICE ELEMENTS
@@ -78,18 +80,12 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
         val scienceCall = newsService.getTopHeadlines(params)
         scienceCall.enqueue(scienceRefreshArticleCallback)
 
-        // Build string for white listed gaming sources
-        var gamingSourceString = GAMING_SOURCES[0]
-        for (source: String in GAMING_SOURCES.subList(1, GAMING_SOURCES.size - 1)) {
-            gamingSourceString += ",$source"
-        }
-
-        // Request gaming article refresh
+        // Request gaming article refresh, gaming does not have a category so we'll request all articles from
+        // domains that generally provide gaming news (see GAMING_DOMAINS)
         val gamingParams = HashMap<String, String>()
         gamingParams[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
-        gamingParams[NewsService.KEY_DOMAINS] = gamingSourceString
-        // TODO: Remove hardcoding of mashable.com
-        gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] = "mashable.com"
+        gamingParams[NewsService.KEY_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS)
+        gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS_EXCLUDE)
         val gamingCall = newsService.getEverything(gamingParams)
         gamingCall.enqueue(gamingRefreshArticleCallback)
     }
@@ -102,7 +98,6 @@ class NewsListPresenter(component: NewsComponent) : BasePresenter<NewsListPresen
 
     private fun getDefaultQueryParams(): HashMap<String, String> {
         val queryParameters = HashMap<String, String>()
-        queryParameters[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
         queryParameters[NewsService.KEY_COUNTRY] = NewsApiCountrys.getCountry(Locale.getDefault().country).code
         return queryParameters
     }
