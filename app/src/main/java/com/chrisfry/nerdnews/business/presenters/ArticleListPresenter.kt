@@ -22,6 +22,7 @@ import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.AppUtils
 import java.lang.Exception
+import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -191,12 +192,14 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
             val imageUrl = article.urlToImage ?: AppConstants.EMPTY_STRING
             val author = article.author ?: AppConstants.EMPTY_STRING
             val articleUrl = article.url ?: AppConstants.EMPTY_STRING
+            val articleContent = article.content ?: AppConstants.EMPTY_STRING
 
             var publishedAt: Date? = null
             try {
                 // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
                 @SuppressLint("SimpleDateFormat")
                 val dateFormat = SimpleDateFormat(AppConstants.PUBLISHED_AT_TIME_FORMAT)
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
 
                 publishedAt = dateFormat.parse(article.publishedAt)
             } catch (exception: ParseException) {
@@ -209,15 +212,17 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
                 title = trimSourceFromArticleTitle(title, sourceName)
             }
 
+            // Change published at date to local format
+            val publishedAtString = if (publishedAt == null) {
+                AppConstants.EMPTY_STRING
+            } else {
+                val dateFormat = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
+                dateFormat.timeZone = TimeZone.getDefault()
+                dateFormat.format(publishedAt)
+            }
+
             articleDisplayModelList.add(
-                ArticleDisplayModel(
-                    title,
-                    sourceName,
-                    imageUrl,
-                    author,
-                    articleUrl,
-                    publishedAt
-                )
+                ArticleDisplayModel(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
             )
         }
 
