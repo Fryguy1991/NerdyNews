@@ -2,6 +2,7 @@ package com.chrisfry.nerdnews.userinterface.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -14,11 +15,12 @@ import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
+import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 import java.lang.Exception
 
-class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView {
+class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener {
     companion object {
         private val TAG = ArticleListFragment::class.java.name
         const val KEY_ARTICLE_TYPE = "key_article_type"
@@ -56,6 +58,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         newsRecyclerView = view.findViewById(R.id.recycler_view_news_list)
+        articleAdapter.listener = this
         newsRecyclerView.adapter = articleAdapter
 
         val currentContext = context
@@ -114,5 +117,23 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView {
 
     override fun noMoreArticlesAvailable() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onArticleSelected(article: ArticleDisplayModel) {
+        Log.d(TAG, "Article selected with title: \"${article.title}\"")
+
+        // Launch article item fragment to display selected article
+        val itemFragment = ArticleItemFragment()
+        val args = Bundle()
+        args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, article)
+        itemFragment.arguments = args
+
+        val parentActivity = activity
+        if (parentActivity != null) {
+            val transaction = parentActivity.supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.frag_placeholder, itemFragment)
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
     }
 }
