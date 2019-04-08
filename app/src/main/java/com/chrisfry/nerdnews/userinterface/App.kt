@@ -7,6 +7,7 @@ import com.chrisfry.nerdnews.business.dagger.components.NewsComponent
 import com.chrisfry.nerdnews.business.dagger.components.PresenterComponent
 import com.chrisfry.nerdnews.business.dagger.modules.NewsModule
 import com.chrisfry.nerdnews.business.dagger.modules.PresenterModule
+import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 
 class App : Application() {
 
@@ -17,6 +18,9 @@ class App : Application() {
         super.onCreate()
 
         newsComponent = DaggerNewsComponent.builder().newsModule(NewsModule()).build()
-        presenterComponent = DaggerPresenterComponent.builder().presenterModule(PresenterModule(newsComponent)).build()
+        presenterComponent = DaggerPresenterComponent.builder().presenterModule(PresenterModule()).build()
+
+        // Instantiate article list presenters
+        ArticleListPresenter.createPresenters(newsComponent)
     }
 }

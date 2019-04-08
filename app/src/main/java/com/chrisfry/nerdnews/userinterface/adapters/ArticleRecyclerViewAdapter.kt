@@ -6,12 +6,12 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.InvalidPositionException
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.adapters.holders.ArticleViewHolder
-import com.chrisfry.nerdnews.userinterface.fragments.NewsListFragment
+import com.chrisfry.nerdnews.userinterface.fragments.ArticleListFragment
 
 /**
  * Adapter for displaying Article objects in a recycler view
  */
-class ArticleRecyclerViewAdapter(private val fragment: NewsListFragment) : BaseRecyclerViewAdapter<ArticleDisplayModel, ArticleViewHolder>() {
+class ArticleRecyclerViewAdapter(private val fragment: ArticleListFragment) : BaseRecyclerViewAdapter<ArticleDisplayModel, ArticleViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
         return ArticleViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_holder_article, parent, false))
     }

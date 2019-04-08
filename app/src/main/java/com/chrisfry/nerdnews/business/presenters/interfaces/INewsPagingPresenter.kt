@@ -1,11 +1,11 @@
 package com.chrisfry.nerdnews.business.presenters.interfaces
 
-import com.chrisfry.nerdnews.business.presenters.NewsListPresenter
+import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 
 /**
  * Interface for presenter that will provide article data
  */
-interface INewsListPresenter : IBasePresenter<NewsListPresenter.INewsListView> {
+interface INewsPagingPresenter : IBasePresenter<NewsPagingPresenter.INewsPagingView> {
 
     /**
      * Attached view has moved to page with provided index
@@ -18,9 +18,4 @@ interface INewsListPresenter : IBasePresenter<NewsListPresenter.INewsListView> {
      * Attached view has requested that the article list be refreshed
      */
     fun requestArticleRefresh()
-
-    /**
-     * Attached view has requested that more articles be provided (reached bottom of list)
-     */
-    fun requestMoreArticles()
 }
