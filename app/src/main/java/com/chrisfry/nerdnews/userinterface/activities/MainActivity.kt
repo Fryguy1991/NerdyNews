@@ -2,6 +2,7 @@ package com.chrisfry.nerdnews.userinterface.activities
 
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -9,10 +10,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.userinterface.fragments.NewsPagerFragment
 import com.chrisfry.nerdnews.R
+import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.google.android.material.tabs.TabLayout
 import java.lang.Exception
 
-class MainActivity : AppCompatActivity(), NewsPagerFragment.TabsProvider {
+class MainActivity : AppCompatActivity(), ITabsProvider {
     companion object {
         private val TAG = MainActivity::class.java.name
     }
@@ -58,5 +60,23 @@ class MainActivity : AppCompatActivity(), NewsPagerFragment.TabsProvider {
     override fun setupTabs(viewPager: ViewPager) {
         Log.d(TAG, "Setting up tabs with fragment view pager")
         tabLayout.setupWithViewPager(viewPager)
+        tabLayout.visibility = View.VISIBLE
+    }
+
+    override fun hideTabs() {
+        tabLayout.visibility = View.GONE
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item != null) {
+            when (item.itemId) {
+                android.R.id.home -> {
+                    onBackPressed()
+                    return true
+                }
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }
