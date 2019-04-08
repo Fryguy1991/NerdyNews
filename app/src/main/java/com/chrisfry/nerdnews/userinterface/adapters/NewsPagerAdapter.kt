@@ -1,14 +1,13 @@
 package com.chrisfry.nerdnews.userinterface.adapters
 
 import android.content.Context
-import android.util.Log
+import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.chrisfry.nerdnews.business.InvalidPositionException
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
-import com.chrisfry.nerdnews.userinterface.fragments.NewsListFragment
+import com.chrisfry.nerdnews.userinterface.fragments.ArticleListFragment
 
 class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
     companion object {
@@ -16,17 +15,21 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
     }
 
     // List of fragments handled by this adapter (Tech, Science, Gaming)
-    private val fragmentList = mutableListOf<NewsListFragment>()
+    private val fragmentList = mutableListOf<ArticleListFragment>()
 
     init {
         // Add a news list fragment for each article type to display (currently static number)
         for(articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-            fragmentList.add(NewsListFragment())
+            // Add article type as an argument (used for presenter retrieval)
+            val newFragment = ArticleListFragment()
+            val args = Bundle()
+            args.putInt(ArticleListFragment.KEY_ARTICLE_TYPE, articleType.ordinal)
+            newFragment.arguments = args
+            fragmentList.add(newFragment)
         }
     }
 
     override fun getItem(position: Int): Fragment {
-
         if (position < 0 || position >= ArticleDisplayType.values().size) {
             throw InvalidPositionException("$TAG: Invalid position in getItem")
         } else {
@@ -36,38 +39,6 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
 
     override fun getCount(): Int {
         return ArticleDisplayType.values().size
-    }
-
-    /**
-     * Updates the list of articles in the desired fragment (based on articleType)
-     *
-     * @param articleType: Article type of the list to be updated
-     * @param articles: Updated article list
-     */
-    fun updateFragment(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
-        val articleTypeIndex = ArticleDisplayType.values().indexOf(articleType)
-
-        if (articleTypeIndex < 0 || articleTypeIndex >= fragmentList.size){
-            Log.e(TAG, "Error article type index is invalid. Something went very wrong")
-        } else {
-            fragmentList[articleTypeIndex].updateList(articles)
-        }
-    }
-
-    /**
-     * Refreshes the list of articles in the desired fragment (based on articleType)
-     *
-     * @param articleType: Article type of the list to be refreshed
-     * @param articles: New article list
-     */
-    fun refreshFragment(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
-        val articleTypeIndex = ArticleDisplayType.values().indexOf(articleType)
-
-        if (articleTypeIndex < 0 || articleTypeIndex >= fragmentList.size){
-            Log.e(TAG, "Error article type index is invalid. Something went very wrong")
-        } else {
-            fragmentList[articleTypeIndex].refreshList(articles)
-        }
     }
 
     override fun getPageTitle(position: Int): CharSequence? {

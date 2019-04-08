@@ -11,10 +11,8 @@ import android.view.ViewGroup
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.R
-import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.presenters.NewsListPresenter
-import com.chrisfry.nerdnews.business.presenters.interfaces.INewsListPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
+import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
 import java.lang.Exception
@@ -23,14 +21,14 @@ import javax.inject.Inject
 /**
  * Fragment class for displaying news article lists in a view pager
  */
-class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager.OnPageChangeListener {
+class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewPager.OnPageChangeListener {
     companion object {
         private val TAG = NewsPagerFragment::class.java.name
     }
 
     // Presenter that provides list of news articles
     @Inject
-    lateinit var presenter: INewsListPresenter
+    lateinit var presenter: INewsPagingPresenter
     // ViewPager elements
     private lateinit var newsListViewPager: ViewPager
     private lateinit var newsPagerAdapter: NewsPagerAdapter
@@ -98,11 +96,13 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
         }
     }
 
+    override fun onDestroyView() {
+        presenter?.detach()
+        super.onDestroyView()
+    }
+
     override fun onDestroy() {
         tabsProvider = null
-
-        presenter?.detach()
-
         super.onDestroy()
     }
 
@@ -120,24 +120,12 @@ class NewsPagerFragment : Fragment(), NewsListPresenter.INewsListView, ViewPager
         presenter?.movedToPage(position)
     }
 
-    override fun refreshArticles(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
-        newsPagerAdapter.refreshFragment(articleType, articles)
-    }
-
-    override fun updateArticleList(articleType: ArticleDisplayType, articles: List<ArticleDisplayModel>) {
-        newsPagerAdapter.updateFragment(articleType, articles)
-    }
-
     override fun displayRefreshing() {
         swipeRefreshLayout.isRefreshing = true
     }
 
     override fun refreshingComplete() {
         swipeRefreshLayout.isRefreshing = false
-    }
-
-    override fun noMoreArticlesAvailable() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**
