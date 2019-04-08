@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.R
@@ -15,6 +16,7 @@ import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
+import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -33,7 +35,7 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
     private lateinit var newsListViewPager: ViewPager
     private lateinit var newsPagerAdapter: NewsPagerAdapter
     // Reference responsible for providing tabs to the ViewPager
-    private var tabsProvider: TabsProvider? = null
+    private var tabsProvider: ITabsProvider? = null
     // Swipe refresh layout containing ViewPager
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
@@ -42,7 +44,7 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
 
         val parentActivity = activity
 
-        if (parentActivity == null || parentActivity !is TabsProvider) {
+        if (parentActivity == null || parentActivity !is ITabsProvider) {
             throw Exception("Error invalid activity provided")
         } else {
             // Inject presenter from presenter component
@@ -54,6 +56,15 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val parentActivity = activity
+        if (parentActivity == null || parentActivity !is AppCompatActivity) {
+            throw Exception("Error invalid activity provided")
+        } else {
+            // Reset toolbar appearance
+            parentActivity.supportActionBar?.title = getString(R.string.app_name)
+            parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        }
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_news_pager, container, false)
     }
@@ -77,8 +88,8 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
         }
 
         // Setup view pager
-        val fragManager = fragmentManager
-        if (fragManager != null && currentContext != null) {
+        val fragManager = childFragmentManager
+        if (currentContext != null) {
             newsPagerAdapter = NewsPagerAdapter(fragManager, currentContext)
             newsListViewPager.adapter = newsPagerAdapter
 
@@ -126,17 +137,5 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
 
     override fun refreshingComplete() {
         swipeRefreshLayout.isRefreshing = false
-    }
-
-    /**
-     * Object which provides tabs for the viewpager in this fragment
-     */
-    interface TabsProvider {
-        /**
-         * Instructs the tab provided to setup with the viewpager
-         *
-         * @param viewPager: ViewPager for tab provider to setup with
-         */
-        fun setupTabs(viewPager: ViewPager)
     }
 }
