@@ -151,8 +151,8 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
                 val gamingParams = HashMap<String, String>()
                 gamingParams[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
                 gamingParams[NewsService.KEY_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS)
-                gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] =
-                    AppUtils.buildCommaSeparatedString(GAMING_DOMAINS_EXCLUDE)
+                gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS_EXCLUDE)
+                gamingParams[NewsService.KEY_PAGE_SIZE] = getPageSize().toString()
                 newsService.getEverything(gamingParams)
             }
         }
@@ -169,7 +169,21 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
     private fun getDefaultQueryParams(): HashMap<String, String> {
         val queryParameters = HashMap<String, String>()
         queryParameters[NewsService.KEY_COUNTRY] = NewsApiCountrys.getCountry(Locale.getDefault().country).code
+        queryParameters[NewsService.KEY_PAGE_SIZE] = getPageSize().toString()
         return queryParameters
+    }
+
+    /**
+     * Calculate the page size we want to pull from NewsApi
+     */
+    private fun getPageSize(): Int {
+        // Determine page size so in landscape mode we don't display any empty spaces
+        var pageSize = NewsService.DEFAULT_PAGE_SIZE
+        val articleRemainder = pageSize % AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT
+        if (articleRemainder > 0) {
+            pageSize += AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT - articleRemainder
+        }
+        return pageSize
     }
 
     override fun requestMoreArticles() {
