@@ -58,7 +58,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     }
 
     override fun detach() {
-        Log.d(TAG, "News List Presenter is detaching from view")
+        Log.d(TAG, "NewsPagingPresenter is detaching from view")
 
         super.detach()
     }
