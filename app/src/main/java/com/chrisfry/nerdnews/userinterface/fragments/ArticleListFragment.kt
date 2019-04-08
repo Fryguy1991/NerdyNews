@@ -1,18 +1,20 @@
 package com.chrisfry.nerdnews.userinterface.fragments
 
+import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
+import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 import java.lang.Exception
 
@@ -28,7 +30,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView {
     // RecyclerView elements
     private lateinit var newsRecyclerView: RecyclerView
     private val articleAdapter = ArticleRecyclerViewAdapter(this)
-    private lateinit var linearLayoutManager: LinearLayoutManager
+    private lateinit var layoutManager: RecyclerView.LayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,11 +60,37 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView {
 
         val currentContext = context
         if (currentContext != null) {
-            linearLayoutManager = LinearLayoutManager(currentContext, RecyclerView.VERTICAL, false)
-            newsRecyclerView.layoutManager = linearLayoutManager
-            newsRecyclerView.addItemDecoration(LinearLayoutDecorator())
+            val display = (currentContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+            // Use linear list view for portrait mode and grid view for landscape mode
+            if (display != null) {
+                when (display.rotation) {
+                    Surface.ROTATION_0,
+                    Surface.ROTATION_180 -> {
+                        setupLinearRecyclerView(currentContext)
+                    }
+                    Surface.ROTATION_90,
+                    Surface.ROTATION_270 -> {
+                        setupGridRecyclerView(currentContext)
+                    }
+                }
+            } else {
+                // If rotation can't be determined, default to linear list view
+                setupLinearRecyclerView(currentContext)
+            }
         }
         presenter?.requestArticles()
+    }
+
+    private fun setupLinearRecyclerView(currentContext: Context) {
+        layoutManager = LinearLayoutManager(currentContext, RecyclerView.VERTICAL, false)
+        newsRecyclerView.layoutManager = layoutManager
+        newsRecyclerView.addItemDecoration(LinearLayoutDecorator())
+    }
+
+    private fun setupGridRecyclerView(currentContext: Context) {
+        layoutManager = GridLayoutManager(currentContext, AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT)
+        newsRecyclerView.layoutManager = layoutManager
+        newsRecyclerView.addItemDecoration(GridLayoutDecorator())
     }
 
     override fun onDestroyView() {
@@ -77,7 +105,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView {
 
     override fun refreshArticles(articles: List<ArticleDisplayModel>) {
         articleAdapter.updateAdapter(articles)
-        newsRecyclerView.scrollToPosition(0)
+        layoutManager.scrollToPosition(0)
     }
 
     override fun updateArticleList(articles: List<ArticleDisplayModel>) {
