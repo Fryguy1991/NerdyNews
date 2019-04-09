@@ -208,6 +208,8 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
             val articleUrl = article.url ?: AppConstants.EMPTY_STRING
             val articleContent = article.content ?: AppConstants.EMPTY_STRING
 
+            // TODO: If date format is changed (Locale) when on ArticleItemFragment this value will still be displayed
+            // in the old format
             var publishedAt: Date? = null
             try {
                 // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
