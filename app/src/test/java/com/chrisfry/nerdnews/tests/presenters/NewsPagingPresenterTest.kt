@@ -18,13 +18,29 @@ class NewsPagingPresenterTest: BaseTest() {
         private val TAG = NewsPagingPresenterTest::class.java.name
     }
 
+    /**
+     * Mock class for view that attaches to NewsPagingPresenter (INewsPagingView)
+     */
+    class MockNewsPagingView: NewsPagingPresenter.INewsPagingView {
+        // Variable to represent if view is in refreshing state
+        var isRefreshing = false
+
+        override fun displayRefreshing() {
+            isRefreshing = true
+        }
+
+        override fun refreshingComplete() {
+            isRefreshing = false
+        }
+    }
+
+
     // Presenter instance we will be testing with
     private var newsPagingPresenter: INewsPagingPresenter? = null
 
     // Mock for view that attaches to presenter
     private lateinit var mockNewsPagingView: MockNewsPagingView
 
-    @Before
     override fun setUp() {
         super.setUp()
 
@@ -32,7 +48,6 @@ class NewsPagingPresenterTest: BaseTest() {
         mockNewsPagingView = MockNewsPagingView()
     }
 
-    @After
     override fun tearDown() {
         super.tearDown()
 
@@ -174,22 +189,6 @@ class NewsPagingPresenterTest: BaseTest() {
             }
             // View should no longer be refreshing
             Assert.assertFalse(mockNewsPagingView.isRefreshing)
-        }
-    }
-
-    /**
-     * Mock class for view that attaches to NewsPagingPresenter (INewsPagingView)
-     */
-    class MockNewsPagingView: NewsPagingPresenter.INewsPagingView {
-        // Variable to represent if view is in refreshing state
-        var isRefreshing = false
-
-        override fun displayRefreshing() {
-            isRefreshing = true
-        }
-
-        override fun refreshingComplete() {
-            isRefreshing = false
         }
     }
 }
