@@ -117,17 +117,43 @@ class ArticleItemPresenterTest : BaseTest() {
             Assert.assertTrue(false)
         } else {
             presenter.attach(mockArticleItemView)
-        }
 
-        // View should not have received any data and should be closing
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.sourceName)
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.title)
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.imageUrl)
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.author)
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.publishedAt)
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.content)
-        Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.articleUrl)
-        Assert.assertTrue(mockArticleItemView.isViewClosing)
+            // View should not have received any data and should be closing
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.sourceName)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.title)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.imageUrl)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.author)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.publishedAt)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.content)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.articleUrl)
+            Assert.assertTrue(mockArticleItemView.isViewClosing)
+        }
+    }
+
+    @Test
+    fun testAttachWithNull() {
+        // Attaching to presenter after sending null for article data
+        Assert.assertFalse(mockArticleItemView.isViewClosing)
+
+        Assert.assertNotNull(articleItemPresenter)
+        val presenter = articleItemPresenter
+        if (presenter == null) {
+            Assert.assertTrue(false)
+        } else {
+            // Load presenter with null and attach mock view
+            presenter.setArticleData(null)
+            presenter.attach(mockArticleItemView)
+
+            // View should not have received any data and should be closing
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.sourceName)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.title)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.imageUrl)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.author)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.publishedAt)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.content)
+            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.articleUrl)
+            Assert.assertTrue(mockArticleItemView.isViewClosing)
+        }
     }
 
     @Test
