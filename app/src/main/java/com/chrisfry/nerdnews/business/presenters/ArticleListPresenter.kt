@@ -34,7 +34,7 @@ import javax.inject.Inject
  * @param newsComponent: Component used to inject NewsService
  * @param articleType: Type of article to be displayed by the presenter instace
  */
-class ArticleListPresenter(newsComponent: NewsComponent, private val articleType: ArticleDisplayType) :
+class ArticleListPresenter private constructor(newsComponent: NewsComponent, private val articleType: ArticleDisplayType) :
     BasePresenter<ArticleListPresenter.IArticleListView>(), IArticleListPresenter,
     RefreshEventReceiver {
     companion object {

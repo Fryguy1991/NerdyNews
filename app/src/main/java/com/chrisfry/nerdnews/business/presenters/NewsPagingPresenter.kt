@@ -13,7 +13,9 @@ import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import java.lang.Exception
 
-
+/**
+ * Presenter for displaying a view that displays a paging list for news article types
+ */
 class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresenter.INewsPagingView>(),
     INewsPagingPresenter, RefreshCompleteEventReceiver {
     companion object {
