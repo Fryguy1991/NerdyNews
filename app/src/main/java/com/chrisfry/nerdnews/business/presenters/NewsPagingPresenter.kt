@@ -1,7 +1,5 @@
 package com.chrisfry.nerdnews.business.presenters
 
-import android.util.Log
-
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.*
 import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
@@ -11,6 +9,7 @@ import com.chrisfry.nerdnews.business.eventhandling.receivers.RefreshCompleteEve
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
+import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 
 /**
@@ -21,14 +20,9 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     companion object {
         private val TAG = NewsPagingPresenter::class.java.name
 
-        @Volatile
-        private var instance: NewsPagingPresenter? = null
-
         @Synchronized
         fun getInstance(): NewsPagingPresenter {
-            return instance ?: synchronized(this) {
-                instance ?: NewsPagingPresenter()
-            }
+            return NewsPagingPresenter()
         }
     }
 
@@ -52,15 +46,15 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         super.attach(view)
 
         if (!refreshInProgressFlagList.contains(false)) {
-            view?.displayRefreshing()
+            getView()?.displayRefreshing()
             EventHandler.broadcast(RefreshEvent())
         }
 
-        Log.d(TAG, "NewsPagingPresenter is attaching to view")
+        LogUtils.debug(TAG, "NewsPagingPresenter is attaching to view")
     }
 
     override fun detach() {
-        Log.d(TAG, "NewsPagingPresenter is detaching from view")
+        LogUtils.debug(TAG, "NewsPagingPresenter is detaching from view")
 
         super.detach()
     }
@@ -70,12 +64,12 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
             throw Exception("$TAG: Invalid position received from onPageSelected")
         } else {
             currentArticleType = ArticleDisplayType.values()[pageIndex]
-            Log.d(TAG, "Moved to $currentArticleType articles")
+            LogUtils.debug(TAG, "Moved to $currentArticleType articles")
         }
     }
 
     override fun requestArticleRefresh() {
-        Log.d(TAG, "View requested article refresh")
+        LogUtils.debug(TAG, "View requested article refresh")
 
         if (!isRefreshInProgress()) {
             getView()?.displayRefreshing()
@@ -89,7 +83,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
                 handleArticleTypeRefreshCompleteEvent(event.articleDisplayType)
             }
             else -> {
-                Log.e(TAG, "Not handling this event here: ${event::class.java.name}")
+                LogUtils.error(TAG, "Not handling this event here: ${event::class.java.name}")
             }
         }
     }
