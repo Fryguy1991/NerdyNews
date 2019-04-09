@@ -10,7 +10,6 @@ import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.LogUtils
-import java.lang.Exception
 
 /**
  * Presenter for displaying a view that displays a paging list for news article types
@@ -61,6 +60,11 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         LogUtils.debug(TAG, "View requested article refresh")
 
         if (!isRefreshInProgress()) {
+            // Flag refreshes as in progress
+            for (i in 0 until refreshInProgressFlagList.size) {
+                refreshInProgressFlagList[i] = true
+            }
+
             getView()?.displayRefreshing()
             EventHandler.broadcast(RefreshEvent())
         }
