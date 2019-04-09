@@ -43,7 +43,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
         private val GAMING_DOMAINS =
             listOf(
                 "ign.com", "polygon.com", "kotaku.com", "gamesspot.com", "gamesradar.com", "gamerant.com",
-                "nintendolife.com"
+                "nintendolife.com", "pushsquare.com"
             )
         private val GAMING_DOMAINS_EXCLUDE = listOf("mashable.com")
 
