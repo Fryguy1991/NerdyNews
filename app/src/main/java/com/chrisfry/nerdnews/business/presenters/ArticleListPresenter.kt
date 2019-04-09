@@ -22,6 +22,7 @@ import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.AppUtils
 import java.lang.Exception
+import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -150,8 +151,8 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
                 val gamingParams = HashMap<String, String>()
                 gamingParams[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
                 gamingParams[NewsService.KEY_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS)
-                gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] =
-                    AppUtils.buildCommaSeparatedString(GAMING_DOMAINS_EXCLUDE)
+                gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS_EXCLUDE)
+                gamingParams[NewsService.KEY_PAGE_SIZE] = getPageSize().toString()
                 newsService.getEverything(gamingParams)
             }
         }
@@ -168,7 +169,21 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
     private fun getDefaultQueryParams(): HashMap<String, String> {
         val queryParameters = HashMap<String, String>()
         queryParameters[NewsService.KEY_COUNTRY] = NewsApiCountrys.getCountry(Locale.getDefault().country).code
+        queryParameters[NewsService.KEY_PAGE_SIZE] = getPageSize().toString()
         return queryParameters
+    }
+
+    /**
+     * Calculate the page size we want to pull from NewsApi
+     */
+    private fun getPageSize(): Int {
+        // Determine page size so in landscape mode we don't display any empty spaces
+        var pageSize = NewsService.DEFAULT_PAGE_SIZE
+        val articleRemainder = pageSize % AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT
+        if (articleRemainder > 0) {
+            pageSize += AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT - articleRemainder
+        }
+        return pageSize
     }
 
     override fun requestMoreArticles() {
@@ -191,12 +206,14 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
             val imageUrl = article.urlToImage ?: AppConstants.EMPTY_STRING
             val author = article.author ?: AppConstants.EMPTY_STRING
             val articleUrl = article.url ?: AppConstants.EMPTY_STRING
+            val articleContent = article.content ?: AppConstants.EMPTY_STRING
 
             var publishedAt: Date? = null
             try {
                 // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
                 @SuppressLint("SimpleDateFormat")
                 val dateFormat = SimpleDateFormat(AppConstants.PUBLISHED_AT_TIME_FORMAT)
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
 
                 publishedAt = dateFormat.parse(article.publishedAt)
             } catch (exception: ParseException) {
@@ -209,15 +226,17 @@ class ArticleListPresenter(newsComponent: NewsComponent, private val articleType
                 title = trimSourceFromArticleTitle(title, sourceName)
             }
 
+            // Change published at date to local format
+            val publishedAtString = if (publishedAt == null) {
+                AppConstants.EMPTY_STRING
+            } else {
+                val dateFormat = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
+                dateFormat.timeZone = TimeZone.getDefault()
+                dateFormat.format(publishedAt)
+            }
+
             articleDisplayModelList.add(
-                ArticleDisplayModel(
-                    title,
-                    sourceName,
-                    imageUrl,
-                    author,
-                    articleUrl,
-                    publishedAt
-                )
+                ArticleDisplayModel(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
             )
         }
 

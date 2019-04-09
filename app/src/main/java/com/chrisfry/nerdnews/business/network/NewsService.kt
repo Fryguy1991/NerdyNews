@@ -61,6 +61,9 @@ interface NewsService {
         const val SORTBY_RELEVANCY = "relevancy"
         const val SORTBY_POPULARITY = "popularity"
         const val SORTBY_PUBLISHED_AT = "publishedAt"
+
+        // Default page size of calls
+        const val DEFAULT_PAGE_SIZE = 20
     }
 
     /**

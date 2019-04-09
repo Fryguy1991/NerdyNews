@@ -7,4 +7,6 @@
     <string name="tab_gaming">Gaming</string>
 
     <string name="no_title_string">NO TITLE PROVIDED</string>
+
+    <string name="invalid_article_message">Article Can\'t Be Displayed</string>
 </resources>
