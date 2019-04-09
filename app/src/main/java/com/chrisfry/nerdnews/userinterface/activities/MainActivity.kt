@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.userinterface.fragments.NewsPagerFragment
 import com.chrisfry.nerdnews.R
+import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
 import com.google.android.material.tabs.TabLayout
@@ -78,5 +79,11 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        // Ensure we have no event receivers referenced anymore
+        EventHandler.clearAllReceivers()
+        super.onDestroy()
     }
 }

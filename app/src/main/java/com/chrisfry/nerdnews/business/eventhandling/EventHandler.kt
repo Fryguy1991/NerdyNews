@@ -59,5 +59,13 @@ class EventHandler {
                 receiver.onReceive(event)
             }
         }
+
+        /**
+         * Remove all event receivers from the event handler
+         */
+        fun clearAllReceivers() {
+            refreshCompleteReceivers.clear()
+            refreshReceivers.clear()
+        }
     }
 }
