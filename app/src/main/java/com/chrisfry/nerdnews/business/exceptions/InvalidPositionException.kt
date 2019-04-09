@@ -1,4 +1,4 @@
-package com.chrisfry.nerdnews.business
+package com.chrisfry.nerdnews.business.exceptions
 
 import java.lang.Exception
 
