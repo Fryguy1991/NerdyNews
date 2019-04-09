@@ -1,7 +1,6 @@
 package com.chrisfry.nerdnews.business.presenters
 
 import android.annotation.SuppressLint
-import android.util.Log
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.dagger.components.NewsComponent
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
@@ -21,6 +20,7 @@ import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.AppUtils
+import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 import java.text.DateFormat
 import java.text.ParseException
@@ -97,7 +97,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     override fun attach(view: IArticleListView) {
         super.attach(view)
 
-        Log.d(TAG, "ArticleListPresenter is attaching to view")
+        LogUtils.debug(TAG, "ArticleListPresenter is attaching to view")
     }
 
     override fun requestArticles() {
@@ -115,7 +115,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
                 requestArticleRefresh()
             }
             else -> {
-                Log.e(TAG, "Not handling event here: ${event::class.java.simpleName}")
+                LogUtils.error(TAG, "Not handling event here: ${event::class.java.simpleName}")
             }
         }
     }
@@ -127,7 +127,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     }
 
     private fun refreshArticles() {
-        Log.d(TAG, "Refreshing $articleType articles")
+        LogUtils.debug(TAG, "Refreshing $articleType articles")
 
         // Flag refresh as in progress
         isRefreshInProgress = true
@@ -161,7 +161,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     }
 
     override fun detach() {
-        Log.d(TAG, "ArticleListPresenter is detaching from view")
+        LogUtils.debug(TAG, "ArticleListPresenter is detaching from view")
 
         super.detach()
     }
@@ -217,7 +217,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
 
                 publishedAt = dateFormat.parse(article.publishedAt)
             } catch (exception: ParseException) {
-                Log.e(TAG, "Failed to parse published at date")
+                LogUtils.error(TAG, "Failed to parse published at date")
             }
 
             // If the article title contains a dash (-) it may have the source
@@ -303,7 +303,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     // CALLBACK OBJECTS
     private val articleRefreshCallback = object : NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
-            Log.d(TAG, "Successfully retrieved $articleType articles")
+            LogUtils.debug(TAG, "Successfully retrieved $articleType articles")
             // Clear old articles
             articleList.clear()
             // Add newly retrieved articles
@@ -316,8 +316,8 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
         }
 
         override fun onFailure(error: ResponseError) {
-            Log.e(TAG, "Error refreshing TECH articles")
-            Log.e(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
+            LogUtils.error(TAG, "Error refreshing TECH articles")
+            LogUtils.error(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
 
             // TODO: Handle this case
         }

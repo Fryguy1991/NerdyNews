@@ -1,9 +1,9 @@
 package com.chrisfry.nerdnews.business.presenters
 
-import android.util.Log
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
+import com.chrisfry.nerdnews.utils.LogUtils
 
 /**
  * Presenter for displaying one article to a view
@@ -23,14 +23,14 @@ class ArticleItemPresenter private constructor(): BasePresenter<ArticleItemPrese
     override fun attach(view: IArticleItemView) {
         super.attach(view)
 
-        Log.d(TAG, "ArticleItemPresenter is attaching to view")
+        LogUtils.debug(TAG, "ArticleItemPresenter is attaching to view")
 
         val articleData = articleDisplayModel
         if (articleData == null) {
-            Log.e(TAG, "Article is null, closing item view")
+            LogUtils.error(TAG, "Article is null, closing item view")
             getView()?.closeView()
         } else {
-            Log.d(TAG, "Injecting article data into view")
+            LogUtils.debug(TAG, "Injecting article data into view")
             getView()?.displaySourceName(articleData.sourceName)
             getView()?.displayTitle(articleData.title)
             getView()?.displayImage(articleData.imageUrl)
@@ -42,7 +42,7 @@ class ArticleItemPresenter private constructor(): BasePresenter<ArticleItemPrese
     }
 
     override fun detach() {
-        Log.d(TAG, "ArticleItemPresenter is detaching from view")
+        LogUtils.debug(TAG, "ArticleItemPresenter is detaching from view")
 
         super.detach()
     }

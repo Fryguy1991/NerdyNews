@@ -2,7 +2,6 @@ package com.chrisfry.nerdnews.userinterface.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,6 +17,7 @@ import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
+import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 
 class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener {
@@ -120,7 +120,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     }
 
     override fun onArticleSelected(article: ArticleDisplayModel) {
-        Log.d(TAG, "Article selected with title: \"${article.title}\"")
+        LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article
         val itemFragment = ArticleItemFragment()

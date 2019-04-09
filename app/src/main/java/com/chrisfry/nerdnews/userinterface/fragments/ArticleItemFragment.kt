@@ -2,7 +2,6 @@ package com.chrisfry.nerdnews.userinterface.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +19,7 @@ import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresente
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -63,7 +63,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
         // Setup presenter with article argument (or null if not sent one)
         val args = arguments
         if (args == null) {
-            Log.e(TAG, "Error article item fragment has no arguments")
+            LogUtils.error(TAG, "Error article item fragment has no arguments")
             presenter.setArticleData(null)
         } else {
             val articleToDisplay: ArticleDisplayModel? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
@@ -87,7 +87,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
         // Setup toolbar for current fragment
         val parentActivity = activity
         if (parentActivity == null || parentActivity !is ITabsProvider || parentActivity !is AppCompatActivity) {
-            Log.e(TAG, "Invalid activity to change support action bar title")
+            LogUtils.error(TAG, "Invalid activity to change support action bar title")
         } else {
             // Display back arrow and hide tabs below toolbar
             parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -105,7 +105,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     override fun displaySourceName(sourceName: String) {
         val parentActivity = activity
         if (parentActivity == null || parentActivity !is AppCompatActivity) {
-            Log.e(TAG, "Error invalid activity to change support action bar title")
+            LogUtils.error(TAG, "Error invalid activity to change support action bar title")
         } else {
             // Set source into title
             parentActivity.supportActionBar?.title = sourceName
@@ -153,13 +153,13 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
         // Presenter has indicated that we need to close the view (article is null)
         val manager = fragmentManager
         if (manager == null) {
-            Log.e(TAG, "Error fragment manager is null")
+            LogUtils.error(TAG, "Error fragment manager is null")
         } else {
             val currentContext = context
             if (currentContext != null) {
                 Toast.makeText(currentContext, R.string.invalid_article_message, Toast.LENGTH_LONG).show()
             } else {
-                Log.e(TAG, "Can't toast from view. Article invalid")
+                LogUtils.error(TAG, "Can't toast from view. Article invalid")
             }
             manager.popBackStack()
         }
