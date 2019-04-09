@@ -19,7 +19,6 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     companion object {
         private val TAG = NewsPagingPresenter::class.java.name
 
-        @Synchronized
         fun getInstance(): NewsPagingPresenter {
             return NewsPagingPresenter()
         }
