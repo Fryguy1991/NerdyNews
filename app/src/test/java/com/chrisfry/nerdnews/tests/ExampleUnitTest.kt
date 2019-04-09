@@ -1,4 +1,4 @@
-package com.chrisfry.nerdnews
+package com.chrisfry.nerdnews.tests
 
 import org.junit.Test
 

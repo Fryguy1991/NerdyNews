@@ -1,14 +1,17 @@
 package com.chrisfry.nerdnews.business.presenters
 
-import android.util.Log
+import com.chrisfry.nerdnews.AppConstants
+import com.chrisfry.nerdnews.business.exceptions.LateArticleLoadException
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
+import com.chrisfry.nerdnews.utils.LogUtils
 
 /**
  * Presenter for displaying one article to a view
  */
-class ArticleItemPresenter private constructor(): BasePresenter<ArticleItemPresenter.IArticleItemView>(), IArticleItemPresenter {
+class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPresenter.IArticleItemView>(),
+    IArticleItemPresenter {
     companion object {
         private val TAG = ArticleItemPresenter::class.java.name
 
@@ -18,37 +21,65 @@ class ArticleItemPresenter private constructor(): BasePresenter<ArticleItemPrese
     }
 
     // Article data to display
-    var articleDisplayModel: ArticleDisplayModel? = null
+    private var articleDisplayModel: ArticleDisplayModel? = null
 
     override fun attach(view: IArticleItemView) {
         super.attach(view)
 
-        Log.d(TAG, "ArticleItemPresenter is attaching to view")
+        LogUtils.debug(TAG, "ArticleItemPresenter is attaching to view")
 
         val articleData = articleDisplayModel
-        if (articleData == null) {
-            Log.e(TAG, "Article is null, closing item view")
-            getView()?.closeView()
-        } else {
-            Log.d(TAG, "Injecting article data into view")
-            getView()?.displaySourceName(articleData.sourceName)
-            getView()?.displayTitle(articleData.title)
-            getView()?.displayImage(articleData.imageUrl)
-            getView()?.displayAuthor(articleData.author)
-            getView()?.displayPublishedAt(articleData.publishedAt)
-            getView()?.displayContent(articleData.articleContent)
-            getView()?.displayLinkToArticle(articleData.articleUrl)
+        when {
+            articleData == null -> {
+                LogUtils.error(TAG, "Article is null, closing item view")
+                getView()?.closeView()
+            }
+            !doesArticleModelContainAnyData(articleData) -> {
+                LogUtils.error(TAG, "Article has no data, closing item view")
+                getView()?.closeView()
+            }
+            else -> {
+                LogUtils.debug(TAG, "Injecting article data into view")
+                getView()?.displaySourceName(articleData.sourceName)
+                getView()?.displayTitle(articleData.title)
+                getView()?.displayImage(articleData.imageUrl)
+                getView()?.displayAuthor(articleData.author)
+                getView()?.displayPublishedAt(articleData.publishedAt)
+                getView()?.displayContent(articleData.articleContent)
+                getView()?.displayLinkToArticle(articleData.articleUrl)
+            }
         }
     }
 
     override fun detach() {
-        Log.d(TAG, "ArticleItemPresenter is detaching from view")
+        LogUtils.debug(TAG, "ArticleItemPresenter is detaching from view")
 
         super.detach()
     }
 
     override fun setArticleData(articleToDisplay: ArticleDisplayModel?) {
-        articleDisplayModel = articleToDisplay
+        val view = getView()
+        if (view == null) {
+            articleDisplayModel = articleToDisplay
+        } else {
+            throw LateArticleLoadException("Article was loaded AFTER view was attached. Data will not be displayed")
+        }
+    }
+
+    /**
+     * Methods that returns false if article object is completely empty (all empty strings)
+     *
+     * @param articleDisplayModel: Article model checking for data
+     * @return False if all elements in model are empty else true
+     */
+    private fun doesArticleModelContainAnyData(articleDisplayModel: ArticleDisplayModel): Boolean {
+        return articleDisplayModel.title != AppConstants.EMPTY_STRING
+                || articleDisplayModel.sourceName != AppConstants.EMPTY_STRING
+                || articleDisplayModel.author != AppConstants.EMPTY_STRING
+                || articleDisplayModel.publishedAt != AppConstants.EMPTY_STRING
+                || articleDisplayModel.imageUrl != AppConstants.EMPTY_STRING
+                || articleDisplayModel.articleUrl != AppConstants.EMPTY_STRING
+                || articleDisplayModel.articleContent != AppConstants.EMPTY_STRING
     }
 
     /**

@@ -2,7 +2,6 @@ package com.chrisfry.nerdnews.userinterface.fragments
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -13,11 +12,12 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
+import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 
 class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener {
@@ -106,12 +106,12 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         super.onDestroy()
     }
 
-    override fun refreshArticles(articles: List<ArticleDisplayModel>) {
+    override fun refreshArticles(articles: List<ArticleDisplayModelParcelable>) {
         articleAdapter.updateAdapter(articles)
         layoutManager.scrollToPosition(0)
     }
 
-    override fun updateArticleList(articles: List<ArticleDisplayModel>) {
+    override fun updateArticleList(articles: List<ArticleDisplayModelParcelable>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -119,8 +119,8 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onArticleSelected(article: ArticleDisplayModel) {
-        Log.d(TAG, "Article selected with title: \"${article.title}\"")
+    override fun onArticleSelected(article: ArticleDisplayModelParcelable) {
+        LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article
         val itemFragment = ArticleItemFragment()

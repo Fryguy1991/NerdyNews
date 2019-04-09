@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.chrisfry.nerdnews.business.InvalidPositionException
+import com.chrisfry.nerdnews.business.exceptions.InvalidPositionException
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.userinterface.fragments.ArticleListFragment
 

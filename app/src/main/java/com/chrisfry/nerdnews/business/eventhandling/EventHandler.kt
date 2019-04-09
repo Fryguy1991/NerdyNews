@@ -1,10 +1,10 @@
 package com.chrisfry.nerdnews.business.eventhandling
 
-import android.util.Log
 import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.RefreshEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.RefreshCompleteEventReceiver
 import com.chrisfry.nerdnews.business.eventhandling.receivers.RefreshEventReceiver
+import com.chrisfry.nerdnews.utils.LogUtils
 
 /**
  * Static class used for sending events between presenters
@@ -37,7 +37,7 @@ class EventHandler {
          * @param event: Event object to be sent to receivers
          */
         fun broadcast(event: BaseEvent) {
-            Log.d(TAG, "Broadcasting Event: ${event::class.java.simpleName}")
+            LogUtils.debug(TAG, "Broadcasting Event: ${event::class.java.simpleName}")
 
             // Determine who will be receiving event based on event type
             val receivers: List<BaseEventReceiver>
@@ -49,7 +49,7 @@ class EventHandler {
                     receivers = refreshCompleteReceivers
                 }
                 else -> {
-                    Log.e(TAG, "${event::class.java} event not handled here")
+                    LogUtils.error(TAG, "${event::class.java} event not handled here")
                     return
                 }
             }
@@ -58,6 +58,14 @@ class EventHandler {
             for (receiver: BaseEventReceiver in receivers) {
                 receiver.onReceive(event)
             }
+        }
+
+        /**
+         * Remove all event receivers from the event handler
+         */
+        fun clearAllReceivers() {
+            refreshCompleteReceivers.clear()
+            refreshReceivers.clear()
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.chrisfry.nerdnews.userinterface.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -10,7 +9,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.userinterface.fragments.NewsPagerFragment
 import com.chrisfry.nerdnews.R
+import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import com.chrisfry.nerdnews.utils.LogUtils
 import com.google.android.material.tabs.TabLayout
 import java.lang.Exception
 
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
 
         // Ensure we have the correct layout before attempting to add fragment
         if (findViewById<View>(R.id.frag_placeholder) == null) {
-            Log.e(TAG, "Error, must have inflated the wrong layout")
+            LogUtils.error(TAG, "Error, must have inflated the wrong layout")
             val exception = Exception("Error must have inflated the wrong layout")
             throw exception
         } else {
@@ -58,7 +59,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
     }
 
     override fun setupTabs(viewPager: ViewPager) {
-        Log.d(TAG, "Setting up tabs with fragment view pager")
+        LogUtils.debug(TAG, "Setting up tabs with fragment view pager")
         tabLayout.setupWithViewPager(viewPager)
         tabLayout.visibility = View.VISIBLE
     }
@@ -78,5 +79,11 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        // Ensure we have no event receivers referenced anymore
+        EventHandler.clearAllReceivers()
+        super.onDestroy()
     }
 }

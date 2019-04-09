@@ -128,7 +128,7 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
     }
 
     override fun onPageSelected(position: Int) {
-        presenter?.movedToPage(position)
+        // Not currently handling page selection
     }
 
     override fun displayRefreshing() {

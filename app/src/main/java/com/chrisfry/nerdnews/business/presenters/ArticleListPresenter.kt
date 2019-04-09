@@ -1,7 +1,6 @@
 package com.chrisfry.nerdnews.business.presenters
 
 import android.annotation.SuppressLint
-import android.util.Log
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.dagger.components.NewsComponent
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
@@ -16,11 +15,12 @@ import com.chrisfry.nerdnews.business.network.NewsCallback
 import com.chrisfry.nerdnews.business.network.NewsService
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.Article
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.AppUtils
+import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 import java.text.DateFormat
 import java.text.ParseException
@@ -43,7 +43,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
         private val GAMING_DOMAINS =
             listOf(
                 "ign.com", "polygon.com", "kotaku.com", "gamesspot.com", "gamesradar.com", "gamerant.com",
-                "nintendolife.com"
+                "nintendolife.com", "pushsquare.com"
             )
         private val GAMING_DOMAINS_EXCLUDE = listOf("mashable.com")
 
@@ -97,7 +97,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     override fun attach(view: IArticleListView) {
         super.attach(view)
 
-        Log.d(TAG, "ArticleListPresenter is attaching to view")
+        LogUtils.debug(TAG, "ArticleListPresenter is attaching to view")
     }
 
     override fun requestArticles() {
@@ -115,7 +115,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
                 requestArticleRefresh()
             }
             else -> {
-                Log.e(TAG, "Not handling event here: ${event::class.java.simpleName}")
+                LogUtils.error(TAG, "Not handling event here: ${event::class.java.simpleName}")
             }
         }
     }
@@ -127,7 +127,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     }
 
     private fun refreshArticles() {
-        Log.d(TAG, "Refreshing $articleType articles")
+        LogUtils.debug(TAG, "Refreshing $articleType articles")
 
         // Flag refresh as in progress
         isRefreshInProgress = true
@@ -161,7 +161,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     }
 
     override fun detach() {
-        Log.d(TAG, "ArticleListPresenter is detaching from view")
+        LogUtils.debug(TAG, "ArticleListPresenter is detaching from view")
 
         super.detach()
     }
@@ -196,9 +196,9 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
      * @param articlesToConvert: List of Article models to convert to ArticleDisplayModel
      * @return: List of ArticleDisplayModel based on provided Article list
      */
-    private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModel> {
+    private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModelParcelable> {
 
-        val articleDisplayModelList = mutableListOf<ArticleDisplayModel>()
+        val articleDisplayModelList = mutableListOf<ArticleDisplayModelParcelable>()
 
         for (article: Article in articlesToConvert) {
             var title = article.title ?: AppConstants.EMPTY_STRING
@@ -208,6 +208,8 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
             val articleUrl = article.url ?: AppConstants.EMPTY_STRING
             val articleContent = article.content ?: AppConstants.EMPTY_STRING
 
+            // TODO: If date format is changed (Locale) when on ArticleItemFragment this value will still be displayed
+            // in the old format
             var publishedAt: Date? = null
             try {
                 // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
@@ -217,7 +219,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
 
                 publishedAt = dateFormat.parse(article.publishedAt)
             } catch (exception: ParseException) {
-                Log.e(TAG, "Failed to parse published at date")
+                LogUtils.error(TAG, "Failed to parse published at date")
             }
 
             // If the article title contains a dash (-) it may have the source
@@ -236,7 +238,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
             }
 
             articleDisplayModelList.add(
-                ArticleDisplayModel(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
+                ArticleDisplayModelParcelable(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
             )
         }
 
@@ -303,7 +305,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
     // CALLBACK OBJECTS
     private val articleRefreshCallback = object : NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
-            Log.d(TAG, "Successfully retrieved $articleType articles")
+            LogUtils.debug(TAG, "Successfully retrieved $articleType articles")
             // Clear old articles
             articleList.clear()
             // Add newly retrieved articles
@@ -316,8 +318,8 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
         }
 
         override fun onFailure(error: ResponseError) {
-            Log.e(TAG, "Error refreshing TECH articles")
-            Log.e(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
+            LogUtils.error(TAG, "Error refreshing TECH articles")
+            LogUtils.error(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
 
             // TODO: Handle this case
         }
@@ -333,14 +335,14 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
          *
          * @param articles: List of articles to refresh the view with
          */
-        fun refreshArticles(articles: List<ArticleDisplayModel>)
+        fun refreshArticles(articles: List<ArticleDisplayModelParcelable>)
 
         /**
          * Provides an updated article list (more articles) to display
          *
          * @param articles: List of articles to update the view with
          */
-        fun updateArticleList(articles: List<ArticleDisplayModel>)
+        fun updateArticleList(articles: List<ArticleDisplayModelParcelable>)
 
         /**
          * View should indicate that there are no more articles available (reached bottom of possible list)

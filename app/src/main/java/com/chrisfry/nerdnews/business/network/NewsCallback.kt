@@ -1,7 +1,7 @@
 package com.chrisfry.nerdnews.business.network
 
-import android.util.Log
 import com.chrisfry.nerdnews.model.ResponseError
+import com.chrisfry.nerdnews.utils.LogUtils
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import retrofit2.Call
@@ -28,7 +28,7 @@ abstract class NewsCallback<T> : Callback<T> {
                 onResponse(body)
             }
         } else {
-            Log.e(TAG, "${response.code()}: ${response.message()}")
+            LogUtils.error(TAG, "${response.code()}: ${response.message()}")
 
             val errorBody = response.errorBody()
             if (errorBody == null) {
@@ -49,7 +49,7 @@ abstract class NewsCallback<T> : Callback<T> {
     }
 
     override fun onFailure(call: Call<T>, t: Throwable) {
-        Log.e(TAG, "Error: ${t.message}")
+        LogUtils.error(TAG, "Error: ${t.message}")
     }
 
     abstract fun onResponse(response: T)
