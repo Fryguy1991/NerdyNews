@@ -15,7 +15,7 @@ import com.chrisfry.nerdnews.business.network.NewsCallback
 import com.chrisfry.nerdnews.business.network.NewsService
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.Article
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
@@ -196,9 +196,9 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
      * @param articlesToConvert: List of Article models to convert to ArticleDisplayModel
      * @return: List of ArticleDisplayModel based on provided Article list
      */
-    private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModel> {
+    private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModelParcelable> {
 
-        val articleDisplayModelList = mutableListOf<ArticleDisplayModel>()
+        val articleDisplayModelList = mutableListOf<ArticleDisplayModelParcelable>()
 
         for (article: Article in articlesToConvert) {
             var title = article.title ?: AppConstants.EMPTY_STRING
@@ -238,7 +238,7 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
             }
 
             articleDisplayModelList.add(
-                ArticleDisplayModel(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
+                ArticleDisplayModelParcelable(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
             )
         }
 
@@ -335,14 +335,14 @@ class ArticleListPresenter private constructor(newsComponent: NewsComponent, pri
          *
          * @param articles: List of articles to refresh the view with
          */
-        fun refreshArticles(articles: List<ArticleDisplayModel>)
+        fun refreshArticles(articles: List<ArticleDisplayModelParcelable>)
 
         /**
          * Provides an updated article list (more articles) to display
          *
          * @param articles: List of articles to update the view with
          */
-        fun updateArticleList(articles: List<ArticleDisplayModel>)
+        fun updateArticleList(articles: List<ArticleDisplayModelParcelable>)
 
         /**
          * View should indicate that there are no more articles available (reached bottom of possible list)

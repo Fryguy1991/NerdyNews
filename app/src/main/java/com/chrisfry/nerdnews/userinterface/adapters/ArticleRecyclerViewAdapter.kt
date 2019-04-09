@@ -3,8 +3,8 @@ package com.chrisfry.nerdnews.userinterface.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.chrisfry.nerdnews.R
-import com.chrisfry.nerdnews.business.InvalidPositionException
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.business.exceptions.InvalidPositionException
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.adapters.holders.ArticleViewHolder
 import com.chrisfry.nerdnews.userinterface.fragments.ArticleListFragment
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
@@ -14,7 +14,7 @@ import com.chrisfry.nerdnews.utils.LogUtils
 /**
  * Adapter for displaying Article objects in a recycler view
  */
-class ArticleRecyclerViewAdapter(private val fragment: ArticleListFragment) : BaseRecyclerViewAdapter<ArticleDisplayModel, ArticleViewHolder>(),
+class ArticleRecyclerViewAdapter(private val fragment: ArticleListFragment) : BaseRecyclerViewAdapter<ArticleDisplayModelParcelable, ArticleViewHolder>(),
     ItemSelectionListener {
     companion object {
         private val TAG = ArticleRecyclerViewAdapter::class.java.name

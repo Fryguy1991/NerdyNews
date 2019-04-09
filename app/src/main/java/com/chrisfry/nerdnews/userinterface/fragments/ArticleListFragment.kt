@@ -12,7 +12,7 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
@@ -106,12 +106,12 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         super.onDestroy()
     }
 
-    override fun refreshArticles(articles: List<ArticleDisplayModel>) {
+    override fun refreshArticles(articles: List<ArticleDisplayModelParcelable>) {
         articleAdapter.updateAdapter(articles)
         layoutManager.scrollToPosition(0)
     }
 
-    override fun updateArticleList(articles: List<ArticleDisplayModel>) {
+    override fun updateArticleList(articles: List<ArticleDisplayModelParcelable>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -119,7 +119,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onArticleSelected(article: ArticleDisplayModel) {
+    override fun onArticleSelected(article: ArticleDisplayModelParcelable) {
         LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article
