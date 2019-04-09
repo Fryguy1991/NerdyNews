@@ -17,6 +17,7 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
@@ -66,8 +67,21 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
             LogUtils.error(TAG, "Error article item fragment has no arguments")
             presenter.setArticleData(null)
         } else {
-            val articleToDisplay: ArticleDisplayModel? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
-            presenter.setArticleData(articleToDisplay)
+            val articleToDisplay: ArticleDisplayModelParcelable? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
+            if (articleToDisplay == null) {
+                presenter.setArticleData(null)
+            } else {
+                // Convert model to non-parcelable version and send to presenter
+                presenter.setArticleData(ArticleDisplayModel(
+                    articleToDisplay.title,
+                    articleToDisplay.sourceName,
+                    articleToDisplay.imageUrl,
+                    articleToDisplay.author,
+                    articleToDisplay.articleUrl,
+                    articleToDisplay.articleContent,
+                    articleToDisplay.publishedAt
+                ))
+            }
         }
     }
 
