@@ -1,5 +1,6 @@
 package com.chrisfry.nerdnews.userinterface.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,22 +8,32 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.R
+import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
+import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import java.lang.Exception
+import javax.inject.Inject
 
 /**
  * Fragment for displaying a single article
  */
-class ArticleItemFragment : Fragment() {
+class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     companion object {
         private val TAG = ArticleItemFragment::class.java.name
     }
+
+    // Reference to presenter that provides data
+    @Inject
+    lateinit var presenter: IArticleItemPresenter
 
     // UI Elements
     private lateinit var articleImage: ImageView
@@ -31,24 +42,32 @@ class ArticleItemFragment : Fragment() {
     private lateinit var publishedAtText: TextView
     private lateinit var contentText: TextView
 
-    // Data that will be displayed
-    private var articleToDisplay: ArticleDisplayModel? = null
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        val parentActivity = activity
+        if (parentActivity == null) {
+            throw Exception("Error invalid activity provided")
+        } else {
+            // Inject presenter from presenter component
+            val presenterComponent = (parentActivity.application as App).presenterComponent
+            presenterComponent.inject(this)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(false)
 
+        // Setup presenter with article argument (or null if not sent one)
         val args = arguments
         if (args == null) {
             Log.e(TAG, "Error article item fragment has no arguments")
+            presenter.setArticleData(null)
         } else {
             val articleToDisplay: ArticleDisplayModel? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
-            if (articleToDisplay == null) {
-                Log.e(TAG, "Error article has not been sent to fragment")
-            } else {
-                this.articleToDisplay = articleToDisplay
-            }
+            presenter.setArticleData(articleToDisplay)
         }
     }
 
@@ -65,43 +84,84 @@ class ArticleItemFragment : Fragment() {
         publishedAtText = view.findViewById(R.id.tv_article_item_published_at_text)
         contentText = view.findViewById(R.id.tv_article_item_content_text)
 
-
-        val article = articleToDisplay
-        if (article != null) {
-            val parentActivity = activity
-            if (parentActivity == null || parentActivity !is ITabsProvider || parentActivity !is AppCompatActivity) {
-                Log.e(TAG, "Error haven't been sent a article to display")
-            } else {
-                // Set source into title, display back arrow, and hide tabs below toolbar
-                parentActivity.supportActionBar?.title = article.sourceName
-                parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-                parentActivity.hideTabs()
-            }
-
-            // Display or hide image view
-            if (article.imageUrl.isEmpty()) {
-                articleImage.visibility = View.GONE
-            } else {
-                Glide.with(this).load(article.imageUrl).apply(RequestOptions().centerCrop()).into(articleImage)
-            }
-
-            // Display title (or placeholder if empty)
-            if (article.title.isEmpty()) {
-                titleText.text = getString(R.string.no_title_string)
-            } else {
-                titleText.text = article.title
-            }
-
-            // Display or hide author text
-            showOrHideTextView(authorText, article.author)
-
-            // Display or hide published at date
-            showOrHideTextView(publishedAtText, article.publishedAt)
-
-            // Display content of article (or hide if empty)
-            showOrHideTextView(contentText, article.articleContent)
+        // Setup toolbar for current fragment
+        val parentActivity = activity
+        if (parentActivity == null || parentActivity !is ITabsProvider || parentActivity !is AppCompatActivity) {
+            Log.e(TAG, "Invalid activity to change support action bar title")
         } else {
-            Log.e(TAG, "Error we don't have an article to display in onViewCreated")
+            // Display back arrow and hide tabs below toolbar
+            parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            parentActivity.hideTabs()
+        }
+
+        presenter.attach(this)
+    }
+
+    override fun onDestroyView() {
+        presenter.detach()
+        super.onDestroyView()
+    }
+
+    override fun displaySourceName(sourceName: String) {
+        val parentActivity = activity
+        if (parentActivity == null || parentActivity !is AppCompatActivity) {
+            Log.e(TAG, "Error invalid activity to change support action bar title")
+        } else {
+            // Set source into title
+            parentActivity.supportActionBar?.title = sourceName
+        }
+    }
+
+    override fun displayTitle(title: String) {
+        // Display title (or placeholder if empty)
+        if (title.isEmpty()) {
+            titleText.text = getString(R.string.no_title_string)
+        } else {
+            titleText.text = title
+        }
+    }
+
+    override fun displayImage(imageUrl: String) {
+        // Display or hide image view
+        if (imageUrl.isEmpty()) {
+            articleImage.visibility = View.GONE
+        } else {
+            Glide.with(this).load(imageUrl).apply(RequestOptions().centerCrop()).into(articleImage)
+        }
+    }
+
+    override fun displayAuthor(author: String) {
+        // Display or hide author text
+        showOrHideTextView(authorText, author)
+    }
+
+    override fun displayPublishedAt(publishedAt: String) {
+        // Display or hide published at date
+        showOrHideTextView(publishedAtText, publishedAt)
+    }
+
+    override fun displayContent(content: String) {
+        // Display content of article (or hide if empty)
+        showOrHideTextView(contentText, content)
+    }
+
+    override fun displayLinkToArticle(articleUrl: String) {
+        // TODO: Need to implement
+    }
+
+    override fun closeView() {
+        // Presenter has indicated that we need to close the view (article is null)
+        val manager = fragmentManager
+        if (manager == null) {
+            Log.e(TAG, "Error fragment manager is null")
+        } else {
+            val currentContext = context
+            if (currentContext != null) {
+                Toast.makeText(currentContext, R.string.invalid_article_message, Toast.LENGTH_LONG).show()
+            } else {
+                Log.e(TAG, "Can't toast from view. Article invalid")
+            }
+            manager.popBackStack()
         }
     }
 
