@@ -26,8 +26,6 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         }
     }
 
-    // Current type of article being displayed
-    private var currentArticleType = ArticleDisplayType.TECH
     // Flags indicating if individual refreshes are in progress (used to determine if full refresh is complete)
     private val refreshInProgressFlagList: MutableList<Boolean> = mutableListOf()
 
@@ -57,15 +55,6 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         LogUtils.debug(TAG, "NewsPagingPresenter is detaching from view")
 
         super.detach()
-    }
-
-    override fun movedToPage(pageIndex: Int) {
-        if (pageIndex < 0 || pageIndex >= ArticleDisplayType.values().size) {
-            throw Exception("$TAG: Invalid position received from onPageSelected")
-        } else {
-            currentArticleType = ArticleDisplayType.values()[pageIndex]
-            LogUtils.debug(TAG, "Moved to $currentArticleType articles")
-        }
     }
 
     override fun requestArticleRefresh() {
