@@ -165,7 +165,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
         } else {
             val currentContext = context
             if (currentContext != null) {
-                Toast.makeText(currentContext, R.string.invalid_article_message, Toast.LENGTH_LONG).show()
+                Toast.makeText(currentContext, R.string.toast_invalid_article_message, Toast.LENGTH_LONG).show()
             } else {
                 LogUtils.error(TAG, "Can't toast from view. Article invalid")
             }

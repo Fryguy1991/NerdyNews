@@ -26,7 +26,8 @@ import javax.inject.Inject
  * Presenter for displaying a view that displays a paging list for news article types.
  * This presenters handles article refresh events that will come form the UI.
  */
-class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresenter.INewsPagingView>(), INewsPagingPresenter,
+class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresenter.INewsPagingView>(),
+    INewsPagingPresenter,
     RequestMoreArticleEventReceiver {
     companion object {
         private val TAG = NewsPagingPresenter::class.java.name
@@ -47,30 +48,34 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     @Inject
     lateinit var newsService: NewsService
     // Instance for model containing article lists to be displayed
-    private val articleModelInstance = ArticleListsModel.getInstance()
+    @Inject
+    lateinit var articleModelInstance: ArticleListsModel
     // Flags indicating if individual refreshes are in progress (used to determine if full refresh is complete)
     private val refreshInProgressFlagList: MutableList<Boolean> = mutableListOf()
 
     init {
+        // Add presenter to event receiver list (RequestMoreArticleEventReceiver)
+        EventHandler.addEventReceiver(this)
+    }
+
+    fun initialArticleCheck() {
         // Add a refresh flag for each article type
         for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
             // If model article list is empty mark refresh as in progress (will refresh articles in attach)
             refreshInProgressFlagList.add(articleModelInstance.getArticleList(articleType).isEmpty())
         }
 
-        // Add presenter to event receiver list (RequestMoreArticleEventReceiver)
-        EventHandler.addEventReceiver(this)
+        if (refreshInProgressFlagList.contains(true)) {
+            // A list in our article model needs to be refreshed, so refresh everything
+            refreshArticles()
+        }
     }
 
     override fun attach(view: INewsPagingView) {
         super.attach(view)
         LogUtils.debug(TAG, "NewsPagingPresenter is attaching to view")
 
-        if (refreshInProgressFlagList.contains(true)) {
-            // A list in our article model needs to be refreshed, so refresh everything
-            getView()?.displayRefreshing()
-            refreshArticles()
-        }
+        getView()?.displayRefreshing(isRefreshInProgress())
     }
 
     override fun detach() {
@@ -83,7 +88,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         LogUtils.debug(TAG, "View requested article refresh")
 
         if (!isRefreshInProgress()) {
-            getView()?.displayRefreshing()
+            getView()?.displayRefreshing(true)
             refreshArticles()
         }
     }
@@ -103,6 +108,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         refreshInProgressFlagList[articleDisplayType.ordinal] = false
 
         if (!isRefreshInProgress()) {
+            getView()?.displayRefreshing(false)
             getView()?.refreshingComplete()
 
             // Notify other presenters (articles lists) that the article refresh is complete
@@ -168,7 +174,8 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
      *
      * @param articleDisplayType: The article type the callback is receiving
      */
-    inner class ArticleRefreshCallback(private val articleDisplayType: ArticleDisplayType): NewsCallback<ArticleResponse>() {
+    inner class ArticleRefreshCallback(private val articleDisplayType: ArticleDisplayType) :
+        NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
             LogUtils.debug(TAG, "Successfully retrieved $articleDisplayType articles")
             // Set articles into model
@@ -188,17 +195,19 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     }
 
     /**
-     * View interface for a view that will display a list of articles
+     * View interface for a view that will a paging view of articles
      */
     interface INewsPagingView : IView {
 
         /**
-         * View should be in a "refreshing" state where it will display it is refreshing to the user and handle less input
+         * View should be in our out of a "refreshing" state
+         *
+         * @param isRefreshing: True if the view should display refreshing else false
          */
-        fun displayRefreshing()
+        fun displayRefreshing(isRefreshing: Boolean)
 
         /**
-         * View should no longer display that it is refreshing
+         * View should indicate that an article refresh has been completed
          */
         fun refreshingComplete()
     }
