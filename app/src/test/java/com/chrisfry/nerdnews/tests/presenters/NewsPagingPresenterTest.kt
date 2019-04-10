@@ -1,5 +1,6 @@
 package com.chrisfry.nerdnews.tests.presenters
 
+import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
@@ -130,6 +131,11 @@ class NewsPagingPresenterTest : BaseTest() {
         if (presenter == null) {
             Assert.assertTrue(false)
         } else {
+            // Model should start off empty
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
+            }
+
             // Have presenter check for initial articles (will do a refresh)
             if (presenter is NewsPagingPresenter) {
                 presenter.initialArticleCheck()
@@ -152,6 +158,12 @@ class NewsPagingPresenterTest : BaseTest() {
             mockNewsService.fireCallbacks()
             // View should not be refreshing anymore
             Assert.assertFalse(mockNewsPagingView.isRefreshing)
+
+            // MockNewsPresenter standard response is a ArticleResponse containing 20 items
+            // Ensure our model received data from the presenter
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).size == 20)
+            }
         }
     }
 
@@ -216,6 +228,42 @@ class NewsPagingPresenterTest : BaseTest() {
 
             // Simulate callbacks, receiver should be called and view should not be in refreshing state
             mockNewsService.fireCallbacks()
+            // View should no longer be refreshing
+            Assert.assertFalse(mockNewsPagingView.isRefreshing)
+        }
+    }
+
+    @Test
+    fun testRefreshAllErrorCallbacks() {
+        Assert.assertNotNull(newsPagingPresenter)
+
+        val presenter = newsPagingPresenter
+        if (presenter == null) {
+            Assert.assertTrue(false)
+        } else {
+            // Ensure our beginning model lists are empty
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
+            }
+
+            // Set news service to provide errors instead of successes
+            mockNewsService.responseType = MockNewsService.MockResponseType.ERROR
+
+            // Have presenter initiate which will call for refresh
+            if (presenter is NewsPagingPresenter) {
+                presenter.initialArticleCheck()
+            }
+            presenter.attach(mockNewsPagingView)
+            // View should be refreshing
+            Assert.assertTrue(mockNewsPagingView.isRefreshing)
+
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
+
+            // Presenter should only have received errors, which means articles lists should still be empty
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
+            }
             // View should no longer be refreshing
             Assert.assertFalse(mockNewsPagingView.isRefreshing)
         }
