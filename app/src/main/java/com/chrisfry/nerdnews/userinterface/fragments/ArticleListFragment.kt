@@ -12,6 +12,7 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
@@ -106,26 +107,33 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         super.onDestroy()
     }
 
-    override fun refreshArticles(articles: List<ArticleDisplayModelParcelable>) {
+    override fun displayArticles(articles: List<ArticleDisplayModel>) {
         articleAdapter.updateAdapter(articles)
-        layoutManager.scrollToPosition(0)
     }
 
-    override fun updateArticleList(articles: List<ArticleDisplayModelParcelable>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun displayNoArticles() {
+       // TODO: Need to add to view
     }
 
     override fun noMoreArticlesAvailable() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onArticleSelected(article: ArticleDisplayModelParcelable) {
+    override fun onArticleSelected(article: ArticleDisplayModel) {
         LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article
         val itemFragment = ArticleItemFragment()
         val args = Bundle()
-        args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, article)
+        args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, ArticleDisplayModelParcelable(
+            article.title,
+            article.sourceName,
+            article.imageUrl,
+            article.author,
+            article.articleUrl,
+            article.articleContent,
+            article.publishedAt
+        ))
         itemFragment.arguments = args
 
         val parentActivity = activity
