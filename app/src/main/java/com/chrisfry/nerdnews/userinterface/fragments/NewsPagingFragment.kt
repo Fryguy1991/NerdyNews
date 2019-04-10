@@ -4,10 +4,8 @@ package com.chrisfry.nerdnews.userinterface.fragments
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
@@ -18,19 +16,17 @@ import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import java.lang.Exception
-import javax.inject.Inject
 
 /**
  * Fragment class for displaying news article lists in a view pager
  */
-class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewPager.OnPageChangeListener {
+class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewPager.OnPageChangeListener {
     companion object {
-        private val TAG = NewsPagerFragment::class.java.name
+        private val TAG = NewsPagingFragment::class.java.name
     }
 
     // Presenter that provides list of news articles
-    @Inject
-    lateinit var presenter: INewsPagingPresenter
+    private var presenter: INewsPagingPresenter? = null
     // ViewPager elements
     private lateinit var newsListViewPager: ViewPager
     private lateinit var newsPagerAdapter: NewsPagerAdapter
@@ -42,14 +38,20 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
+        // Ensure options menu for fragment will be inflated
+        setHasOptionsMenu(true)
+
         val parentActivity = activity
 
         if (parentActivity == null || parentActivity !is ITabsProvider) {
             throw Exception("Error invalid activity provided")
         } else {
-            // Inject presenter from presenter component
-            val presenterComponent = (parentActivity.application as App).presenterComponent
-            presenterComponent.inject(this)
+            // Create presenter and inject news component for NewsAPI elements
+            val newPresenter = NewsPagingPresenter.getInstance()
+            val presenterComponent = (parentActivity.application as App).newsComponent
+            presenterComponent.inject(newPresenter)
+
+            presenter = newPresenter
 
             tabsProvider = parentActivity
         }
@@ -69,6 +71,24 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
         return inflater.inflate(R.layout.fragment_news_pager, container, false)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        // Load menu with refresh icon
+        inflater.inflate(R.menu.menu_fragment_news_paging, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_refresh -> {
+                // User requested refresh from options menu (toolbar refresh icon)
+                presenter?.requestArticleRefresh()
+                return true
+            }
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         // Retrieve UI elements
         newsListViewPager = view.findViewById(R.id.view_pager_news)
@@ -83,6 +103,8 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
             resources.getColor(R.color.colorAccent)
         }
         swipeRefreshLayout.setColorSchemeColors(colorResoureId)
+
+        // When swipe down to refresh is activated request article refresh from presenter
         swipeRefreshLayout.setOnRefreshListener {
             presenter?.requestArticleRefresh()
         }
@@ -114,6 +136,7 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
 
     override fun onDestroy() {
         tabsProvider = null
+        presenter = null
         super.onDestroy()
     }
 

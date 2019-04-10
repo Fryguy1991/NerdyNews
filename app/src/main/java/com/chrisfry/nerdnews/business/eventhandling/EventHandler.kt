@@ -1,9 +1,9 @@
 package com.chrisfry.nerdnews.business.eventhandling
 
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshEvent
-import com.chrisfry.nerdnews.business.eventhandling.receivers.RefreshCompleteEventReceiver
-import com.chrisfry.nerdnews.business.eventhandling.receivers.RefreshEventReceiver
+import com.chrisfry.nerdnews.business.eventhandling.events.RequestMoreArticleEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
+import com.chrisfry.nerdnews.business.eventhandling.receivers.RequestMoreArticleEventReceiver
 import com.chrisfry.nerdnews.utils.LogUtils
 
 /**
@@ -13,22 +13,16 @@ class EventHandler {
     companion object {
         private val TAG = EventHandler::class.java.name
 
-        // TODO: Consider refactoring to 1 list of presenters and checking by type
-        private val refreshReceivers = mutableListOf<RefreshEventReceiver>()
-        private val refreshCompleteReceivers = mutableListOf<RefreshCompleteEventReceiver>()
+        // List of all event receivers
+        private val eventReceivers = mutableListOf<BaseEventReceiver>()
 
         /**
-         * Adds a receiver looking for RefreshEvents
+         * Add a event receiver to handle events
+         *
+         * @param receiver: New receiver that will listen for events
          */
-        fun addRefreshReceiver(receiver: RefreshEventReceiver) {
-            refreshReceivers.add(receiver)
-        }
-
-        /**
-         * Adds a receiver looking for RefreshCompleteEvents
-         */
-        fun addRefreshCompleteReceiver(receiver: RefreshCompleteEventReceiver) {
-            refreshCompleteReceivers.add(receiver)
+        fun addEventReceiver(receiver: BaseEventReceiver) {
+            eventReceivers.add(receiver)
         }
 
         /**
@@ -39,24 +33,22 @@ class EventHandler {
         fun broadcast(event: BaseEvent) {
             LogUtils.debug(TAG, "Broadcasting Event: ${event::class.java.simpleName}")
 
-            // Determine who will be receiving event based on event type
-            val receivers: List<BaseEventReceiver>
-            when (event::class.java) {
-                RefreshEvent::class.java -> {
-                    receivers = refreshReceivers
+            // Loop through event receivers checking if they need to receive the broadcasted event
+            for (receiver: BaseEventReceiver in eventReceivers) {
+                when (event::class) {
+                    // ArticleRefreshCompleteEventReceivers should receive ArticleRefreshCompleteEvents
+                    ArticleRefreshCompleteEvent::class -> {
+                        if (receiver is ArticleRefreshCompleteEventReceiver) {
+                            receiver.onReceive(event)
+                        }
+                    }
+                    // RequestMoreArticleEventReceivers should receive RequestMoreArticleEvents
+                    RequestMoreArticleEvent::class -> {
+                        if (receiver is RequestMoreArticleEventReceiver) {
+                            receiver.onReceive(event)
+                        }
+                    }
                 }
-                RefreshCompleteEvent::class.java -> {
-                    receivers = refreshCompleteReceivers
-                }
-                else -> {
-                    LogUtils.error(TAG, "${event::class.java} event not handled here")
-                    return
-                }
-            }
-
-            // Notify receivers of event
-            for (receiver: BaseEventReceiver in receivers) {
-                receiver.onReceive(event)
             }
         }
 
@@ -64,8 +56,7 @@ class EventHandler {
          * Remove all event receivers from the event handler
          */
         fun clearAllReceivers() {
-            refreshCompleteReceivers.clear()
-            refreshReceivers.clear()
+            eventReceivers.clear()
         }
     }
 }

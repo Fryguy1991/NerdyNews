@@ -3,6 +3,6 @@ package com.chrisfry.nerdnews.business.eventhandling.receivers
 import com.chrisfry.nerdnews.business.eventhandling.BaseEventReceiver
 
 /**
- * Receiver class used for receiving RefreshEvents from EventHandler
+ * Receiver class used for receiving ArticleRefreshEvents from EventHandler
  */
-interface RefreshEventReceiver: BaseEventReceiver
+interface ArticleRefreshCompleteEventReceiver: BaseEventReceiver

@@ -18,11 +18,8 @@ import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
-import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
-import java.lang.Exception
-import javax.inject.Inject
 
 /**
  * Fragment for displaying a single article
@@ -33,8 +30,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     }
 
     // Reference to presenter that provides data
-    @Inject
-    lateinit var presenter: IArticleItemPresenter
+    private var presenter: IArticleItemPresenter? = null
 
     // UI Elements
     private lateinit var articleImage: ImageView
@@ -46,14 +42,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        val parentActivity = activity
-        if (parentActivity == null) {
-            throw Exception("Error invalid activity provided")
-        } else {
-            // Inject presenter from presenter component
-            val presenterComponent = (parentActivity.application as App).presenterComponent
-            presenterComponent.inject(this)
-        }
+        presenter = ArticleItemPresenter.getInstance()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,14 +54,14 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
         val args = arguments
         if (args == null) {
             LogUtils.error(TAG, "Error article item fragment has no arguments")
-            presenter.setArticleData(null)
+            presenter?.setArticleData(null)
         } else {
             val articleToDisplay: ArticleDisplayModelParcelable? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
             if (articleToDisplay == null) {
-                presenter.setArticleData(null)
+                presenter?.setArticleData(null)
             } else {
                 // Convert model to non-parcelable version and send to presenter
-                presenter.setArticleData(ArticleDisplayModel(
+                presenter?.setArticleData(ArticleDisplayModel(
                     articleToDisplay.title,
                     articleToDisplay.sourceName,
                     articleToDisplay.imageUrl,
@@ -108,12 +97,17 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
             parentActivity.hideTabs()
         }
 
-        presenter.attach(this)
+        presenter?.attach(this)
     }
 
     override fun onDestroyView() {
-        presenter.detach()
+        presenter?.detach()
         super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        presenter = null
+        super.onDestroy()
     }
 
     override fun displaySourceName(sourceName: String) {

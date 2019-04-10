@@ -3,6 +3,6 @@ package com.chrisfry.nerdnews.business.eventhandling.events
 import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 
 /**
- * Event for broadcasting when an articles need to be refreshed
+ * Event for broadcasting when article data has been refreshed
  */
-class RefreshEvent: BaseEvent()
+class ArticleRefreshCompleteEvent: BaseEvent()
