@@ -18,7 +18,6 @@ import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import java.lang.Exception
-import javax.inject.Inject
 
 /**
  * Fragment class for displaying news article lists in a view pager
@@ -29,8 +28,7 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
     }
 
     // Presenter that provides list of news articles
-    @Inject
-    lateinit var presenter: INewsPagingPresenter
+    private var presenter: INewsPagingPresenter? = null
     // ViewPager elements
     private lateinit var newsListViewPager: ViewPager
     private lateinit var newsPagerAdapter: NewsPagerAdapter
@@ -47,9 +45,12 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
         if (parentActivity == null || parentActivity !is ITabsProvider) {
             throw Exception("Error invalid activity provided")
         } else {
-            // Inject presenter from presenter component
-            val presenterComponent = (parentActivity.application as App).presenterComponent
-            presenterComponent.inject(this)
+            // Create presenter and inject news component for NewsAPI elements
+            val newPresenter = NewsPagingPresenter.getInstance()
+            val presenterComponent = (parentActivity.application as App).newsComponent
+            presenterComponent.inject(newPresenter)
+
+            presenter = newPresenter
 
             tabsProvider = parentActivity
         }
@@ -83,6 +84,8 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
             resources.getColor(R.color.colorAccent)
         }
         swipeRefreshLayout.setColorSchemeColors(colorResoureId)
+
+        // When swipe down to refresh is activated request article refresh from presenter
         swipeRefreshLayout.setOnRefreshListener {
             presenter?.requestArticleRefresh()
         }
@@ -114,6 +117,7 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
 
     override fun onDestroy() {
         tabsProvider = null
+        presenter = null
         super.onDestroy()
     }
 
