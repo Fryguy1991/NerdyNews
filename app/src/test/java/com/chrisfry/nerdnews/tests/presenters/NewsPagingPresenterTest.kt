@@ -3,17 +3,18 @@ package com.chrisfry.nerdnews.tests.presenters
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshEvent
-import com.chrisfry.nerdnews.business.eventhandling.receivers.RefreshEventReceiver
+import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
 import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
+import com.chrisfry.nerdnews.mocks.MockArticleListsModel
+import com.chrisfry.nerdnews.mocks.MockNewsService
 import com.chrisfry.nerdnews.tests.BaseTest
 import com.chrisfry.nerdnews.utils.LogUtils
 import org.junit.*
 import java.util.concurrent.TimeUnit
 
-class NewsPagingPresenterTest: BaseTest() {
+class NewsPagingPresenterTest : BaseTest() {
     companion object {
         private val TAG = NewsPagingPresenterTest::class.java.name
     }
@@ -21,30 +22,48 @@ class NewsPagingPresenterTest: BaseTest() {
     /**
      * Mock class for view that attaches to NewsPagingPresenter (INewsPagingView)
      */
-    class MockNewsPagingView: NewsPagingPresenter.INewsPagingView {
+    class MockNewsPagingView : NewsPagingPresenter.INewsPagingView {
         // Variable to represent if view is in refreshing state
         var isRefreshing = false
+        // Variable to track if we've received a refreshing complete event from the presenter
+        var isRefreshingComplete = true
 
-        override fun displayRefreshing() {
-            isRefreshing = true
+        override fun displayRefreshing(isRefreshing: Boolean) {
+            this.isRefreshing = isRefreshing
+            if (isRefreshing) {
+                isRefreshingComplete = false
+            }
         }
 
         override fun refreshingComplete() {
-            isRefreshing = false
+            isRefreshingComplete = true
         }
     }
 
-
     // Presenter instance we will be testing with
     private var newsPagingPresenter: INewsPagingPresenter? = null
-
     // Mock for view that attaches to presenter
     private lateinit var mockNewsPagingView: MockNewsPagingView
+    // Mock for service that retrieves data for presenter
+    private lateinit var mockNewsService: MockNewsService
+    // Mock model that presenter will use
+    private lateinit var mockArticleListsModel: MockArticleListsModel
 
     override fun setUp() {
         super.setUp()
 
-        newsPagingPresenter = NewsPagingPresenter.getInstance()
+        // Create presenter
+        val presenter = NewsPagingPresenter.getInstance()
+
+        // Instantiate mocks
+        mockNewsService = MockNewsService()
+        mockArticleListsModel = MockArticleListsModel()
+
+        // Inject mocks into presenter
+        presenter.newsService = mockNewsService
+        presenter.articleModelInstance = mockArticleListsModel
+
+        newsPagingPresenter = presenter
         mockNewsPagingView = MockNewsPagingView()
     }
 
@@ -52,6 +71,8 @@ class NewsPagingPresenterTest: BaseTest() {
         super.tearDown()
 
         newsPagingPresenter?.detach()
+        mockNewsService.clearCallbacks()
+        mockArticleListsModel.clearAllData()
     }
 
     @Test
@@ -61,21 +82,34 @@ class NewsPagingPresenterTest: BaseTest() {
 
     @Test
     fun testAttachView() {
+        // Tell presenter to pull initial article list
+        val presenter = newsPagingPresenter
+        if (presenter is NewsPagingPresenter) {
+            presenter.initialArticleCheck()
+        }
+
         newsPagingPresenter?.attach(mockNewsPagingView)
 
-        // At first attachment view should be refreshing as we have no articles
+        // We haven't told mock service to fire callbacks so view should still be refreshing
         Assert.assertTrue(mockNewsPagingView.isRefreshing)
+
+        // Simulate API callbacks
+        mockNewsService.fireCallbacks()
+
+        // View should no longer be refreshing
+        Assert.assertFalse(mockNewsPagingView.isRefreshing)
     }
 
     @Test
     fun testRefreshRequest() {
-        // Ensure that when presenter requests a refresh we receive the request quickly (less than 1 second)
+        // Ensure that when presenter completes a refresh we receive the complete event quickly (less than 1 second)
+        // Service providing news data is mocked so this should be very fast
         val timeStamp = System.currentTimeMillis()
 
-        // Add a mock item that will receiver the call to refresh from the presenter
-        val refreshReceiver = object : RefreshEventReceiver {
+        // Add a mock item that will receive the event that article data has been refreshed
+        val refreshReceiver = object : ArticleRefreshCompleteEventReceiver {
             override fun onReceive(event: BaseEvent) {
-                if (event is RefreshEvent) {
+                if (event is ArticleRefreshCompleteEvent) {
                     val eventTime = System.currentTimeMillis()
                     LogUtils.debug(TAG, "testRefreshRequest received refresh event")
                     Assert.assertTrue(eventTime - timeStamp < TimeUnit.SECONDS.toMicros(1))
@@ -84,7 +118,7 @@ class NewsPagingPresenterTest: BaseTest() {
                 }
             }
         }
-        EventHandler.addRefreshReceiver(refreshReceiver)
+        EventHandler.addEventReceiver(refreshReceiver)
 
         newsPagingPresenter?.requestArticleRefresh()
     }
@@ -97,16 +131,22 @@ class NewsPagingPresenterTest: BaseTest() {
         if (presenter == null) {
             Assert.assertTrue(false)
         } else {
-            presenter.attach(mockNewsPagingView)
+            // Model should start off empty
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
+            }
 
+            // Have presenter check for initial articles (will do a refresh)
+            if (presenter is NewsPagingPresenter) {
+                presenter.initialArticleCheck()
+            }
+            presenter.attach(mockNewsPagingView)
             // First attachment, view should be displaying refreshing
             Assert.assertTrue(mockNewsPagingView.isRefreshing)
 
-            // Simulate all article types have completed refresh, presenter should tell view to stop refreshing
-            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-                EventHandler.broadcast(RefreshCompleteEvent(articleType))
-            }
-            // View should no longer be refreshing
+            //Simulate callbacks
+            mockNewsService.fireCallbacks()
+            // View should not be refreshing anymore
             Assert.assertFalse(mockNewsPagingView.isRefreshing)
 
             // Let's request another refresh
@@ -114,17 +154,16 @@ class NewsPagingPresenterTest: BaseTest() {
             // View should be refreshing
             Assert.assertTrue(mockNewsPagingView.isRefreshing)
 
-            // Complete all but one article type refresh
-            for (i in 0..ArticleDisplayType.values().size - 2) {
-                EventHandler.broadcast(RefreshCompleteEvent(ArticleDisplayType.values()[i]))
-            }
-            // View should still be in refreshing state
-            Assert.assertTrue(mockNewsPagingView.isRefreshing)
-
-            // Complete last article type
-            EventHandler.broadcast(RefreshCompleteEvent(ArticleDisplayType.values()[ArticleDisplayType.values().size - 1]))
-            // View should no longer be in refreshing state
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
+            // View should not be refreshing anymore
             Assert.assertFalse(mockNewsPagingView.isRefreshing)
+
+            // MockNewsPresenter standard response is a ArticleResponse containing 20 items
+            // Ensure our model received data from the presenter
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).size == 20)
+            }
         }
     }
 
@@ -136,42 +175,46 @@ class NewsPagingPresenterTest: BaseTest() {
         if (presenter == null) {
             Assert.assertTrue(false)
         } else {
+            // Have presenter to an initial article check which will call for a refresh
+            if (presenter is NewsPagingPresenter) {
+                presenter.initialArticleCheck()
+            }
             presenter.attach(mockNewsPagingView)
-
             // First attachment, view should be displaying refreshing
             Assert.assertTrue(mockNewsPagingView.isRefreshing)
 
-            // Simulate all article types have completed refresh, presenter should tell view to stop refreshing
-            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-                EventHandler.broadcast(RefreshCompleteEvent(articleType))
-            }
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
             // View should no longer be refreshing
             Assert.assertFalse(mockNewsPagingView.isRefreshing)
 
-            // Add a mock item that will receive the call to refresh from the presenter, this will assert true once
-            // and assert false for any other time (simulating multiple refresh calls without completion)
-            val refreshReceiver = object : RefreshEventReceiver {
-                private var shouldRefreshFlag = true
+
+            // Add receiver to handler that will look for refresh complete events. This should only be received once
+            // as we're going to request a bunch of refreshes without completing one
+            val receiver = object : ArticleRefreshCompleteEventReceiver {
+                private var refreshFlag = true
                 override fun onReceive(event: BaseEvent) {
-                    if (event is RefreshEvent) {
-                        LogUtils.debug(TAG, "testRefreshRequest received refresh event, should receive no more as we're simulating not ending a refresh")
-                        Assert.assertTrue(shouldRefreshFlag)
-                        shouldRefreshFlag = false
-                    } else {
-                        // Ignore other events
+                    when {
+                        event is ArticleRefreshCompleteEvent -> {
+                            LogUtils.debug(TAG, "Received ArticleRefreshCompleteEvent")
+                            Assert.assertTrue(refreshFlag)
+                            refreshFlag = false
+                        }
+                        else -> {
+                            LogUtils.debug(TAG, "")
+                        }
                     }
+
                 }
             }
-            EventHandler.addRefreshReceiver(refreshReceiver)
+            EventHandler.addEventReceiver(receiver)
 
-            // Request a refresh from the presenter, above receiver should pass
+            // Request a refresh from the presenter, above receiver should not be called
             presenter.requestArticleRefresh()
-
             // View should still be in refreshing state
             Assert.assertTrue(mockNewsPagingView.isRefreshing)
 
-            // Request another refresh from the presenter, above receiver
-            // should not get a RefreshEvent call (or else it will fail)
+            // Request another refresh from the presenter, above receiver should not still not be called
             presenter.requestArticleRefresh()
             // View should still be in refreshing state
             Assert.assertTrue(mockNewsPagingView.isRefreshing)
@@ -180,12 +223,46 @@ class NewsPagingPresenterTest: BaseTest() {
             for (i in 0 until 1000) {
                 presenter.requestArticleRefresh()
             }
-            // View should still be in refreshing state
+            // Request another refresh from the presenter, above receiver should not still not be called
             Assert.assertTrue(mockNewsPagingView.isRefreshing)
 
-            // Simulate all article types have completed refresh, presenter should tell view to stop refreshing
+            // Simulate callbacks, receiver should be called and view should not be in refreshing state
+            mockNewsService.fireCallbacks()
+            // View should no longer be refreshing
+            Assert.assertFalse(mockNewsPagingView.isRefreshing)
+        }
+    }
+
+    @Test
+    fun testRefreshAllErrorCallbacks() {
+        Assert.assertNotNull(newsPagingPresenter)
+
+        val presenter = newsPagingPresenter
+        if (presenter == null) {
+            Assert.assertTrue(false)
+        } else {
+            // Ensure our beginning model lists are empty
             for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-                EventHandler.broadcast(RefreshCompleteEvent(articleType))
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
+            }
+
+            // Set news service to provide errors instead of successes
+            mockNewsService.responseType = MockNewsService.MockResponseType.ERROR
+
+            // Have presenter initiate which will call for refresh
+            if (presenter is NewsPagingPresenter) {
+                presenter.initialArticleCheck()
+            }
+            presenter.attach(mockNewsPagingView)
+            // View should be refreshing
+            Assert.assertTrue(mockNewsPagingView.isRefreshing)
+
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
+
+            // Presenter should only have received errors, which means articles lists should still be empty
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
             }
             // View should no longer be refreshing
             Assert.assertFalse(mockNewsPagingView.isRefreshing)

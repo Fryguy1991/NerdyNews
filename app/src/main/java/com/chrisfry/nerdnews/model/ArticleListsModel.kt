@@ -7,7 +7,7 @@ import java.lang.Exception
 /**
  * Model which contains lists of article data (based on ArticleDisplayType) to be displayed by the user interface
  */
-class ArticleListsModel {
+open class ArticleListsModel {
     companion object {
         private val TAG = ArticleListsModel::class.java.name
 
@@ -43,7 +43,7 @@ class ArticleListsModel {
      *
      * @param articleDisplayType: Requested type of article to retrieve
      */
-    fun getArticleList(articleDisplayType: ArticleDisplayType): MutableList<Article> {
+    open fun getArticleList(articleDisplayType: ArticleDisplayType): MutableList<Article> {
         if (articleLists.size != ArticleDisplayType.values().size) {
             throw Exception("$TAG: Model list size does not match article type size (GET)")
         } else {
@@ -57,7 +57,7 @@ class ArticleListsModel {
      * @param articleDisplayType: Requested type of article to replace
      * @param articleList: List of article data to use as a replacement
      */
-    fun setArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
+    open fun setArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
         if (articleLists.size != ArticleDisplayType.values().size) {
             LogUtils.wtf(TAG, "Model list size does not match article type size (SET)")
         } else {
@@ -72,7 +72,7 @@ class ArticleListsModel {
      * @param articleDisplayType: Requested type of article data to add to
      * @param articleList: List of article data to add to the model
      */
-    fun addToArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
+    open fun addToArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
         if (articleLists.size != ArticleDisplayType.values().size) {
             LogUtils.wtf(TAG, "Model list size does not match article type size (ADD)")
         } else {

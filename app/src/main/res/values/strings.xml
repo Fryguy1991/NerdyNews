@@ -10,7 +10,8 @@
     <string name="no_title_string">NO TITLE PROVIDED</string>
 
     <!-- Toast Messages -->
-    <string name="invalid_article_message">Article Can\'t Be Displayed</string>
+    <string name="toast_invalid_article_message">Article Can\'t Be Displayed</string>
+    <string name="toast_articles_refreshed">Articles Refreshed</string>
 
     <!-- Menu Item Strings -->
     <string name="menu_refresh_title">Refresh</string>

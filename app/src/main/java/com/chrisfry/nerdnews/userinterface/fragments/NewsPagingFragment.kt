@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -48,8 +49,8 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
         } else {
             // Create presenter and inject news component for NewsAPI elements
             val newPresenter = NewsPagingPresenter.getInstance()
-            val presenterComponent = (parentActivity.application as App).newsComponent
-            presenterComponent.inject(newPresenter)
+            (parentActivity.application as App).appComponent.inject(newPresenter)
+            newPresenter.initialArticleCheck()
 
             presenter = newPresenter
 
@@ -154,11 +155,14 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
         // Not currently handling page selection
     }
 
-    override fun displayRefreshing() {
-        swipeRefreshLayout.isRefreshing = true
+    override fun displayRefreshing(isRefreshing: Boolean) {
+        swipeRefreshLayout.isRefreshing = isRefreshing
     }
 
     override fun refreshingComplete() {
-        swipeRefreshLayout.isRefreshing = false
+        val currentContext = context
+        if (currentContext != null) {
+            Toast.makeText(currentContext, R.string.toast_articles_refreshed, Toast.LENGTH_LONG).show()
+        }
     }
 }

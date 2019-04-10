@@ -16,6 +16,7 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 
 /**
  * Presenter class for displaying a list of news articles
@@ -33,7 +34,8 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     }
 
     // Instance of article model
-    private val articleModelInstance = ArticleListsModel.getInstance()
+    @Inject
+    lateinit var articleModelInstance: ArticleListsModel
 
     init {
         // Register for refresh events
