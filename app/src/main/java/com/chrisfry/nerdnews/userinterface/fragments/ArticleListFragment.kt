@@ -14,6 +14,7 @@ import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
+import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
@@ -46,7 +47,12 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
             if (typeOrdinal < 0 || typeOrdinal >= ArticleDisplayType.values().size) {
                 throw Exception("$TAG: Error invalid article type ordinal provided")
             } else {
-                presenter = ArticleListPresenter.getInstance(ArticleDisplayType.values()[typeOrdinal])
+                val newPresenter = ArticleListPresenter.getInstance(ArticleDisplayType.values()[typeOrdinal])
+                val parentActivity = activity
+                if (parentActivity != null) {
+                    (parentActivity.application as App).appComponent.inject(newPresenter)
+                }
+                presenter = newPresenter
                 presenter?.attach(this)
             }
         }
