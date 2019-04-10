@@ -4,10 +4,8 @@ package com.chrisfry.nerdnews.userinterface.fragments
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
@@ -22,9 +20,9 @@ import java.lang.Exception
 /**
  * Fragment class for displaying news article lists in a view pager
  */
-class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewPager.OnPageChangeListener {
+class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewPager.OnPageChangeListener {
     companion object {
-        private val TAG = NewsPagerFragment::class.java.name
+        private val TAG = NewsPagingFragment::class.java.name
     }
 
     // Presenter that provides list of news articles
@@ -39,6 +37,9 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+
+        // Ensure options menu for fragment will be inflated
+        setHasOptionsMenu(true)
 
         val parentActivity = activity
 
@@ -68,6 +69,24 @@ class NewsPagerFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewP
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_news_pager, container, false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        // Load menu with refresh icon
+        inflater.inflate(R.menu.menu_fragment_news_paging, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_refresh -> {
+                // User requested refresh from options menu (toolbar refresh icon)
+                presenter?.requestArticleRefresh()
+                return true
+            }
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

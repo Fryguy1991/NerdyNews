@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
-import com.chrisfry.nerdnews.userinterface.fragments.NewsPagerFragment
+import com.chrisfry.nerdnews.userinterface.fragments.NewsPagingFragment
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
 
     // UI ELEMENTS
     // Fragments
-    private val newsPagerFragment = NewsPagerFragment()
+    private val newsPagerFragment = NewsPagingFragment()
     // Reference to app toolbar
     private lateinit var toolbar: Toolbar
     // Tabs for displaying article type

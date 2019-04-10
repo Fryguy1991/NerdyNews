@@ -6,7 +6,12 @@
     <string name="tab_science">Science</string>
     <string name="tab_gaming">Gaming</string>
 
+    <!-- Default article title to display (if sent was empty -->
     <string name="no_title_string">NO TITLE PROVIDED</string>
 
+    <!-- Toast Messages -->
     <string name="invalid_article_message">Article Can\'t Be Displayed</string>
+
+    <!-- Menu Item Strings -->
+    <string name="menu_refresh_title">Refresh</string>
 </resources>
