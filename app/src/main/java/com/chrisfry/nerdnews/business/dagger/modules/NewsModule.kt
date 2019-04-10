@@ -11,7 +11,7 @@ class NewsModule {
 
     @Provides
     @Singleton
-    fun providesNewsService(): NewsService {
+    fun provideNewsService(): NewsService {
         return NewsApi().getService()
     }
 }
