@@ -8,4 +8,4 @@ import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
  *
  * @param articleDisplayType: Article type that has completed refreshing
  */
-class RefreshCompleteEvent(val articleDisplayType: ArticleDisplayType): BaseEvent()
+class RequestMoreArticleEvent(val articleDisplayType: ArticleDisplayType): BaseEvent()
