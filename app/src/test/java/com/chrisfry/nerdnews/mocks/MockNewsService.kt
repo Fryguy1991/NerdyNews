@@ -5,6 +5,7 @@ import com.chrisfry.nerdnews.business.network.NewsCallback
 import com.chrisfry.nerdnews.business.network.NewsService
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
+import com.chrisfry.nerdnews.utils.LogUtils
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -21,6 +22,10 @@ import java.lang.Exception
  * Mock class for NewsService that is injected into the presenter
  */
 class MockNewsService : NewsService {
+    companion object {
+        private val TAG = MockNewsService::class.java.name
+    }
+
     // Add variable so we can change the responses type that will be received
     var responseType = MockResponseType.SUCCESS
 
@@ -86,37 +91,52 @@ class MockNewsService : NewsService {
         }
 
         override fun isExecuted(): Boolean {
+            LogUtils.debug(TAG, "Not currently handling in this test")
             return true
         }
 
         override fun clone(): Call<ArticleResponse> {
+            LogUtils.debug(TAG, "Not currently handling in this test")
             return this
         }
 
         override fun isCanceled(): Boolean {
+            LogUtils.debug(TAG, "Not currently handling in this test")
             return false
         }
 
         override fun cancel() {
-            // TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            LogUtils.debug(TAG, "Not currently handling in this test")
         }
 
         override fun execute(): Response<ArticleResponse> {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("Not currently handling in this test")
         }
 
         override fun request(): Request {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("Not currently handling in this test")
         }
     }
 
-    enum class MockResponseType(val isSuccessful: Boolean) {
-        SUCCESS(true),
-        ERROR(false)
+    /**
+     * Response types that this service will serve
+     */
+    enum class MockResponseType {
+        SUCCESS,
+        ERROR
     }
 
+    /**
+     * Data class for containing a callback object and provided response
+     *
+     * @param callback: Callback that will receive the response when callbacks are fired
+     * @param responseType: Response type to be provided by the callback
+     */
     data class CallbackObject(val callback: NewsCallback<ArticleResponse>, val responseType: MockResponseType)
 
+    /**
+     * Mock news services fires all stored callbacks
+     */
     fun fireCallbacks() {
         for (callbackEvent: CallbackObject in callbackList) {
             when (callbackEvent.responseType) {
@@ -127,6 +147,9 @@ class MockNewsService : NewsService {
         clearCallbacks()
     }
 
+    /**
+     * Mock news service removes all stored callbacks (without firing them)
+     */
     fun clearCallbacks() {
         callbackList.clear()
     }
