@@ -4,6 +4,7 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.RequestMoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
 import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
@@ -316,6 +317,104 @@ class NewsPagingPresenterTest : BaseTest() {
             // MockNewsPresenter new response should have 5 article items for each type
             for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
                 Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).size == 5)
+            }
+        }
+    }
+
+    @Test
+    fun testRequestMoreArticles() {
+        Assert.assertNotNull(newsPagingPresenter)
+
+        val presenter = newsPagingPresenter
+        if (presenter == null) {
+            Assert.assertTrue(false)
+        } else {
+            // Numbers of times we've requested more articles
+            var techMoreCount = 0
+            var scienceMoreCount = 0
+            var gamingMoreCount = 0
+
+            // Model should start off empty
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).isEmpty())
+            }
+
+            // Have presenter check for initial articles (will do a refresh)
+            if (presenter is NewsPagingPresenter) {
+                presenter.initialArticleCheck()
+            }
+            presenter.attach(mockNewsPagingView)
+            // First attachment, view should be displaying refreshing
+            Assert.assertTrue(mockNewsPagingView.isRefreshing)
+
+            //Simulate callbacks
+            mockNewsService.fireCallbacks()
+            // View should not be refreshing anymore
+            Assert.assertFalse(mockNewsPagingView.isRefreshing)
+
+            // Model lists should have 20 articles each
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                Assert.assertTrue(mockArticleListsModel.getArticleList(articleType).size == 20)
+            }
+
+            // Fire event for more articles tech type
+            EventHandler.broadcast(RequestMoreArticleEvent(ArticleDisplayType.TECH))
+            techMoreCount++
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
+
+            // Should have added 20 articles to Tech list
+            Assert.assertTrue(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH).size == 40)
+
+
+            // Let's fire a bunch of more article requests
+            for (i in 0 until 1000) {
+                EventHandler.broadcast(RequestMoreArticleEvent(ArticleDisplayType.TECH))
+                mockNewsService.fireCallbacks()
+                techMoreCount++
+
+                // Should be multiple of 20 articles
+                Assert.assertTrue(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH).size == (techMoreCount + 1) * 20)
+            }
+
+            // Fire event for more articles science type
+            EventHandler.broadcast(RequestMoreArticleEvent(ArticleDisplayType.SCIENCE))
+            scienceMoreCount++
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
+
+            // Should have added 20 articles to Science list
+            Assert.assertTrue(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE).size == 40)
+
+
+            // Let's fire a bunch of more article requests
+            for (i in 0 until 1000) {
+                EventHandler.broadcast(RequestMoreArticleEvent(ArticleDisplayType.SCIENCE))
+                mockNewsService.fireCallbacks()
+                scienceMoreCount++
+
+                // Should be multiple of 20 articles
+                Assert.assertTrue(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE).size == (scienceMoreCount + 1) * 20)
+            }
+
+            // Fire event for more articles gaming type
+            EventHandler.broadcast(RequestMoreArticleEvent(ArticleDisplayType.GAMING))
+            gamingMoreCount++
+            // Simulate callbacks
+            mockNewsService.fireCallbacks()
+
+            // Should have added 20 articles to Gaming list
+            Assert.assertTrue(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING).size == 40)
+
+
+            // Let's fire a bunch of more article requests
+            for (i in 0 until 1000) {
+                EventHandler.broadcast(RequestMoreArticleEvent(ArticleDisplayType.GAMING))
+                mockNewsService.fireCallbacks()
+                gamingMoreCount++
+
+                // Should be multiple of 20 articles
+                Assert.assertTrue(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING).size == (gamingMoreCount + 1) * 20)
             }
         }
     }
