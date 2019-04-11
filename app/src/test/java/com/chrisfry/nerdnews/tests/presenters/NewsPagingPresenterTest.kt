@@ -15,6 +15,9 @@ import com.chrisfry.nerdnews.utils.LogUtils
 import org.junit.*
 import java.util.concurrent.TimeUnit
 
+/**
+ * Class for isolating and testing NewsPagingPresenter
+ */
 class NewsPagingPresenterTest : BaseTest() {
     companion object {
         private val TAG = NewsPagingPresenterTest::class.java.name
