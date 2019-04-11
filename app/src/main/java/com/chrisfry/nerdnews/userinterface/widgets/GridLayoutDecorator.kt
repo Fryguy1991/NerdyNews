@@ -20,10 +20,12 @@ class GridLayoutDecorator : RecyclerView.ItemDecoration() {
             val childIndex = parent.getChildAdapterPosition(view)
 
             // Retrieve item count from recyclerview adapter
-            var totalChildCount = -1
+            val totalChildCount: Int
             val parentAdapter = parent.adapter
             if (parentAdapter != null) {
                 totalChildCount = parentAdapter.itemCount
+            } else {
+                throw Exception("$TAG: Error decorator does not have a parent adapter")
             }
 
             // Use default margin for top items in the adapter, else use half default margin
@@ -32,8 +34,18 @@ class GridLayoutDecorator : RecyclerView.ItemDecoration() {
                 else -> halfDefaultMarginPixels
             }
 
+            // Total number of rows
+            val rowCount: Int = if (totalChildCount % AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT > 0) {
+                (totalChildCount / AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT) + 1
+            } else {
+                totalChildCount / AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT
+            }
+
+            // First index in last row = (row count - 1) * column count
+            val firstIndexInLastRow = (rowCount - 1) * AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT
+
             // Use default margin for bottom items in the adapter, else use half default margin
-            outRect.bottom = when (childIndex > totalChildCount - AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT) {
+            outRect.bottom = when (childIndex >= firstIndexInLastRow) {
                 true -> defaultMarginPixels
                 false -> halfDefaultMarginPixels
             }

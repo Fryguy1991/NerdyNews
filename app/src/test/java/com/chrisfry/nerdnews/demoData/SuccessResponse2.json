@@ -1,0 +1,71 @@
+{
+  "status": "ok",
+  "totalResults": 4972,
+  "articles": [
+    {
+      "source": {
+        "id": "vice-news",
+        "name": "Vice News"
+      },
+      "author": "Mike Power, Max Daly",
+      "title": "The World’s Biggest Dark Net Market Has Shut Down—What's Next?",
+      "description": "Under mysterious circumstances, Dream Market is due to close at the end of April. Is the game up for the big online drug bazaars?",
+      "url": "https://www.vice.com/en_us/article/wjmw3w/the-worlds-biggest-dark-net-market-has-shut-downwhats-next",
+      "urlToImage": "https://video-images.vice.com/articles/5cac82cc3d5fe9000789484e/lede/1554890435289-darkweb.png?crop=Infinityxw:Infinityxh;NaNxw,Infinityxh&resize=1200:*",
+      "publishedAt": "2019-04-10T15:15:00Z",
+      "content": "This article originally appeared on VICE UK.\r\nJust over two weeks ago, on March 26, hundreds of thousands of people worldwide logged on to the dark net market site, Dream, and found the following message: \r\nAll buying and selling on Dream (the largest, longes… [+8164 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Newsbtc.com"
+      },
+      "author": "Davit Babayan",
+      "title": "Bitcoin Price and Stocks Do Not Correlate, Indicates Latest FRED Data",
+      "description": "Cryptocurrency and stock price movements do not correlate with each other, indicated the latest Federal Reserve Economic Data (FRED). The data pitted S&P 500 index performance against the cryptocurrency index managed by US-based Coinbase crypto exchange platf…",
+      "url": "https://www.newsbtc.com/2019/04/10/crypto-and-stocks-do-not-correlate-indicates-latest-fred-data/",
+      "urlToImage": "https://www.newsbtc.com/wp-content/uploads/2019/04/photo-1517424788495-0d03ec42e244.jpg",
+      "publishedAt": "2019-04-10T15:14:43Z",
+      "content": "Cryptocurrency and stock price movements do not correlate with each other, indicated the latest Federal Reserve Economic Data (FRED).\r\nThe data pitted S&amp;P 500 index performance against the cryptocurrency index managed by US-based Coinbase crypto exchange … [+3179 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Forbes.com"
+      },
+      "author": "Jim Preissler, Contributor, Jim Preissler, Contributor https://www.forbes.com/sites/jpreissler/",
+      "title": "Range Bound Markets With No Fresh Direction",
+      "description": "Crypto Market Commentary April 10, 2019",
+      "url": "https://www.forbes.com/sites/jpreissler/2019/04/10/range-bound-markets-with-no-fresh-direction/",
+      "urlToImage": "https://thumbor.forbes.com/thumbor/600x315/https%3A%2F%2Fspecials-images.forbesimg.com%2Fdam%2Fimageserve%2F1141275416%2F960x0.jpg%3Ffit%3Dscale",
+      "publishedAt": "2019-04-10T15:03:00Z",
+      "content": "Share to facebook\r\nShare to twitter\r\nShare to linkedin\r\nBlockchain, Data Mining, Internet, Technology\r\nGetty\r\nYesterday began with some small losses across the aboard although still well within Mondays ranges. Bitcoin&amp;nbsp;(BTC)&amp;nbsp; was at $5,180 an… [+3946 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Yahoo.com"
+      },
+      "author": null,
+      "title": "The story of the Venezuelan petro and what the future might hold",
+      "description": "Venezuela, a nation with the largest oil reserves in the world and which is currently ravaged by hyperinflation, is the first nation to create its own cryptocurrency, called the Venezuelan petro. Petro is an interesting name to choose. The “petrodollar” was o…",
+      "url": "https://finance.yahoo.com/news/story-venezuelan-petro-future-might-150029445.html",
+      "urlToImage": "https://s.yimg.com/uu/api/res/1.2/qKaS3J1rC9AazYW5rSWTug--~B/aD02ODM7dz0xMDI0O3NtPTE7YXBwaWQ9eXRhY2h5b24-/http://media.zenfs.com/en-US/homerun/coin_rivet_596/88ec2a9ba82132534d9d493791a0eaeb",
+      "publishedAt": "2019-04-10T15:00:29Z",
+      "content": "Venezuela, a nation with the largest oil reserves in the world and which is currently ravaged by hyperinflation, is the first nation to create its own cryptocurrency, called the Venezuelan petro.\r\nPetro is an interesting name to choose. The petrodollar was or… [+4869 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Readwrite.com"
+      },
+      "author": "Gregory S Mathew",
+      "title": "Blockchain Supercharged with AI: The Next Revolution",
+      "description": "In the last decade, Blockchain and Artificial Intelligence (AI) are among the rare developments in technology that is poised to become so disruptive that they’ve become synonymous with innovation and the future. Startups have begun aiming to bring an amalgama…",
+      "url": "https://readwrite.com/2019/04/10/blockchain-supercharged-with-ai-the-next-revolution/",
+      "urlToImage": "https://images.readwrite.com/wp-content/uploads/2019/03/Blockchain-supercharged-with-AI-the-next-revolution.jpg",
+      "publishedAt": "2019-04-10T15:00:27Z",
+      "content": "In the last decade, Blockchain and Artificial Intelligence (AI) are among the rare developments in technology that is poised to become so disruptive that theyve become synonymous with innovation and the future. Startups have begun aiming to bring an amalgamat… [+6711 chars]"
+    }
+  ]
+}

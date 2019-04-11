@@ -27,7 +27,7 @@ class MockNewsService : NewsService {
     }
 
     // Add variable so we can change the responses type that will be received
-    var responseType = MockResponseType.SUCCESS
+    var responseType = MockResponseType.SUCCESS_1
 
     // Fake retrofit used for converting responses
     private val fakeRetrofit: Retrofit = Retrofit.Builder()
@@ -37,8 +37,9 @@ class MockNewsService : NewsService {
         .build()
 
     // Some mock responses we want to provide
-    private val mockSuccessResponse: ArticleResponse
-    private val mockErrorResponse: ResponseError
+    private val mockSuccessResponse1: ArticleResponse
+    private val mockSuccessResponse2: ArticleResponse
+    private val mockApiKeyErrorResponse: ResponseError
 
     // List of callbacks
     private val callbackList= mutableListOf<CallbackObject>()
@@ -50,24 +51,34 @@ class MockNewsService : NewsService {
         val responseErrorConverter =
             fakeRetrofit.responseBodyConverter<ResponseError>(ResponseError::class.java, arrayOf())
 
-        // Setup mock success
+        // Setup mock success 1
         var responseBody =
-            ResponseBody.create(MediaType.parse("application/json"), TestUtils.readJsonFile("successResponse1.json"))
+            ResponseBody.create(MediaType.parse("application/json"), TestUtils.readJsonFile("SuccessResponse1.json"))
         var successConvertOutput = articleResponseConverter.convert(responseBody)
         if (successConvertOutput == null) {
             throw Exception("Test Setup Failed")
         } else {
-            mockSuccessResponse = successConvertOutput
+            mockSuccessResponse1 = successConvertOutput
         }
 
-        // Setup mock error
+        // Setup mock success 2
         responseBody =
-            ResponseBody.create(MediaType.parse("application/json"), TestUtils.readJsonFile("errorResponse1.json"))
+            ResponseBody.create(MediaType.parse("application/json"), TestUtils.readJsonFile("SuccessResponse2.json"))
+        successConvertOutput = articleResponseConverter.convert(responseBody)
+        if (successConvertOutput == null) {
+            throw Exception("Test Setup Failed")
+        } else {
+            mockSuccessResponse2 = successConvertOutput
+        }
+
+        // Setup mock api key error
+        responseBody =
+            ResponseBody.create(MediaType.parse("application/json"), TestUtils.readJsonFile("ApiKeyErrorResponse.json"))
         val errorConvertOutput = responseErrorConverter.convert(responseBody)
         if (errorConvertOutput == null) {
             throw Exception("Test Setup Failed")
         } else {
-            mockErrorResponse = errorConvertOutput
+            mockApiKeyErrorResponse = errorConvertOutput
         }
     }
 
@@ -122,8 +133,9 @@ class MockNewsService : NewsService {
      * Response types that this service will serve
      */
     enum class MockResponseType {
-        SUCCESS,
-        ERROR
+        SUCCESS_1,
+        SUCCESS_2,
+        API_KEY_ERROR
     }
 
     /**
@@ -140,8 +152,9 @@ class MockNewsService : NewsService {
     fun fireCallbacks() {
         for (callbackEvent: CallbackObject in callbackList) {
             when (callbackEvent.responseType) {
-                MockResponseType.SUCCESS -> callbackEvent.callback.onResponse(mockSuccessResponse)
-                MockResponseType.ERROR -> callbackEvent.callback.onFailure(mockErrorResponse)
+                MockResponseType.SUCCESS_1 -> callbackEvent.callback.onResponse(mockSuccessResponse1)
+                MockResponseType.SUCCESS_2 -> callbackEvent.callback.onResponse(mockSuccessResponse2)
+                MockResponseType.API_KEY_ERROR -> callbackEvent.callback.onFailure(mockApiKeyErrorResponse)
             }
         }
         clearCallbacks()

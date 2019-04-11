@@ -29,11 +29,14 @@ open class ArticleListsModel {
 
     // List of article lists
     private val articleLists: List<MutableList<Article>>
+    // List of page counts for article lists
+    private val pageCounts = mutableListOf<Int>()
 
     init {
         val modelList = mutableListOf<MutableList<Article>>()
         for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
             modelList.add(mutableListOf())
+            pageCounts.add(0)
         }
         articleLists = modelList.toList()
     }
@@ -77,6 +80,35 @@ open class ArticleListsModel {
             LogUtils.wtf(TAG, "Model list size does not match article type size (ADD)")
         } else {
             articleLists[articleDisplayType.ordinal].addAll(articleList)
+        }
+    }
+
+    /**
+     * Set current page count used to retrieve article data from NewsAPI
+     * THIS IS NOT ZERO INDEXED FOR NEWSAPI!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @param articleDisplayType: Requested type of article data to add to
+     * @param count: The count of the page to store
+     */
+    open fun setPageCount(articleDisplayType: ArticleDisplayType, count: Int) {
+        if (articleLists.size != ArticleDisplayType.values().size) {
+            LogUtils.wtf(TAG, "Page count list size does not match article type size (ADD)")
+        } else {
+            pageCounts[articleDisplayType.ordinal] = count
+        }
+    }
+
+    /**
+     * Gets current page count used to retrieve article data from NewsAPI
+     * THIS IS NOT ZERO INDEXED FOR NEWSAPI!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @param articleDisplayType: Requested type of article data to add to
+     */
+    open fun getPageCount(articleDisplayType: ArticleDisplayType): Int {
+        if (articleLists.size != ArticleDisplayType.values().size) {
+            throw Exception("$TAG: Page count list size does not match article type size (ADD)")
+        } else {
+            return pageCounts[articleDisplayType.ordinal]
         }
     }
 }

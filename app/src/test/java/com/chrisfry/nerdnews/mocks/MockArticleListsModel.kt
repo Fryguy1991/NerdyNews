@@ -42,7 +42,7 @@ class MockArticleListsModel : ArticleListsModel() {
      * @param articleList: List of article data to add to the model
      */
     override fun addToArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
-        // Currently not implemented in mock
+        articleData[articleDisplayType.ordinal].addAll(articleList)
     }
 
     fun clearAllData() {

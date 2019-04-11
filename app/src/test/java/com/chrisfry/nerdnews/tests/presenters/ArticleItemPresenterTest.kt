@@ -10,35 +10,17 @@ import com.chrisfry.nerdnews.utils.LogUtils
 import org.junit.Assert
 import org.junit.Test
 
+/**
+ * Class for isolating and testing ArticleItemPresenter
+ */
 class ArticleItemPresenterTest : BaseTest() {
     companion object {
         private val TAG = ArticleItemPresenterTest::class.java.name
     }
 
-    private val normalArticle1 = ArticleDisplayModel(
-        "The one tiny thing that made me give up my iPhone for Android",
-        "Bgr.com",
-        "https://boygeniusreport.files.wordpress.com/2019/03/bgr-iphone-xs-2.jpg?quality=98&strip=all",
-        "Mike Wehner",
-        "https://bgr.com/2019/04/09/switching-to-android-reasons-chromecast-streaming/",
-        "I’ve been an iPhone user since almost the very beginning. I didn’t own an original iPhone " +
-                "at launch, but began using Apple’s smartphones with the iPhone 3G and never looked back. Until " +
-                "recently, that is. A few days ago, I decided to make the switch to Android… [+6036 chars]",
-        "April 9, 2019 12:30 PM"
-    )
-
-    private val normalArticle2 = ArticleDisplayModel(
-        "SpaceX's Falcon Heavy rocket set for first commercial launch. Here's how to watch it live online. - NBC News",
-        "NBC News",
-        "https://media1.s-nbcnews.com/j/newscms/2018_06/2319226/180206-spacex-ac-835p_2dac8aaa78ac1eb66098d945a4b4c843.nbcnews-fp-1200-630.jpg",
-        "Denise Chow",
-        "https://www.nbcnews.com/mach/science/spacex-s-falcon-heavy-rocket-set-first-commercial-launch-here-ncna992446",
-        "SUBSCRIBE April 9, 2019, 3:56 PM GMT Thirteen months after its maiden flight, SpaceXs " +
-                "huge Falcon Heavy rocket is being readied for its first commercial launch on Wednesday. The " +
-                "230-foot-tall rocket is scheduled to lift off at 6:35 p.m. ET from the Kennedy Sp… [+1828 chars]",
-        "April 9, 2019 10:56 AM"
-    )
-
+    /**
+     * Mock view for interacting with ArticleItemPresenter
+     */
     class MockArticleItemView : ArticleItemPresenter.IArticleItemView {
         var sourceName = AppConstants.EMPTY_STRING
         var title = AppConstants.EMPTY_STRING
@@ -82,9 +64,32 @@ class ArticleItemPresenterTest : BaseTest() {
         }
     }
 
+    // Few demo article display models
+    private val normalArticle1 = ArticleDisplayModel(
+        "The one tiny thing that made me give up my iPhone for Android",
+        "Bgr.com",
+        "https://boygeniusreport.files.wordpress.com/2019/03/bgr-iphone-xs-2.jpg?quality=98&strip=all",
+        "Mike Wehner",
+        "https://bgr.com/2019/04/09/switching-to-android-reasons-chromecast-streaming/",
+        "I’ve been an iPhone user since almost the very beginning. I didn’t own an original iPhone " +
+                "at launch, but began using Apple’s smartphones with the iPhone 3G and never looked back. Until " +
+                "recently, that is. A few days ago, I decided to make the switch to Android… [+6036 chars]",
+        "April 9, 2019 12:30 PM"
+    )
+    private val normalArticle2 = ArticleDisplayModel(
+        "SpaceX's Falcon Heavy rocket set for first commercial launch. Here's how to watch it live online. - NBC News",
+        "NBC News",
+        "https://media1.s-nbcnews.com/j/newscms/2018_06/2319226/180206-spacex-ac-835p_2dac8aaa78ac1eb66098d945a4b4c843.nbcnews-fp-1200-630.jpg",
+        "Denise Chow",
+        "https://www.nbcnews.com/mach/science/spacex-s-falcon-heavy-rocket-set-first-commercial-launch-here-ncna992446",
+        "SUBSCRIBE April 9, 2019, 3:56 PM GMT Thirteen months after its maiden flight, SpaceXs " +
+                "huge Falcon Heavy rocket is being readied for its first commercial launch on Wednesday. The " +
+                "230-foot-tall rocket is scheduled to lift off at 6:35 p.m. ET from the Kennedy Sp… [+1828 chars]",
+        "April 9, 2019 10:56 AM"
+    )
+
     // Presenter instance we will be testing with
     private var articleItemPresenter: IArticleItemPresenter? = null
-
     // Mock for view that attaches to presenter
     private lateinit var mockArticleItemView: MockArticleItemView
 

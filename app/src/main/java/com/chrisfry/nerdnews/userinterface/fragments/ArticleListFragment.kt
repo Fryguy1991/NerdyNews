@@ -3,6 +3,7 @@ package com.chrisfry.nerdnews.userinterface.fragments
 import android.content.Context
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +23,7 @@ import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 import com.chrisfry.nerdnews.utils.LogUtils
 import java.lang.Exception
 
-class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener {
+class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener{
     companion object {
         private val TAG = ArticleListFragment::class.java.name
         const val KEY_ARTICLE_TYPE = "key_article_type"
@@ -35,6 +36,35 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     private lateinit var newsRecyclerView: RecyclerView
     private val articleAdapter = ArticleRecyclerViewAdapter(this)
     private lateinit var layoutManager: RecyclerView.LayoutManager
+
+    // Reference to object that will listen to recycler view scrolling
+    inner class NewsScrollListener: RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val manager = recyclerView.layoutManager
+            when (manager) {
+                // If the layout manager says we're at the last item to display request more articles
+                is LinearLayoutManager -> {
+                    if (manager.findLastCompletelyVisibleItemPosition() == manager.itemCount - 1) {
+                        presenter?.requestMoreArticles()
+                    }
+                }
+                is GridLayoutManager -> {
+                    if (manager.findLastCompletelyVisibleItemPosition() == manager.itemCount - 1) {
+                        presenter?.requestMoreArticles()
+                    }
+                }
+                else -> {
+                    LogUtils.error(TAG, "Invalid layout manager")
+                }
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            // Not currently handling state change
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +83,6 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
                     (parentActivity.application as App).appComponent.inject(newPresenter)
                 }
                 presenter = newPresenter
-                presenter?.attach(this)
             }
         }
     }
@@ -64,9 +93,15 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // Initiate UI elements
         newsRecyclerView = view.findViewById(R.id.recycler_view_news_list)
+
+        // Set adapter to recycler view
         articleAdapter.listener = this
         newsRecyclerView.adapter = articleAdapter
+
+        // Add listener for scroll events
+        newsRecyclerView.addOnScrollListener(NewsScrollListener())
 
         val currentContext = context
         if (currentContext != null) {
@@ -88,6 +123,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
                 setupLinearRecyclerView(currentContext)
             }
         }
+        presenter?.attach(this)
         presenter?.requestArticles()
     }
 
@@ -118,11 +154,14 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     }
 
     override fun displayNoArticles() {
-       // TODO: Need to add to view
+        articleAdapter.updateAdapter(listOf())
     }
 
     override fun noMoreArticlesAvailable() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val currentContext = context
+        if (currentContext != null) {
+            Toast.makeText(currentContext, R.string.toast_no_more_articles_available, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onArticleSelected(article: ArticleDisplayModel) {

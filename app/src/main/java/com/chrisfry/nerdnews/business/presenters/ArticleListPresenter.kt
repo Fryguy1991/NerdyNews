@@ -6,8 +6,10 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.RequestMoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
+import com.chrisfry.nerdnews.business.eventhandling.receivers.MoreArticleEventReceiver
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
@@ -24,7 +26,8 @@ import javax.inject.Inject
  * @param articleType: Type of article to be displayed by the presenter instance
  */
 class ArticleListPresenter private constructor(private val articleType: ArticleDisplayType) :
-    BasePresenter<ArticleListPresenter.IArticleListView>(), IArticleListPresenter, ArticleRefreshCompleteEventReceiver {
+    BasePresenter<ArticleListPresenter.IArticleListView>(), IArticleListPresenter, ArticleRefreshCompleteEventReceiver,
+    MoreArticleEventReceiver {
     companion object {
         private val TAG = ArticleListPresenter::class.java.name
 
@@ -36,6 +39,11 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     // Instance of article model
     @Inject
     lateinit var articleModelInstance: ArticleListsModel
+
+    // Flag to indicate if a request for more articles is in progress
+    private var isMoreArticleRequestInProgress = false
+    // Cached value of article count (to see if article list has actually changed)
+    private var cachedArticleCount = 0
 
     init {
         // Register for refresh events
@@ -51,6 +59,8 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     override fun requestArticles() {
         // Pull articles from model and convert them for display
         val modelArticles = articleModelInstance.getArticleList(articleType)
+        // Cache article count
+        cachedArticleCount = modelArticles.size
         if (modelArticles.isEmpty()) {
             getView()?.displayNoArticles()
         } else {
@@ -59,14 +69,37 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     }
 
     override fun onReceive(event: BaseEvent) {
-        when (event::class.java) {
-            ArticleRefreshCompleteEvent::class.java -> {
+        when (event) {
+            is ArticleRefreshCompleteEvent -> {
                 // If view is not null (visible) send updated article list to view
                 val modelArticles = articleModelInstance.getArticleList(articleType)
+                // Cache article count
+                cachedArticleCount = modelArticles.size
                 if (modelArticles.isEmpty()) {
                     getView()?.displayNoArticles()
                 } else {
                     getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles))
+                }
+
+                // Reset flag for more article requests
+                isMoreArticleRequestInProgress = false
+            }
+            is MoreArticleEvent -> {
+                if (event.articleType == articleType) {
+                    // If view is not null (visible) send updated article list to view
+                    val modelArticles = articleModelInstance.getArticleList(articleType)
+
+                    if (modelArticles.size == cachedArticleCount) {
+                        LogUtils.debug(TAG, "No more articles to pull for $articleType category")
+                        getView()?.noMoreArticlesAvailable()
+                    } else {
+                        // Cache article count
+                        cachedArticleCount = modelArticles.size
+                        isMoreArticleRequestInProgress = false
+                        getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles))
+                    }
+                } else {
+                    LogUtils.debug(TAG, "More article event was not for this presenter")
                 }
             }
             else -> {
@@ -82,7 +115,10 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     }
 
     override fun requestMoreArticles() {
-        EventHandler.broadcast(RequestMoreArticleEvent(articleType))
+        if (!isMoreArticleRequestInProgress) {
+            isMoreArticleRequestInProgress = true
+            EventHandler.broadcast(RequestMoreArticleEvent(articleType))
+        }
     }
 
     /**

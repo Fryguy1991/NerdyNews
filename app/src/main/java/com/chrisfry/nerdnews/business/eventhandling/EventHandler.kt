@@ -2,7 +2,9 @@ package com.chrisfry.nerdnews.business.eventhandling
 
 import com.chrisfry.nerdnews.business.eventhandling.events.RequestMoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
+import com.chrisfry.nerdnews.business.eventhandling.receivers.MoreArticleEventReceiver
 import com.chrisfry.nerdnews.business.eventhandling.receivers.RequestMoreArticleEventReceiver
 import com.chrisfry.nerdnews.utils.LogUtils
 
@@ -35,16 +37,22 @@ class EventHandler {
 
             // Loop through event receivers checking if they need to receive the broadcasted event
             for (receiver: BaseEventReceiver in eventReceivers) {
-                when (event::class) {
+                when (event) {
                     // ArticleRefreshCompleteEventReceivers should receive ArticleRefreshCompleteEvents
-                    ArticleRefreshCompleteEvent::class -> {
+                    is ArticleRefreshCompleteEvent -> {
                         if (receiver is ArticleRefreshCompleteEventReceiver) {
                             receiver.onReceive(event)
                         }
                     }
                     // RequestMoreArticleEventReceivers should receive RequestMoreArticleEvents
-                    RequestMoreArticleEvent::class -> {
+                    is RequestMoreArticleEvent -> {
                         if (receiver is RequestMoreArticleEventReceiver) {
+                            receiver.onReceive(event)
+                        }
+                    }
+                    // MoreArticleEventReceivers should receive MoreArticleEvents
+                    is MoreArticleEvent -> {
+                        if (receiver is MoreArticleEventReceiver) {
                             receiver.onReceive(event)
                         }
                     }
