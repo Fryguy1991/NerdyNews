@@ -5,7 +5,7 @@ import java.io.*
 
 class TestUtils {
     companion object {
-        private val TAG = TestUtils::class.java.name
+        private val TAG = TestUtils::class.java.simpleName
 
         /**
          * Function that attempts to read a json file based on file name

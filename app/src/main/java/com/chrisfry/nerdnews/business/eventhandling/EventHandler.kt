@@ -13,7 +13,7 @@ import com.chrisfry.nerdnews.utils.LogUtils
  */
 class EventHandler {
     companion object {
-        private val TAG = EventHandler::class.java.name
+        private val TAG = EventHandler::class.java.simpleName
 
         // List of all event receivers
         private val eventReceivers = mutableListOf<BaseEventReceiver>()

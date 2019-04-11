@@ -24,7 +24,7 @@ import kotlin.random.Random
  */
 class ArticleListPresenterTest: BaseTest() {
     companion object {
-        private val TAG = ArticleListPresenterTest::class.java.name
+        private val TAG = ArticleListPresenterTest::class.java.simpleName
     }
 
     /**

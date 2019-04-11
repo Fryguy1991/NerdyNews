@@ -11,7 +11,7 @@ import com.chrisfry.nerdnews.userinterface.fragments.ArticleListFragment
 
 class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Context) : FragmentPagerAdapter(fragmentManager) {
     companion object {
-        private val TAG = NewsPagerAdapter::class.java.name
+        private val TAG = NewsPagerAdapter::class.java.simpleName
     }
 
     // List of fragments handled by this adapter (Tech, Science, Gaming)

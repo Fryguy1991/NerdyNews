@@ -17,7 +17,7 @@ import java.lang.Exception
 
 class MainActivity : AppCompatActivity(), ITabsProvider {
     companion object {
-        private val TAG = MainActivity::class.java.name
+        private val TAG = MainActivity::class.java.simpleName
     }
 
     // UI ELEMENTS

@@ -7,7 +7,7 @@ import com.chrisfry.nerdnews.AppConstants
  */
 class AppUtils {
     companion object {
-        private val TAG = AppUtils::class.java.name
+        private val TAG = AppUtils::class.java.simpleName
 
         /**
          * Build a comma separated string consisting of provided strings

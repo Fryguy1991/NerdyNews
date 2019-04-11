@@ -25,7 +25,7 @@ import java.lang.Exception
 
 class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener{
     companion object {
-        private val TAG = ArticleListFragment::class.java.name
+        private val TAG = ArticleListFragment::class.java.simpleName
         const val KEY_ARTICLE_TYPE = "key_article_type"
     }
 
