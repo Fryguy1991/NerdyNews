@@ -18,6 +18,8 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.userinterface.adapters.holders.ArticleViewHolder
 import kotlinx.android.synthetic.main.fragment_news_list.*
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import com.chrisfry.nerdnews.model.ArticleListsModel
+import org.junit.After
 import org.junit.Assert
 
 
@@ -34,6 +36,14 @@ class AppTest {
     private val recyclerTechCd = "${ArticleDisplayType.TECH}_recycler_view"
     private val recyclerScienceCd = "${ArticleDisplayType.SCIENCE}_recycler_view"
     private val recyclerGamingCd = "${ArticleDisplayType.GAMING}_recycler_view"
+
+    @After
+    fun tearDown() {
+        // Ensure any pulled article data is erased between tests
+        for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+            ArticleListsModel.getInstance().setArticleList(articleType, listOf())
+        }
+    }
 
     @Test
     fun launchApp() {
@@ -294,15 +304,15 @@ class AppTest {
 
 
         // Store adapter item count (this should be more than item count after refresh)
-        adapterItemCount = adapter!!.itemCount
+        val adapterItemCount2 = adapter!!.itemCount
         // Perform a swipe to refresh
         val swipeRefreshLayout = onView(withId(R.id.swipe_refresh_news_pager))
         swipeRefreshLayout.perform(swipeDown())
         // Allow time for refresh to complete
         Thread.sleep(2000)
 
-        newAdapterItemCount = adapter!!.itemCount
+        val newAdapterItemCount2 = adapter!!.itemCount
         // Technology article count should be less than previous count with 2 pages of data
-        Assert.assertTrue(adapterItemCount > newAdapterItemCount)
+        Assert.assertTrue(adapterItemCount2 > newAdapterItemCount2)
     }
 }
