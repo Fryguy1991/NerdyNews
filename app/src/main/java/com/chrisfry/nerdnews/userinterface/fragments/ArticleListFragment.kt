@@ -37,6 +37,9 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     private val articleAdapter = ArticleRecyclerViewAdapter(this)
     private lateinit var layoutManager: RecyclerView.LayoutManager
 
+    // Article type displayed by this fragment
+    private lateinit var articleType: ArticleDisplayType
+
     // Reference to object that will listen to recycler view scrolling
     inner class NewsScrollListener: RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -77,7 +80,8 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
             if (typeOrdinal < 0 || typeOrdinal >= ArticleDisplayType.values().size) {
                 throw Exception("$TAG: Error invalid article type ordinal provided")
             } else {
-                val newPresenter = ArticleListPresenter.getInstance(ArticleDisplayType.values()[typeOrdinal])
+                articleType = ArticleDisplayType.values()[typeOrdinal]
+                val newPresenter = ArticleListPresenter.getInstance(articleType)
                 val parentActivity = activity
                 if (parentActivity != null) {
                     (parentActivity.application as App).appComponent.inject(newPresenter)
@@ -102,6 +106,8 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
 
         // Add listener for scroll events
         newsRecyclerView.addOnScrollListener(NewsScrollListener())
+        // Set contentDescription (used for testing)
+        newsRecyclerView.contentDescription = "${articleType}_recycler_view"
 
         val currentContext = context
         if (currentContext != null) {
