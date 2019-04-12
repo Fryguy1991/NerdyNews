@@ -13,7 +13,7 @@ import com.chrisfry.nerdnews.utils.LogUtils
 class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPresenter.IArticleItemView>(),
     IArticleItemPresenter {
     companion object {
-        private val TAG = ArticleItemPresenter::class.java.name
+        private val TAG = ArticleItemPresenter::class.java.simpleName
 
         fun getInstance(): ArticleItemPresenter {
             return ArticleItemPresenter()

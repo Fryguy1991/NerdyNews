@@ -14,7 +14,7 @@ import java.lang.Exception
  */
 abstract class NewsCallback<T> : Callback<T> {
     companion object {
-        private val TAG = NewsCallback::class.java.name
+        private val TAG = NewsCallback::class.java.simpleName
     }
 
     override fun onResponse(call: Call<T>, response: Response<T>) {

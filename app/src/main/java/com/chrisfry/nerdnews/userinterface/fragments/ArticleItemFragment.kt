@@ -26,7 +26,7 @@ import com.chrisfry.nerdnews.utils.LogUtils
  */
 class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     companion object {
-        private val TAG = ArticleItemFragment::class.java.name
+        private val TAG = ArticleItemFragment::class.java.simpleName
     }
 
     // Reference to presenter that provides data

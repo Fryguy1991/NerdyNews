@@ -31,11 +31,11 @@ import kotlin.collections.HashMap
 class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresenter.INewsPagingView>(),
     INewsPagingPresenter, RequestMoreArticleEventReceiver {
     companion object {
-        private val TAG = NewsPagingPresenter::class.java.name
+        private val TAG = NewsPagingPresenter::class.java.simpleName
 
         private val GAMING_DOMAINS =
             listOf(
-                "ign.com", "polygon.com", "kotaku.com", "gamesspot.com", "gamesradar.com", "gamerant.com",
+                "ign.com", "polygon.com", "kotaku.com", "gamespot.com", "gamesradar.com", "gamerant.com",
                 "nintendolife.com", "pushsquare.com"
             )
         private val GAMING_DOMAINS_EXCLUDE = listOf("mashable.com")
@@ -101,7 +101,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
                 requestMoreArticles(event.articleDisplayType)
             }
             else -> {
-                LogUtils.error(TAG, "Not handling this event here: ${event::class.java.name}")
+                LogUtils.error(TAG, "Not handling this event here: ${event::class.java.simpleName}")
             }
         }
     }

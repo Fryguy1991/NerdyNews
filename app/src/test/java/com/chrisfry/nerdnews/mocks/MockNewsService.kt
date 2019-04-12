@@ -23,7 +23,7 @@ import java.lang.Exception
  */
 class MockNewsService : NewsService {
     companion object {
-        private val TAG = MockNewsService::class.java.name
+        private val TAG = MockNewsService::class.java.simpleName
     }
 
     // Add variable so we can change the responses type that will be received

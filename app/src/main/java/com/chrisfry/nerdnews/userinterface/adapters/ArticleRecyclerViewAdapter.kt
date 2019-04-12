@@ -17,7 +17,7 @@ import com.chrisfry.nerdnews.utils.LogUtils
 class ArticleRecyclerViewAdapter(private val fragment: ArticleListFragment) : BaseRecyclerViewAdapter<ArticleDisplayModel, ArticleViewHolder>(),
     ItemSelectionListener {
     companion object {
-        private val TAG = ArticleRecyclerViewAdapter::class.java.name
+        private val TAG = ArticleRecyclerViewAdapter::class.java.simpleName
     }
 
     // Reference to object listening for article selection

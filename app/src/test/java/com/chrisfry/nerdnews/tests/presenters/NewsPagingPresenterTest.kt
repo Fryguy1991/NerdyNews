@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
  */
 class NewsPagingPresenterTest : BaseTest() {
     companion object {
-        private val TAG = NewsPagingPresenterTest::class.java.name
+        private val TAG = NewsPagingPresenterTest::class.java.simpleName
     }
 
     /**

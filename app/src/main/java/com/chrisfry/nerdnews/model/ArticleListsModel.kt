@@ -9,7 +9,7 @@ import java.lang.Exception
  */
 open class ArticleListsModel {
     companion object {
-        private val TAG = ArticleListsModel::class.java.name
+        private val TAG = ArticleListsModel::class.java.simpleName
 
         @Volatile
         private var instance: ArticleListsModel? = null

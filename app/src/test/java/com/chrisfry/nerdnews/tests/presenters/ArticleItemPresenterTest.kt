@@ -15,7 +15,7 @@ import org.junit.Test
  */
 class ArticleItemPresenterTest : BaseTest() {
     companion object {
-        private val TAG = ArticleItemPresenterTest::class.java.name
+        private val TAG = ArticleItemPresenterTest::class.java.simpleName
     }
 
     /**

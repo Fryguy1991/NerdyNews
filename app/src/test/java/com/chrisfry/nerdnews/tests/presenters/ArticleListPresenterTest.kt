@@ -1,5 +1,6 @@
 package com.chrisfry.nerdnews.tests.presenters
 
+import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
@@ -17,14 +18,13 @@ import com.chrisfry.nerdnews.tests.BaseTest
 import org.junit.Assert
 import org.junit.Test
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 /**
  * Class for isolating and testing ArticleListPresenter
  */
 class ArticleListPresenterTest: BaseTest() {
     companion object {
-        private val TAG = ArticleListPresenterTest::class.java.name
+        private val TAG = ArticleListPresenterTest::class.java.simpleName
     }
 
     /**
@@ -63,6 +63,7 @@ class ArticleListPresenterTest: BaseTest() {
         super.setUp()
 
         // TODO: Currently testing presenter with aricle type TECH, consider testing others
+        // Not priority tho as function is the same no matter the article type
 
         // Instantiate presenter
         val presenter = ArticleListPresenter.getInstance(ArticleDisplayType.TECH)
@@ -362,6 +363,92 @@ class ArticleListPresenterTest: BaseTest() {
                 Assert.assertTrue(mockArticleListView.articleList.size == 100)
                 Assert.assertFalse(mockArticleListView.areDisplayingNoArticles)
                 Assert.assertFalse(mockArticleListView.areMoreArticlesAvailable)
+            }
+        }
+    }
+
+    @Test
+    fun testRealisticArticleData() {
+        val presenter = articleListPresenter
+        Assert.assertNotNull(presenter)
+
+        if (presenter == null) {
+            Assert.assertTrue(false)
+        } else {
+            presenter.attach(mockArticleListView)
+
+            // Nothing happpens on attach, values should be default
+            Assert.assertTrue(mockArticleListView.articleList.isEmpty())
+            Assert.assertFalse(mockArticleListView.areDisplayingNoArticles)
+            Assert.assertTrue(mockArticleListView.areMoreArticlesAvailable)
+
+            // Create some mock data that looks like an actual article and load into model
+            val article1 = Article(
+                ArticleSource(null, "Gizmodo.com"),
+                "Bryan Menegus",
+                "Here's What Could Sink Uber, According to Uber - Gizmodo",
+                "Here's What Could Sink Uber, According to Uber - Gizmodo" + "Uber, the money-losing ridehailing platform which by its own admission in its S-1 filing claims it has “incurred significant losses since inception”  and “may not achieve profitability,” has overcome a lot on the road to today’s initial public offering. It’s …",
+                "https://gizmodo.com/heres-what-could-sink-uber-according-to-uber-1833982890",
+                "https://i.kinja-img.com/gawker-media/image/upload/s--bvCZvrQS--/c_fill,fl_progressive,g_center,h_900,q_80,w_1600/a2ls8hdckvwzsydjsbys.jpg",
+                "2019-04-11T21:27:00Z",
+                "Uber, the money-losing ridehailing platform which by its own admission in its S-1 filing claims it has incurred significant losses since inception and may not achieve profitability, has overcome a lot on the road to todays initial public offering. Its entire … [+8812 chars]"
+            )
+            val article2 = Article(
+                ArticleSource("chrisfry.com", "Chris-J-Fry"),
+                "Chris Fry",
+                "Android-Dev-Takes-On-Different-Kind-of-Writing - Chris J Fry",
+                "This is probably a poorly written article.",
+                "chrisfry/articles/1.com",
+                "chrisfry/images/1.com",
+                "1991-10-30T21:27:00Z",
+                "I should not have quit my job to become a writer. THE END."
+            )
+            val article3 = Article(
+                ArticleSource("the-verge", "The-Verge-"),
+                "Julia Alexander",
+                "Disney CEO calls social media a ‘powerful marketing tool’ for extremism - The-Verge-",
+                "Disney CEO Bob Iger called social media a place that spreads extremism and hate. He added that it’s something Hitler would have loved because it’s easy to market extreme ideas.",
+                "https://www.theverge.com/2019/4/11/18306763/disney-ceo-bob-iger-social-media-hitler-extremism",
+                "https://cdn.vox-cdn.com/thumbor/lWIZAGYxtYlsk7Og_Pmpy1fsRMI=/0x399:5568x3314/fit-in/1200x630/cdn.vox-cdn.com/uploads/chorus_asset/file/16026168/1048053334.jpg.jpg",
+                "2019-04-11T21:17:16Z",
+                "Disney CEO Bob Iger criticized social media platforms for allowing hate to spread, saying they enable the distribution of misinformation and the propagation of vile ideology. Iger referred to social media as something Hitler would have loved, according to Var… [+1891 chars]"
+            )
+            val articleList = listOf(article1, article2, article3)
+            mockArticleModel.setArticleList(ArticleDisplayType.TECH, articleList)
+
+            // Tell presenter that the view wants article data
+            presenter.requestArticles()
+
+            // View should have the 3 articles we sent
+            Assert.assertTrue(mockArticleListView.articleList.size == 3)
+            Assert.assertFalse(mockArticleListView.areDisplayingNoArticles)
+            Assert.assertTrue(mockArticleListView.areMoreArticlesAvailable)
+
+            // Titles have source trimmed from the end. The should now appear as:
+            val dataList = mockArticleListView.articleList
+            Assert.assertEquals("Here's What Could Sink Uber, According to Uber ", dataList[0].title)
+            Assert.assertEquals("Android-Dev-Takes-On-Different-Kind-of-Writing ", dataList[1].title)
+            Assert.assertEquals("Disney CEO calls social media a ‘powerful marketing tool’ for extremism ", dataList[2].title)
+
+            // Test article data view has received
+            for(i in 0 until 3) {
+                val demoData = articleList[i]
+                val viewData = mockArticleListView.articleList[i]
+
+                // Below fields will match unless sent null, then they will be converted to empty strings
+                Assert.assertEquals(demoData.source.name ?: AppConstants.EMPTY_STRING, viewData.sourceName)
+                Assert.assertEquals(demoData.author ?: AppConstants.EMPTY_STRING, viewData.author)
+                Assert.assertEquals(demoData.url ?: AppConstants.EMPTY_STRING, viewData.articleUrl)
+                Assert.assertEquals(demoData.urlToImage ?: AppConstants.EMPTY_STRING, viewData.imageUrl)
+                Assert.assertEquals(demoData.content ?: AppConstants.EMPTY_STRING, viewData.articleContent)
+
+
+                if (demoData.publishedAt == null) {
+                    Assert.assertNotEquals(demoData.publishedAt ?: AppConstants.EMPTY_STRING, viewData.publishedAt)
+                } else {
+                    // Published at date is converted. This should never be the same
+                    Assert.assertNotEquals(demoData.publishedAt, viewData.publishedAt)
+                }
             }
         }
     }

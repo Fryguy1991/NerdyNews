@@ -7,7 +7,7 @@ import com.chrisfry.nerdnews.R
 
 class LinearLayoutDecorator : RecyclerView.ItemDecoration() {
     companion object {
-        private val TAG = LinearLayoutDecorator::class.java.name
+        private val TAG = LinearLayoutDecorator::class.java.simpleName
     }
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {

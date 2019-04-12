@@ -29,7 +29,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     BasePresenter<ArticleListPresenter.IArticleListView>(), IArticleListPresenter, ArticleRefreshCompleteEventReceiver,
     MoreArticleEventReceiver {
     companion object {
-        private val TAG = ArticleListPresenter::class.java.name
+        private val TAG = ArticleListPresenter::class.java.simpleName
 
         fun getInstance(articleType: ArticleDisplayType): ArticleListPresenter {
             return ArticleListPresenter(articleType)
