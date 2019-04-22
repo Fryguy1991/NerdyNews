@@ -27,6 +27,21 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     companion object {
         private val TAG = ArticleListFragment::class.java.simpleName
         const val KEY_ARTICLE_TYPE = "key_article_type"
+
+        /**
+         * Method for creating an instance of ArticleListFragment
+         *
+         * @param articleType: The article type that the fragment will display
+         */
+        fun getInstance (articleType: ArticleDisplayType): ArticleListFragment {
+            // Add article type as an argument (used for presenter retrieval)
+            val fragment = ArticleListFragment()
+            val args = Bundle()
+            args.putInt(ArticleListFragment.KEY_ARTICLE_TYPE, articleType.ordinal)
+            fragment.arguments = args
+
+            return fragment
+        }
     }
 
     // Presenter reference
