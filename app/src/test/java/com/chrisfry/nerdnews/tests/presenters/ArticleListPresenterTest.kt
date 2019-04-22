@@ -9,7 +9,7 @@ import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.Article
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.model.ArticleSource
 import com.chrisfry.nerdnews.model.IArticleListsModel
 import com.chrisfry.nerdnews.tests.BaseTest
@@ -40,7 +40,7 @@ class ArticleListPresenterTest : BaseTest() {
     private lateinit var mockArticleListView: ArticleListPresenter.IArticleListView
     // Capture object for seeing what articles are passed to view
     @Captor
-    private lateinit var articleListCaptor: ArgumentCaptor<List<ArticleDisplayModel>>
+    private lateinit var articleListCaptor: ArgumentCaptor<List<ArticleDisplayModelParcelable>>
 
     override fun setUp() {
         super.setUp()
