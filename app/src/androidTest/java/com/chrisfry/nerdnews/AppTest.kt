@@ -1,10 +1,9 @@
 package com.chrisfry.nerdnews
 
+import android.app.Instrumentation
 import android.content.Intent
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.*
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.*
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
 import com.chrisfry.nerdnews.userinterface.activities.MainActivity
@@ -13,11 +12,13 @@ import org.junit.Test
 
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.swipeDown
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.contrib.ViewPagerActions
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
@@ -121,7 +122,7 @@ class AppTest {
         // When an article is selected title is guaranteed to display (unless all article data is null)
         onView(withId(R.id.tv_article_item_title_text)).check(matches(isDisplayed()))
 
-        ViewActions.pressBack()
+        pressBack()
 
         // Allow time for more article data to populate and display
         Thread.sleep(2000)
@@ -165,25 +166,21 @@ class AppTest {
         // When an article is selected title is guaranteed to display (unless all article data is null)
         onView(withId(R.id.tv_article_item_title_text)).check(matches(isDisplayed()))
 
-        // Swipe down the scroll view (just in case view full article button is off screen)
-        onView(withId(R.id.scroll_view_article_item)).perform(swipeUp())
-
         // Test assumes that the given article has a link to the source (will fail otherwise)
-        val sourceButton = onView(withId(R.id.btn_go_to_article))
+        val sourceButton = onView(withId(R.id.btn_go_to_article)).perform(scrollTo())
         sourceButton.check(matches(isDisplayed()))
 
         // Setup catch for intent to article source, since we're testing with pulled data we won't
         // actually know what URL we may be attempting to access, but we DO know the intent action
+        // Also eat the intent so we don't leave the application
         Intents.init()
+        val expectedIntent = hasAction(Intent.ACTION_VIEW)
+        intending(expectedIntent).respondWith(Instrumentation.ActivityResult(0, null))
 
-        // Click the button to take us to the full article
+        // Click the button to take us to the full article and verify the intent it should fire
         sourceButton.perform(click())
-        intended(hasAction(Intent.ACTION_VIEW))
-
+        intended(expectedIntent)
         Intents.release()
-
-        // Allow time for more article data to populate and display
-        Thread.sleep(2000)
     }
 
     @Test
