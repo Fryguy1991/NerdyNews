@@ -4,8 +4,8 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 /**
- * Model containing the useful information for displaying an article.
- * Calls to NewsAPI can retrieve null for values but these are replaced with empty strings (AppConstants.EMPTY_STRING)
+ * Model containing the useful information for displaying an article. Calls to NewsAPI can retrieve null for values
+ * but these are replaced with empty strings in this model (AppConstants.EMPTY_STRING)
  */
 @Parcelize
 data class ArticleDisplayModel(
