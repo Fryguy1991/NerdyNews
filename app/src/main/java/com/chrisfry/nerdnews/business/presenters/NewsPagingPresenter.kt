@@ -4,7 +4,7 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.eventhandling.*
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
-import com.chrisfry.nerdnews.business.network.NewsApi
+import com.chrisfry.nerdnews.business.network.INewsApi
 
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.model.IArticleListsModel
@@ -32,7 +32,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     lateinit var articleModelInstance: IArticleListsModel
     // Instance for news api to make data requests
     @Inject
-    lateinit var newsApiInstance: NewsApi
+    lateinit var newsApiInstance: INewsApi
     // Flag indicating if an article refresh is in progress
     private var refreshInProgressFlag = false
 
@@ -42,7 +42,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         EventHandler.addEventReceiver(this)
     }
 
-    fun initialArticleCheck() {
+    override fun initialArticleCheck() {
         for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
             // If a list in the model model is empty request article refresh
             if (articleModelInstance.getArticleList(articleType).isEmpty()) {

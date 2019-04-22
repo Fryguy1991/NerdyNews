@@ -50,9 +50,9 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
             // Create presenter and inject news component for NewsAPI elements
             val newPresenter = NewsPagingPresenter.getInstance()
             (parentActivity.application as App).appComponent.inject(newPresenter)
-            newPresenter.initialArticleCheck()
 
             presenter = newPresenter
+            presenter?.initialArticleCheck()
 
             tabsProvider = parentActivity
         }
