@@ -14,7 +14,6 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
@@ -156,7 +155,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         super.onDestroy()
     }
 
-    override fun displayArticles(articles: List<ArticleDisplayModel>) {
+    override fun displayArticles(articles: List<ArticleDisplayModelParcelable>) {
         articleAdapter.updateAdapter(articles)
     }
 
@@ -171,22 +170,11 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         }
     }
 
-    override fun onArticleSelected(article: ArticleDisplayModel) {
+    override fun onArticleSelected(article: ArticleDisplayModelParcelable) {
         LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article
-        val itemFragment = ArticleItemFragment()
-        val args = Bundle()
-        args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, ArticleDisplayModelParcelable(
-            article.title,
-            article.sourceName,
-            article.imageUrl,
-            article.author,
-            article.articleUrl,
-            article.articleContent,
-            article.publishedAt
-        ))
-        itemFragment.arguments = args
+        val itemFragment = ArticleItemFragment.getInstance(article)
 
         val parentActivity = activity
         if (parentActivity != null) {
