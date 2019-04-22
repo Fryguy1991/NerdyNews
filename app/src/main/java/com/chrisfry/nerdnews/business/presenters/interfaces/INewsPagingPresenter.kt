@@ -11,4 +11,9 @@ interface INewsPagingPresenter : IBasePresenter<NewsPagingPresenter.INewsPagingV
      * Attached view has requested that the article list be refreshed
      */
     fun requestArticleRefresh()
+
+    /**
+     * Attached view has requested that the article model be checked (and refreshed if empty)
+     */
+    fun initialArticleCheck()
 }

@@ -1,6 +1,7 @@
 package com.chrisfry.nerdnews.business.dagger.modules
 
 import com.chrisfry.nerdnews.model.ArticleListsModel
+import com.chrisfry.nerdnews.model.IArticleListsModel
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -10,7 +11,7 @@ class ArticleModelModule {
 
     @Provides
     @Singleton
-    fun provideArticleModel(): ArticleListsModel {
+    fun provideArticleModel(): IArticleListsModel {
         return ArticleListsModel.getInstance()
     }
 }
