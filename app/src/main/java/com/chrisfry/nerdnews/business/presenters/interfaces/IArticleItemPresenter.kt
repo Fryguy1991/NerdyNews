@@ -1,7 +1,7 @@
 package com.chrisfry.nerdnews.business.presenters.interfaces
 
 import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 
 /**
  * Interface for presenter that displays a single article to a view
@@ -13,7 +13,7 @@ interface IArticleItemPresenter: IBasePresenter<ArticleItemPresenter.IArticleIte
      *
      * @param articleToDisplay: Article data to be displayed
      */
-    fun setArticleData(articleToDisplay: ArticleDisplayModelParcelable?)
+    fun setArticleData(articleToDisplay: ArticleDisplayModel?)
 
     /**
      * View has pressed the button to go to the article source URL

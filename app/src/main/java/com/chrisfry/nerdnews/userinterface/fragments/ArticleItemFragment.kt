@@ -17,7 +17,7 @@ import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
 import kotlinx.android.synthetic.main.fragment_article_item.*
@@ -34,7 +34,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
          *
          * @param articleToDisplay: The parcelable model of the article we want to display
          */
-        fun getInstance (articleToDisplay: ArticleDisplayModelParcelable): ArticleItemFragment {
+        fun getInstance (articleToDisplay: ArticleDisplayModel): ArticleItemFragment {
             val fragment = ArticleItemFragment()
             val args = Bundle()
             args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, articleToDisplay)
@@ -64,7 +64,7 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
             LogUtils.error(TAG, "Error article item fragment has no arguments")
             presenter?.setArticleData(null)
         } else {
-            val articleToDisplay: ArticleDisplayModelParcelable? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
+            val articleToDisplay: ArticleDisplayModel? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
             presenter?.setArticleData(articleToDisplay)
         }
     }

@@ -4,11 +4,11 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 /**
- * Parcelable version of ArticleDisplayModel so it can be sent in Android bundles.
- * ELEMENTS SHOULD MATCH ArticleDisplayModel
+ * Model containing the useful information for displaying an article.
+ * Calls to NewsAPI can retrieve null for values but these are replaced with empty strings (AppConstants.EMPTY_STRING)
  */
 @Parcelize
-data class ArticleDisplayModelParcelable(
+data class ArticleDisplayModel(
     val title: String,
     val sourceName: String,
     val imageUrl: String,

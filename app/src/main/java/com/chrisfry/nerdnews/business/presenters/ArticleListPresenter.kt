@@ -131,9 +131,9 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
      * @param articlesToConvert: List of Article models to convert to ArticleDisplayModel
      * @return: List of ArticleDisplayModel based on provided Article list
      */
-    private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModelParcelable> {
+    private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModel> {
 
-        val articleDisplayModelList = mutableListOf<ArticleDisplayModelParcelable>()
+        val articleDisplayModelList = mutableListOf<ArticleDisplayModel>()
 
         for (article: Article in articlesToConvert) {
             var title = article.title ?: AppConstants.EMPTY_STRING
@@ -173,7 +173,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
             }
 
             articleDisplayModelList.add(
-                ArticleDisplayModelParcelable(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
+                ArticleDisplayModel(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
             )
         }
 
@@ -247,7 +247,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
          *
          * @param articles: List of articles to refresh the view with
          */
-        fun displayArticles(articles: List<ArticleDisplayModelParcelable>)
+        fun displayArticles(articles: List<ArticleDisplayModel>)
 
         /**
          * View should indicate that there are no more articles available (reached bottom of possible list)

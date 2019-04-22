@@ -4,7 +4,7 @@ import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.exceptions.LateArticleLoadException
 import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.tests.BaseTest
 import com.chrisfry.nerdnews.utils.LogUtils
 import com.nhaarman.mockitokotlin2.*
@@ -24,7 +24,7 @@ class ArticleItemPresenterTest : BaseTest() {
     }
 
     // Few demo article display models
-    private val normalArticle1 = ArticleDisplayModelParcelable(
+    private val normalArticle1 = ArticleDisplayModel(
         "The one tiny thing that made me give up my iPhone for Android",
         "Bgr.com",
         "https://boygeniusreport.files.wordpress.com/2019/03/bgr-iphone-xs-2.jpg?quality=98&strip=all",
@@ -35,7 +35,7 @@ class ArticleItemPresenterTest : BaseTest() {
                 "recently, that is. A few days ago, I decided to make the switch to Android… [+6036 chars]",
         "April 9, 2019 12:30 PM"
     )
-    private val normalArticle2 = ArticleDisplayModelParcelable(
+    private val normalArticle2 = ArticleDisplayModel(
         "SpaceX's Falcon Heavy rocket set for first commercial launch. Here's how to watch it live online. - NBC News",
         "NBC News",
         "https://media1.s-nbcnews.com/j/newscms/2018_06/2319226/180206-spacex-ac-835p_2dac8aaa78ac1eb66098d945a4b4c843.nbcnews-fp-1200-630.jpg",
@@ -126,7 +126,7 @@ class ArticleItemPresenterTest : BaseTest() {
     @Test
     fun testAttachWithEmptyArticle() {
         // Create empty article model and load it into presenter
-        val emptyArticle = ArticleDisplayModelParcelable(
+        val emptyArticle = ArticleDisplayModel(
             AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING,
             AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING,
             AppConstants.EMPTY_STRING

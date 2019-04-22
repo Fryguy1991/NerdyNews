@@ -14,7 +14,7 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
@@ -155,7 +155,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         super.onDestroy()
     }
 
-    override fun displayArticles(articles: List<ArticleDisplayModelParcelable>) {
+    override fun displayArticles(articles: List<ArticleDisplayModel>) {
         articleAdapter.updateAdapter(articles)
     }
 
@@ -170,7 +170,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         }
     }
 
-    override fun onArticleSelected(article: ArticleDisplayModelParcelable) {
+    override fun onArticleSelected(article: ArticleDisplayModel) {
         LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article

@@ -3,7 +3,7 @@ package com.chrisfry.nerdnews.business.presenters
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.exceptions.LateArticleLoadException
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.LogUtils
 
@@ -21,7 +21,7 @@ class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPres
     }
 
     // Article data to display
-    private var articleDisplayModel: ArticleDisplayModelParcelable? = null
+    private var articleDisplayModel: ArticleDisplayModel? = null
 
     override fun attach(view: IArticleItemView) {
         super.attach(view)
@@ -57,7 +57,7 @@ class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPres
         super.detach()
     }
 
-    override fun setArticleData(articleToDisplay: ArticleDisplayModelParcelable?) {
+    override fun setArticleData(articleToDisplay: ArticleDisplayModel?) {
         val view = getView()
         if (view == null) {
             articleDisplayModel = articleToDisplay
@@ -79,7 +79,7 @@ class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPres
      * @param articleDisplayModel: Article model checking for data
      * @return False if all elements in model are empty else true
      */
-    private fun doesArticleModelContainAnyData(articleDisplayModel: ArticleDisplayModelParcelable): Boolean {
+    private fun doesArticleModelContainAnyData(articleDisplayModel: ArticleDisplayModel): Boolean {
         return articleDisplayModel.title != AppConstants.EMPTY_STRING
                 || articleDisplayModel.sourceName != AppConstants.EMPTY_STRING
                 || articleDisplayModel.author != AppConstants.EMPTY_STRING
