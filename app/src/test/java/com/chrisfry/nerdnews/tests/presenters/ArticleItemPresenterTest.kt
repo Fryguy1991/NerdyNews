@@ -255,4 +255,33 @@ class ArticleItemPresenterTest : BaseTest() {
         // Method should have thrown exception, it should be not null
         Assert.assertNotNull(lateArticleLoadException)
     }
+
+    @Test
+    fun testNavigateToArticle() {
+        val presenter = articleItemPresenter!!
+
+        presenter.setArticleData(normalArticle1)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
+
+        // Method to navigate shouldn't have been called
+        verify(mockArticleItemView, never()).navigateToArticleSource(capture(stringCaptor))
+
+        // Simulate view clicked the navigate to full article button
+        presenter.goToArticleClicked()
+
+        // Method to navigate to full article should have been called, capture URL
+        verify(mockArticleItemView, times(1)).navigateToArticleSource(capture(stringCaptor))
+        Assert.assertEquals(normalArticle1.articleUrl, stringCaptor.value)
+
+        // Call this method ~1000 more times just to ensure we're always getting the correct value
+        for (i in 2 until 1000) {
+            // Simulate view clicked the navigate to full article button
+            presenter.goToArticleClicked()
+
+            // Method to navigate to full article should have been called, capture URL
+            verify(mockArticleItemView, times(i)).navigateToArticleSource(capture(stringCaptor))
+            Assert.assertEquals(normalArticle1.articleUrl, stringCaptor.value)
+        }
+    }
 }
