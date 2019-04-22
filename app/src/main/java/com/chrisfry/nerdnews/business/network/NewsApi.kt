@@ -22,7 +22,7 @@ import javax.inject.Singleton
  * Api class for requesting article data from NewsAPI
  */
 @Singleton
-open class NewsApi @Inject constructor() {
+class NewsApi @Inject constructor() : INewsApi {
     companion object {
         private val TAG = NewsApi::class.java.simpleName
 
@@ -56,7 +56,7 @@ open class NewsApi @Inject constructor() {
         }
     }
 
-    fun requestArticleRefresh() {
+    override fun requestArticleRefresh() {
         LogUtils.debug(TAG, "Refreshing articles")
 
         // Flag all refreshes as in progress
@@ -82,7 +82,7 @@ open class NewsApi @Inject constructor() {
             .enqueue(ArticleRefreshCallback(ArticleDisplayType.GAMING))
     }
 
-    fun requestMoreArticles(articleType: ArticleDisplayType) {
+    override fun requestMoreArticles(articleType: ArticleDisplayType) {
         LogUtils.debug(TAG, "Requesting more $articleType articles")
 
         when (articleType) {

@@ -9,7 +9,7 @@ import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshComplet
 import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
 import com.chrisfry.nerdnews.business.eventhandling.receivers.MoreArticleEventReceiver
-import com.chrisfry.nerdnews.business.network.NewsApi
+import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
@@ -41,7 +41,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     lateinit var articleModelInstance: IArticleListsModel
     // Instance of news api to make data requests
     @Inject
-    lateinit var newsApiInstance: NewsApi
+    lateinit var newsApiInstance: INewsApi
 
     // Flag to indicate if a request for more articles is in progress
     private var isMoreArticleRequestInProgress = false
