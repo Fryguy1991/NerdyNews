@@ -6,7 +6,8 @@
         android:minHeight="@dimen/article_view_holder_image_size"
         app:cardCornerRadius="@dimen/card_corner_radius"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp">
+        android:layout_marginEnd="2dp"
+        android:foreground="?android:attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

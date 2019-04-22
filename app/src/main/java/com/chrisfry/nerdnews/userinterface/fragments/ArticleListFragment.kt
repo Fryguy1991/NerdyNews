@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -192,6 +193,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
             val transaction = parentActivity.supportFragmentManager.beginTransaction()
             transaction.replace(R.id.frag_placeholder, itemFragment)
             transaction.addToBackStack(null)
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             transaction.commit()
         }
     }
