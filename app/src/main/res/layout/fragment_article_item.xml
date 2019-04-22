@@ -74,6 +74,7 @@
                 android:paddingTop="@dimen/button_vertical_padding"
                 android:paddingBottom="@dimen/button_vertical_padding"
                 android:text="@string/view_full_article"
+                android:textSize="@dimen/medium_text_2"
                 app:layout_constraintTop_toBottomOf="@id/tv_article_item_content_text"
                 android:layout_marginTop="@dimen/default_margin"
                 app:layout_constraintStart_toStartOf="parent"
