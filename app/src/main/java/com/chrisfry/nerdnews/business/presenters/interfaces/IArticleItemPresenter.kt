@@ -14,4 +14,9 @@ interface IArticleItemPresenter: IBasePresenter<ArticleItemPresenter.IArticleIte
      * @param articleToDisplay: Article data to be displayed
      */
     fun setArticleData(articleToDisplay: ArticleDisplayModel?)
+
+    /**
+     * View has pressed the button to go to the article source URL
+     */
+    fun goToArticleClicked()
 }

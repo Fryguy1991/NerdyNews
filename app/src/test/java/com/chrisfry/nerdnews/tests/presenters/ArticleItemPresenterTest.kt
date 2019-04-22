@@ -7,8 +7,13 @@ import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresente
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.tests.BaseTest
 import com.chrisfry.nerdnews.utils.LogUtils
+import com.nhaarman.mockitokotlin2.*
 import org.junit.Assert
 import org.junit.Test
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 /**
  * Class for isolating and testing ArticleItemPresenter
@@ -16,52 +21,6 @@ import org.junit.Test
 class ArticleItemPresenterTest : BaseTest() {
     companion object {
         private val TAG = ArticleItemPresenterTest::class.java.simpleName
-    }
-
-    /**
-     * Mock view for interacting with ArticleItemPresenter
-     */
-    class MockArticleItemView : ArticleItemPresenter.IArticleItemView {
-        var sourceName = AppConstants.EMPTY_STRING
-        var title = AppConstants.EMPTY_STRING
-        var imageUrl = AppConstants.EMPTY_STRING
-        var author = AppConstants.EMPTY_STRING
-        var publishedAt = AppConstants.EMPTY_STRING
-        var content = AppConstants.EMPTY_STRING
-        var articleUrl = AppConstants.EMPTY_STRING
-        var isViewClosing = false
-
-        override fun displaySourceName(sourceName: String) {
-            this.sourceName = sourceName
-        }
-
-        override fun displayTitle(title: String) {
-            this.title = title
-        }
-
-        override fun displayImage(imageUrl: String) {
-            this.imageUrl = imageUrl
-        }
-
-        override fun displayAuthor(author: String) {
-            this.author = author
-        }
-
-        override fun displayPublishedAt(publishedAt: String) {
-            this.publishedAt = publishedAt
-        }
-
-        override fun displayContent(content: String) {
-            this.content = content
-        }
-
-        override fun displayLinkToArticle(articleUrl: String) {
-            this.articleUrl = articleUrl
-        }
-
-        override fun closeView() {
-            this.isViewClosing = true
-        }
     }
 
     // Few demo article display models
@@ -91,13 +50,19 @@ class ArticleItemPresenterTest : BaseTest() {
     // Presenter instance we will be testing with
     private var articleItemPresenter: IArticleItemPresenter? = null
     // Mock for view that attaches to presenter
-    private lateinit var mockArticleItemView: MockArticleItemView
+    @Mock
+    private lateinit var mockArticleItemView: ArticleItemPresenter.IArticleItemView
+    // Capture object for capturing strings sent to view
+    @Captor
+    private lateinit var stringCaptor: ArgumentCaptor<String>
 
     override fun setUp() {
         super.setUp()
 
+        // Initialize new mock objects
+        MockitoAnnotations.initMocks(this)
+
         articleItemPresenter = ArticleItemPresenter.getInstance()
-        mockArticleItemView = MockArticleItemView()
     }
 
     override fun tearDown() {
@@ -113,52 +78,49 @@ class ArticleItemPresenterTest : BaseTest() {
 
     @Test
     fun testAttachWithNoArticle() {
-        // Attaching without an article should lead the presenter to try and close the view
-        Assert.assertFalse(mockArticleItemView.isViewClosing)
+        val presenter = articleItemPresenter!!
 
-        Assert.assertNotNull(articleItemPresenter)
-        val presenter = articleItemPresenter
-        if (presenter == null) {
-            Assert.assertTrue(false)
-        } else {
-            presenter.attach(mockArticleItemView)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
 
-            // View should not have received any data and should be closing
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.sourceName)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.title)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.imageUrl)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.author)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.publishedAt)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.content)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.articleUrl)
-            Assert.assertTrue(mockArticleItemView.isViewClosing)
+        // Capture data that was sent to view
+        verify(mockArticleItemView, never()).displaySourceName(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayTitle(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayImage(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayAuthor(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayPublishedAt(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayContent(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayLinkToArticle(capture(stringCaptor))
+
+        // View should have only been sent empty strings since article model was not set, view should also be closing
+        for (value: String in stringCaptor.allValues) {
+            Assert.assertEquals(AppConstants.EMPTY_STRING, value)
         }
+        verify(mockArticleItemView, times(1)).closeView()
     }
 
     @Test
     fun testAttachWithNull() {
-        // Attaching to presenter after sending null for article data
-        Assert.assertFalse(mockArticleItemView.isViewClosing)
+        val presenter = articleItemPresenter!!
 
-        Assert.assertNotNull(articleItemPresenter)
-        val presenter = articleItemPresenter
-        if (presenter == null) {
-            Assert.assertTrue(false)
-        } else {
-            // Load presenter with null and attach mock view
-            presenter.setArticleData(null)
-            presenter.attach(mockArticleItemView)
+        presenter.setArticleData(null)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
 
-            // View should not have received any data and should be closing
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.sourceName)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.title)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.imageUrl)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.author)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.publishedAt)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.content)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.articleUrl)
-            Assert.assertTrue(mockArticleItemView.isViewClosing)
+        // Capture data that was sent to view
+        verify(mockArticleItemView, never()).displaySourceName(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayTitle(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayImage(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayAuthor(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayPublishedAt(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayContent(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayLinkToArticle(capture(stringCaptor))
+
+        // View should have only been sent empty strings since article model was not set, view should also be closing
+        for (value: String in stringCaptor.allValues) {
+            Assert.assertEquals(AppConstants.EMPTY_STRING, value)
         }
+        verify(mockArticleItemView, times(1)).closeView()
     }
 
     @Test
@@ -170,107 +132,156 @@ class ArticleItemPresenterTest : BaseTest() {
             AppConstants.EMPTY_STRING
         )
 
-        Assert.assertNotNull(articleItemPresenter)
-        val presenter = articleItemPresenter
-        if (presenter == null) {
-            Assert.assertTrue(false)
-        } else {
-            // Load empty article into presenter and attach view
-            presenter.setArticleData(emptyArticle)
-            presenter.attach(mockArticleItemView)
+        val presenter = articleItemPresenter!!
 
-            // View should not have received any data and should be closing
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.sourceName)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.title)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.imageUrl)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.author)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.publishedAt)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.content)
-            Assert.assertEquals(AppConstants.EMPTY_STRING, mockArticleItemView.articleUrl)
-            Assert.assertTrue(mockArticleItemView.isViewClosing)
+        presenter.setArticleData(emptyArticle)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
+
+        // Capture data that was sent to view
+        verify(mockArticleItemView, never()).displaySourceName(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayTitle(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayImage(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayAuthor(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayPublishedAt(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayContent(capture(stringCaptor))
+        verify(mockArticleItemView, never()).displayLinkToArticle(capture(stringCaptor))
+
+        // View should have only been sent empty strings since article model was not set, view should also be closing
+        for (value: String in stringCaptor.allValues) {
+            Assert.assertEquals(AppConstants.EMPTY_STRING, value)
         }
+        verify(mockArticleItemView, times(1)).closeView()
     }
 
     @Test
     fun testAttachWithNormalArticle() {
-        Assert.assertNotNull(articleItemPresenter)
-        val presenter = articleItemPresenter
-        if (presenter == null) {
-            Assert.assertTrue(false)
-        } else {
-            // Load article in presenter and attach view
-            presenter.setArticleData(normalArticle1)
-            presenter.attach(mockArticleItemView)
+        val presenter = articleItemPresenter!!
 
-            // View should be loaded with data and not closing
-            Assert.assertEquals(normalArticle1.sourceName, mockArticleItemView.sourceName)
-            Assert.assertEquals(normalArticle1.title, mockArticleItemView.title)
-            Assert.assertEquals(normalArticle1.imageUrl, mockArticleItemView.imageUrl)
-            Assert.assertEquals(normalArticle1.author, mockArticleItemView.author)
-            Assert.assertEquals(normalArticle1.publishedAt, mockArticleItemView.publishedAt)
-            Assert.assertEquals(normalArticle1.articleContent, mockArticleItemView.content)
-            Assert.assertEquals(normalArticle1.articleUrl, mockArticleItemView.articleUrl)
-            Assert.assertFalse(mockArticleItemView.isViewClosing)
-        }
+        presenter.setArticleData(normalArticle1)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
+
+        // Capture data that was sent to view
+        verify(mockArticleItemView, times(1)).displaySourceName(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayTitle(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayImage(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayAuthor(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayPublishedAt(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayContent(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayLinkToArticle(capture(stringCaptor))
+
+        // Captured view data should match data in normal article
+        Assert.assertEquals(normalArticle1.sourceName, stringCaptor.allValues[0])
+        Assert.assertEquals(normalArticle1.title, stringCaptor.allValues[1])
+        Assert.assertEquals(normalArticle1.imageUrl, stringCaptor.allValues[2])
+        Assert.assertEquals(normalArticle1.author, stringCaptor.allValues[3])
+        Assert.assertEquals(normalArticle1.publishedAt, stringCaptor.allValues[4])
+        Assert.assertEquals(normalArticle1.articleContent, stringCaptor.allValues[5])
+        Assert.assertEquals(normalArticle1.articleUrl, stringCaptor.allValues[6])
+        // View should not be "closing"
+        verify(mockArticleItemView, never()).closeView()
     }
+
 
     @Test
     fun testLoadTwoArticleBeforeAttach() {
-        Assert.assertNotNull(articleItemPresenter)
-        val presenter = articleItemPresenter
-        if (presenter == null) {
-            Assert.assertTrue(false)
-        } else {
-            // Load two different articles before attaching
-            presenter.setArticleData(normalArticle1)
-            presenter.setArticleData(normalArticle2)
+        val presenter = articleItemPresenter!!
 
-            // Attach to view
-            presenter.attach(mockArticleItemView)
+        // Set article data twice
+        presenter.setArticleData(normalArticle1)
+        presenter.setArticleData(normalArticle2)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
 
-            // View should be loaded with data from the latest article sent to presenter
-            Assert.assertEquals(normalArticle2.sourceName, mockArticleItemView.sourceName)
-            Assert.assertEquals(normalArticle2.title, mockArticleItemView.title)
-            Assert.assertEquals(normalArticle2.imageUrl, mockArticleItemView.imageUrl)
-            Assert.assertEquals(normalArticle2.author, mockArticleItemView.author)
-            Assert.assertEquals(normalArticle2.publishedAt, mockArticleItemView.publishedAt)
-            Assert.assertEquals(normalArticle2.articleContent, mockArticleItemView.content)
-            Assert.assertEquals(normalArticle2.articleUrl, mockArticleItemView.articleUrl)
-            Assert.assertFalse(mockArticleItemView.isViewClosing)
-        }
+        // Capture data that was sent to view
+        verify(mockArticleItemView, times(1)).displaySourceName(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayTitle(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayImage(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayAuthor(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayPublishedAt(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayContent(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayLinkToArticle(capture(stringCaptor))
+
+        // Captured view data should match data in last article sent to presenter
+        Assert.assertEquals(normalArticle2.sourceName, stringCaptor.allValues[0])
+        Assert.assertEquals(normalArticle2.title, stringCaptor.allValues[1])
+        Assert.assertEquals(normalArticle2.imageUrl, stringCaptor.allValues[2])
+        Assert.assertEquals(normalArticle2.author, stringCaptor.allValues[3])
+        Assert.assertEquals(normalArticle2.publishedAt, stringCaptor.allValues[4])
+        Assert.assertEquals(normalArticle2.articleContent, stringCaptor.allValues[5])
+        Assert.assertEquals(normalArticle2.articleUrl, stringCaptor.allValues[6])
+        // View should not be "closing"
+        verify(mockArticleItemView, never()).closeView()
     }
 
     @Test
     fun testLoadArticleAfterAttach() {
-        Assert.assertNotNull(articleItemPresenter)
-        val presenter = articleItemPresenter
-        if (presenter == null) {
-            Assert.assertTrue(false)
-        } else {
-            // Load presenter with article and attach
-            presenter.setArticleData(normalArticle1)
-            presenter.attach(mockArticleItemView)
+        val presenter = articleItemPresenter!!
 
-            // View should be loaded with data from the latest article sent to presenter
-            Assert.assertEquals(normalArticle1.sourceName, mockArticleItemView.sourceName)
-            Assert.assertEquals(normalArticle1.title, mockArticleItemView.title)
-            Assert.assertEquals(normalArticle1.imageUrl, mockArticleItemView.imageUrl)
-            Assert.assertEquals(normalArticle1.author, mockArticleItemView.author)
-            Assert.assertEquals(normalArticle1.publishedAt, mockArticleItemView.publishedAt)
-            Assert.assertEquals(normalArticle1.articleContent, mockArticleItemView.content)
-            Assert.assertEquals(normalArticle1.articleUrl, mockArticleItemView.articleUrl)
-            Assert.assertFalse(mockArticleItemView.isViewClosing)
+        // Set article data in presenter
+        presenter.setArticleData(normalArticle1)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
 
-            // Attempt to load an article after view has been attached
-            var lateArticleLoadException: LateArticleLoadException? = null
-            try {
-                presenter.setArticleData(normalArticle2)
-            } catch (exception: LateArticleLoadException) {
-                LogUtils.error(TAG, exception.message.toString())
-                lateArticleLoadException = exception
-            }
-            // Method should have thrown exception, it should be not null
-            Assert.assertNotNull(lateArticleLoadException)
+        // Capture data that was sent to view
+        verify(mockArticleItemView, times(1)).displaySourceName(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayTitle(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayImage(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayAuthor(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayPublishedAt(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayContent(capture(stringCaptor))
+        verify(mockArticleItemView, times(1)).displayLinkToArticle(capture(stringCaptor))
+
+        // Captured view data should match data in last article sent to presenter
+        Assert.assertEquals(normalArticle1.sourceName, stringCaptor.allValues[0])
+        Assert.assertEquals(normalArticle1.title, stringCaptor.allValues[1])
+        Assert.assertEquals(normalArticle1.imageUrl, stringCaptor.allValues[2])
+        Assert.assertEquals(normalArticle1.author, stringCaptor.allValues[3])
+        Assert.assertEquals(normalArticle1.publishedAt, stringCaptor.allValues[4])
+        Assert.assertEquals(normalArticle1.articleContent, stringCaptor.allValues[5])
+        Assert.assertEquals(normalArticle1.articleUrl, stringCaptor.allValues[6])
+        // View should not be "closing"
+        verify(mockArticleItemView, never()).closeView()
+
+        // Attempt to load an article after view has been attached
+        var lateArticleLoadException: LateArticleLoadException? = null
+        try {
+            presenter.setArticleData(normalArticle2)
+        } catch (exception: LateArticleLoadException) {
+            LogUtils.error(TAG, exception.message.toString())
+            lateArticleLoadException = exception
+        }
+        // Method should have thrown exception, it should be not null
+        Assert.assertNotNull(lateArticleLoadException)
+    }
+
+    @Test
+    fun testNavigateToArticle() {
+        val presenter = articleItemPresenter!!
+
+        presenter.setArticleData(normalArticle1)
+        // Attach view to presenter
+        presenter.attach(mockArticleItemView)
+
+        // Method to navigate shouldn't have been called
+        verify(mockArticleItemView, never()).navigateToArticleSource(capture(stringCaptor))
+
+        // Simulate view clicked the navigate to full article button
+        presenter.goToArticleClicked()
+
+        // Method to navigate to full article should have been called, capture URL
+        verify(mockArticleItemView, times(1)).navigateToArticleSource(capture(stringCaptor))
+        Assert.assertEquals(normalArticle1.articleUrl, stringCaptor.value)
+
+        // Call this method ~1000 more times just to ensure we're always getting the correct value
+        for (i in 2 until 1000) {
+            // Simulate view clicked the navigate to full article button
+            presenter.goToArticleClicked()
+
+            // Method to navigate to full article should have been called, capture URL
+            verify(mockArticleItemView, times(i)).navigateToArticleSource(capture(stringCaptor))
+            Assert.assertEquals(normalArticle1.articleUrl, stringCaptor.value)
         }
     }
 }

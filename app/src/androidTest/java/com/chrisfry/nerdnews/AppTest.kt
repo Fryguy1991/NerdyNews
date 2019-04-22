@@ -1,5 +1,7 @@
 package com.chrisfry.nerdnews
 
+import android.app.Instrumentation
+import android.content.Intent
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.*
 import androidx.test.filters.LargeTest
@@ -10,9 +12,14 @@ import org.junit.Test
 
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.swipeDown
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.contrib.ViewPagerActions
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.intending
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.matcher.ViewMatchers.*
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.userinterface.adapters.holders.ArticleViewHolder
@@ -122,6 +129,58 @@ class AppTest {
 
         // Should return to paging fragment
         recyclerView.check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun testViewFullArticle() {
+        // Ensure our fragment is displayed
+        onView(withId(R.id.frag_placeholder)).check(matches(isDisplayed()))
+
+        // Allow time for article data to populate and display
+        Thread.sleep(2000)
+
+        // Get reference to recycler view
+        val recyclerView = onView(withContentDescription(recyclerTechCd))
+        recyclerView.check(matches(isDisplayed()))
+
+        // Scroll to bottom of technology list
+        var scrollToIndex = activityRule.activity.recycler_view_news_list.adapter!!.itemCount - 1
+        recyclerView.perform(RecyclerViewActions.scrollToPosition<ArticleViewHolder>(scrollToIndex))
+
+        // Allow time for more article data to populate and display
+        Thread.sleep(2000)
+
+        // Scroll to bottom of technology list
+        scrollToIndex = activityRule.activity.recycler_view_news_list.adapter!!.itemCount - 1
+        recyclerView.perform(RecyclerViewActions.scrollToPosition<ArticleViewHolder>(scrollToIndex))
+
+        // Allow time for more article data to populate and display
+        Thread.sleep(2000)
+
+        // Select an item in the list
+        recyclerView.perform(RecyclerViewActions.actionOnItemAtPosition<ArticleViewHolder>(0, click()))
+
+        // Allow time for more article data to populate and display
+        Thread.sleep(2000)
+
+        // When an article is selected title is guaranteed to display (unless all article data is null)
+        onView(withId(R.id.tv_article_item_title_text)).check(matches(isDisplayed()))
+
+        // Test assumes that the given article has a link to the source (will fail otherwise)
+        val sourceButton = onView(withId(R.id.btn_go_to_article)).perform(scrollTo())
+        sourceButton.check(matches(isDisplayed()))
+
+        // Setup catch for intent to article source, since we're testing with pulled data we won't
+        // actually know what URL we may be attempting to access, but we DO know the intent action
+        // Also eat the intent so we don't leave the application
+        Intents.init()
+        val expectedIntent = hasAction(Intent.ACTION_VIEW)
+        intending(expectedIntent).respondWith(Instrumentation.ActivityResult(0, null))
+
+        // Click the button to take us to the full article and verify the intent it should fire
+        sourceButton.perform(click())
+        intended(expectedIntent)
+        Intents.release()
     }
 
     @Test

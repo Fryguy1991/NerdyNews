@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
 
     // UI ELEMENTS
     // Fragments
-    private val newsPagerFragment = NewsPagingFragment()
+    private val newsPagingFragment = NewsPagingFragment.getInstance()
     // Reference to app toolbar
     private lateinit var toolbar: Toolbar
     // Tabs for displaying article type
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
 
             // Start app on news list fragment
             fragmentManager = supportFragmentManager
-            fragmentManager.beginTransaction().add(R.id.frag_placeholder, newsPagerFragment).commit()
+            fragmentManager.beginTransaction().add(R.id.frag_placeholder, newsPagingFragment).commit()
         }
     }
 

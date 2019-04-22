@@ -21,4 +21,8 @@
 
     <!-- Article Item Layout Dimens -->
     <dimen name="article_item_image_height">225dp</dimen>
+
+    <!-- Button Dimens -->
+    <dimen name="button_vertical_padding">12dp</dimen>
+    <dimen name="button_horizontal_padding">16dp</dimen>
 </resources>

@@ -1,7 +1,6 @@
 package com.chrisfry.nerdnews.userinterface.adapters
 
 import android.content.Context
-import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
@@ -20,12 +19,7 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
     init {
         // Add a news list fragment for each article type to display (currently static number)
         for(articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-            // Add article type as an argument (used for presenter retrieval)
-            val newFragment = ArticleListFragment()
-            val args = Bundle()
-            args.putInt(ArticleListFragment.KEY_ARTICLE_TYPE, articleType.ordinal)
-            newFragment.arguments = args
-            fragmentList.add(newFragment)
+            fragmentList.add(ArticleListFragment.getInstance(articleType))
         }
     }
 

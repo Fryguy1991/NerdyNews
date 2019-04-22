@@ -24,6 +24,13 @@ import java.lang.Exception
 class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, ViewPager.OnPageChangeListener {
     companion object {
         private val TAG = NewsPagingFragment::class.java.simpleName
+
+        /**
+         * Method for creating an instance of NewsPagingFragment
+         */
+        fun getInstance(): NewsPagingFragment {
+            return NewsPagingFragment()
+        }
     }
 
     // Presenter that provides list of news articles

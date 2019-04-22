@@ -16,4 +16,6 @@
 
     <!-- Menu Item Strings -->
     <string name="menu_refresh_title">Refresh</string>
+
+    <string name="view_full_article">View Full Article</string>
 </resources>

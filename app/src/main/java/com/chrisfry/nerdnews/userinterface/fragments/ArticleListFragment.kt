@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +15,6 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
@@ -27,6 +27,21 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     companion object {
         private val TAG = ArticleListFragment::class.java.simpleName
         const val KEY_ARTICLE_TYPE = "key_article_type"
+
+        /**
+         * Method for creating an instance of ArticleListFragment
+         *
+         * @param articleType: The article type that the fragment will display
+         */
+        fun getInstance (articleType: ArticleDisplayType): ArticleListFragment {
+            // Add article type as an argument (used for presenter retrieval)
+            val fragment = ArticleListFragment()
+            val args = Bundle()
+            args.putInt(ArticleListFragment.KEY_ARTICLE_TYPE, articleType.ordinal)
+            fragment.arguments = args
+
+            return fragment
+        }
     }
 
     // Presenter reference
@@ -174,24 +189,14 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
         // Launch article item fragment to display selected article
-        val itemFragment = ArticleItemFragment()
-        val args = Bundle()
-        args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, ArticleDisplayModelParcelable(
-            article.title,
-            article.sourceName,
-            article.imageUrl,
-            article.author,
-            article.articleUrl,
-            article.articleContent,
-            article.publishedAt
-        ))
-        itemFragment.arguments = args
+        val itemFragment = ArticleItemFragment.getInstance(article)
 
         val parentActivity = activity
         if (parentActivity != null) {
             val transaction = parentActivity.supportFragmentManager.beginTransaction()
             transaction.replace(R.id.frag_placeholder, itemFragment)
             transaction.addToBackStack(null)
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
             transaction.commit()
         }
     }

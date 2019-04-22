@@ -1,11 +1,12 @@
 package com.chrisfry.nerdnews.userinterface.fragments
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,27 +18,34 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
-import com.chrisfry.nerdnews.model.ArticleDisplayModelParcelable
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
+import kotlinx.android.synthetic.main.fragment_article_item.*
 
 /**
  * Fragment for displaying a single article
  */
-class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
+class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, View.OnClickListener {
     companion object {
         private val TAG = ArticleItemFragment::class.java.simpleName
+
+        /**
+         * Method for creating an instance of ArticleItemFragment
+         *
+         * @param articleToDisplay: The parcelable model of the article we want to display
+         */
+        fun getInstance (articleToDisplay: ArticleDisplayModel): ArticleItemFragment {
+            val fragment = ArticleItemFragment()
+            val args = Bundle()
+            args.putParcelable(AppConstants.KEY_ARGS_ARTICLE, articleToDisplay)
+            fragment.arguments = args
+
+            return fragment
+        }
     }
 
     // Reference to presenter that provides data
     private var presenter: IArticleItemPresenter? = null
-
-    // UI Elements
-    private lateinit var articleImage: ImageView
-    private lateinit var titleText: TextView
-    private lateinit var authorText: TextView
-    private lateinit var publishedAtText: TextView
-    private lateinit var contentText: TextView
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -56,21 +64,8 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
             LogUtils.error(TAG, "Error article item fragment has no arguments")
             presenter?.setArticleData(null)
         } else {
-            val articleToDisplay: ArticleDisplayModelParcelable? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
-            if (articleToDisplay == null) {
-                presenter?.setArticleData(null)
-            } else {
-                // Convert model to non-parcelable version and send to presenter
-                presenter?.setArticleData(ArticleDisplayModel(
-                    articleToDisplay.title,
-                    articleToDisplay.sourceName,
-                    articleToDisplay.imageUrl,
-                    articleToDisplay.author,
-                    articleToDisplay.articleUrl,
-                    articleToDisplay.articleContent,
-                    articleToDisplay.publishedAt
-                ))
-            }
+            val articleToDisplay: ArticleDisplayModel? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
+            presenter?.setArticleData(articleToDisplay)
         }
     }
 
@@ -80,13 +75,6 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Retrieve UI elements references
-        articleImage = view.findViewById(R.id.iv_article_item_image)
-        titleText = view.findViewById(R.id.tv_article_item_title_text)
-        authorText = view.findViewById(R.id.tv_article_item_author_text)
-        publishedAtText = view.findViewById(R.id.tv_article_item_published_at_text)
-        contentText = view.findViewById(R.id.tv_article_item_content_text)
-
         // Setup toolbar for current fragment
         val parentActivity = activity
         if (parentActivity == null || parentActivity !is ITabsProvider || parentActivity !is AppCompatActivity) {
@@ -96,6 +84,9 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
             parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
             parentActivity.hideTabs()
         }
+
+        // Add click listener to button to view full article
+        btn_go_to_article.setOnClickListener(this)
 
         presenter?.attach(this)
     }
@@ -123,38 +114,42 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
     override fun displayTitle(title: String) {
         // Display title (or placeholder if empty)
         if (title.isEmpty()) {
-            titleText.text = getString(R.string.no_title_string)
+            tv_article_item_title_text.text = getString(R.string.no_title_string)
         } else {
-            titleText.text = title
+            tv_article_item_title_text.text = title
         }
     }
 
     override fun displayImage(imageUrl: String) {
         // Display or hide image view
         if (imageUrl.isEmpty()) {
-            articleImage.visibility = View.GONE
+            iv_article_item_image.visibility = View.GONE
         } else {
-            Glide.with(this).load(imageUrl).apply(RequestOptions().centerCrop()).into(articleImage)
+            Glide.with(this).load(imageUrl).apply(RequestOptions().centerCrop()).into(iv_article_item_image)
         }
     }
 
     override fun displayAuthor(author: String) {
         // Display or hide author text
-        showOrHideTextView(authorText, author)
+        showOrHideTextView(tv_article_item_author_text, author)
     }
 
     override fun displayPublishedAt(publishedAt: String) {
         // Display or hide published at date
-        showOrHideTextView(publishedAtText, publishedAt)
+        showOrHideTextView(tv_article_item_published_at_text, publishedAt)
     }
 
     override fun displayContent(content: String) {
         // Display content of article (or hide if empty)
-        showOrHideTextView(contentText, content)
+        showOrHideTextView(tv_article_item_content_text, content)
     }
 
     override fun displayLinkToArticle(articleUrl: String) {
-        // TODO: Need to implement
+        if (articleUrl.isEmpty()) {
+            btn_go_to_article.visibility = View.GONE
+        } else {
+            btn_go_to_article.visibility = View.VISIBLE
+        }
     }
 
     override fun closeView() {
@@ -173,6 +168,15 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
         }
     }
 
+    override fun navigateToArticleSource(articleUrl: String) {
+        if (articleUrl.isNotEmpty()) {
+            // If our URL is not blank, launch an intent to open the article URL in a web browser
+            val browserIntent = Intent(Intent.ACTION_VIEW)
+            browserIntent.data = Uri.parse(articleUrl)
+            startActivity(browserIntent)
+        }
+    }
+
     /**
      * Displays provided text in a text view or hides the text view if it's empty
      *
@@ -184,6 +188,19 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView {
             textView.visibility = View.GONE
         } else {
             textView.text = textValue
+        }
+    }
+
+    override fun onClick(v: View?) {
+        if (v != null) {
+            when(v.id) {
+                btn_go_to_article.id -> {
+                    presenter?.goToArticleClicked()
+                }
+                else -> {
+                    // Not handling this click here
+                }
+            }
         }
     }
 }

@@ -66,6 +66,13 @@ class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPres
         }
     }
 
+    override fun goToArticleClicked() {
+        val article = articleDisplayModel
+        if (article != null) {
+            getView()?.navigateToArticleSource(article.articleUrl)
+        }
+    }
+
     /**
      * Methods that returns false if article object is completely empty (all empty strings)
      *
@@ -140,5 +147,12 @@ class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPres
          * Instruct view that it needs to close
          */
         fun closeView()
+
+        /**
+         * Instruct the view to navigate to the article source URL
+         *
+         * @param articleUrl: URL of the source of the article
+         */
+        fun navigateToArticleSource(articleUrl: String)
     }
 }
