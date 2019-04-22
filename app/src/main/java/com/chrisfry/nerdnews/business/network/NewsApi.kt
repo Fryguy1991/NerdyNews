@@ -10,7 +10,6 @@ import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.model.ArticleListsModel
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
-import com.chrisfry.nerdnews.utils.AppUtils
 import com.chrisfry.nerdnews.utils.LogUtils
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -19,6 +18,9 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Api class for requesting article data from NewsAPI
+ */
 @Singleton
 open class NewsApi @Inject constructor() {
     companion object {
@@ -128,9 +130,8 @@ open class NewsApi @Inject constructor() {
                 // (see GAMING_DOMAINS). By default NewsAPI sorts these by published by date
                 val gamingParams = HashMap<String, String>()
                 gamingParams[NewsService.KEY_LANGUAGE] = NewsApiLanguages.getLanguage(Locale.getDefault().language).code
-                gamingParams[NewsService.KEY_DOMAINS] = AppUtils.buildCommaSeparatedString(GAMING_DOMAINS)
-                gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] =
-                    AppUtils.buildCommaSeparatedString(GAMING_DOMAINS_EXCLUDE)
+                gamingParams[NewsService.KEY_DOMAINS] = GAMING_DOMAINS.joinToString(separator = ",")
+                gamingParams[NewsService.KEY_EXCLUDE_DOMAINS] = GAMING_DOMAINS_EXCLUDE.joinToString(separator = ",")
                 gamingParams[NewsService.KEY_PAGE_SIZE] = getPageSize().toString()
                 // Calculate page to retrieve (NEED TO ADD ONE, THIS IS NOT ZERO BASED)
                 gamingParams[NewsService.KEY_PAGE] = pageCount.toString()
