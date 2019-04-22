@@ -2,11 +2,10 @@ package com.chrisfry.nerdnews.mocks
 
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.model.Article
-import com.chrisfry.nerdnews.model.ArticleListsModel
+import com.chrisfry.nerdnews.model.IArticleListsModel
 
 
-class MockArticleListsModel : ArticleListsModel() {
-
+class MockArticleListsModel : IArticleListsModel {
     var articleData = mutableListOf<MutableList<Article>>()
 
     init {
@@ -51,5 +50,13 @@ class MockArticleListsModel : ArticleListsModel() {
         for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
             articleData.add(mutableListOf())
         }
+    }
+
+    override fun setPageCount(articleDisplayType: ArticleDisplayType, count: Int) {
+        TODO("Currently not using in mock object") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getPageCount(articleDisplayType: ArticleDisplayType): Int {
+        TODO("Currently not using in mock object") //To change body of created functions use File | Settings | File Templates.
     }
 }

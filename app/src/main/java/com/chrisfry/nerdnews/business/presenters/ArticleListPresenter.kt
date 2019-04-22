@@ -7,9 +7,9 @@ import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
 import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
-import com.chrisfry.nerdnews.business.eventhandling.events.RequestMoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
 import com.chrisfry.nerdnews.business.eventhandling.receivers.MoreArticleEventReceiver
+import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
@@ -38,7 +38,10 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
 
     // Instance of article model
     @Inject
-    lateinit var articleModelInstance: ArticleListsModel
+    lateinit var articleModelInstance: IArticleListsModel
+    // Instance of news api to make data requests
+    @Inject
+    lateinit var newsApiInstance: INewsApi
 
     // Flag to indicate if a request for more articles is in progress
     private var isMoreArticleRequestInProgress = false
@@ -46,6 +49,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     private var cachedArticleCount = 0
 
     init {
+        // TODO: Replace event handler
         // Register for refresh events
         EventHandler.addEventReceiver(this)
     }
@@ -117,7 +121,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     override fun requestMoreArticles() {
         if (!isMoreArticleRequestInProgress) {
             isMoreArticleRequestInProgress = true
-            EventHandler.broadcast(RequestMoreArticleEvent(articleType))
+            newsApiInstance.requestMoreArticles(articleType)
         }
     }
 

@@ -7,7 +7,7 @@ import java.lang.Exception
 /**
  * Model which contains lists of article data (based on ArticleDisplayType) to be displayed by the user interface
  */
-open class ArticleListsModel {
+class ArticleListsModel: IArticleListsModel {
     companion object {
         private val TAG = ArticleListsModel::class.java.simpleName
 
@@ -45,8 +45,9 @@ open class ArticleListsModel {
      * Gets a list of requested article data (Article) based on given type
      *
      * @param articleDisplayType: Requested type of article to retrieve
+     * @return A list of Article models
      */
-    open fun getArticleList(articleDisplayType: ArticleDisplayType): MutableList<Article> {
+    override fun getArticleList(articleDisplayType: ArticleDisplayType): MutableList<Article> {
         if (articleLists.size != ArticleDisplayType.values().size) {
             throw Exception("$TAG: Model list size does not match article type size (GET)")
         } else {
@@ -60,7 +61,7 @@ open class ArticleListsModel {
      * @param articleDisplayType: Requested type of article to replace
      * @param articleList: List of article data to use as a replacement
      */
-    open fun setArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
+    override fun setArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
         if (articleLists.size != ArticleDisplayType.values().size) {
             LogUtils.wtf(TAG, "Model list size does not match article type size (SET)")
         } else {
@@ -75,7 +76,7 @@ open class ArticleListsModel {
      * @param articleDisplayType: Requested type of article data to add to
      * @param articleList: List of article data to add to the model
      */
-    open fun addToArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
+    override fun addToArticleList(articleDisplayType: ArticleDisplayType, articleList: List<Article>) {
         if (articleLists.size != ArticleDisplayType.values().size) {
             LogUtils.wtf(TAG, "Model list size does not match article type size (ADD)")
         } else {
@@ -90,7 +91,7 @@ open class ArticleListsModel {
      * @param articleDisplayType: Requested type of article data to add to
      * @param count: The count of the page to store
      */
-    open fun setPageCount(articleDisplayType: ArticleDisplayType, count: Int) {
+    override fun setPageCount(articleDisplayType: ArticleDisplayType, count: Int) {
         if (articleLists.size != ArticleDisplayType.values().size) {
             LogUtils.wtf(TAG, "Page count list size does not match article type size (ADD)")
         } else {
@@ -104,7 +105,7 @@ open class ArticleListsModel {
      *
      * @param articleDisplayType: Requested type of article data to add to
      */
-    open fun getPageCount(articleDisplayType: ArticleDisplayType): Int {
+    override fun getPageCount(articleDisplayType: ArticleDisplayType): Int {
         if (articleLists.size != ArticleDisplayType.values().size) {
             throw Exception("$TAG: Page count list size does not match article type size (ADD)")
         } else {
