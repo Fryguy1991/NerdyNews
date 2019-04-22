@@ -1,11 +1,9 @@
 package com.chrisfry.nerdnews.business.eventhandling
 
-import com.chrisfry.nerdnews.business.eventhandling.events.RequestMoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
 import com.chrisfry.nerdnews.business.eventhandling.receivers.MoreArticleEventReceiver
-import com.chrisfry.nerdnews.business.eventhandling.receivers.RequestMoreArticleEventReceiver
 import com.chrisfry.nerdnews.utils.LogUtils
 
 /**
@@ -41,12 +39,6 @@ class EventHandler {
                     // ArticleRefreshCompleteEventReceivers should receive ArticleRefreshCompleteEvents
                     is ArticleRefreshCompleteEvent -> {
                         if (receiver is ArticleRefreshCompleteEventReceiver) {
-                            receiver.onReceive(event)
-                        }
-                    }
-                    // RequestMoreArticleEventReceivers should receive RequestMoreArticleEvents
-                    is RequestMoreArticleEvent -> {
-                        if (receiver is RequestMoreArticleEventReceiver) {
                             receiver.onReceive(event)
                         }
                     }
