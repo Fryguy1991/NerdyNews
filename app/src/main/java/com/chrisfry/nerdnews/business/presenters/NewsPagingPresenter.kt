@@ -7,7 +7,7 @@ import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshComp
 import com.chrisfry.nerdnews.business.network.NewsApi
 
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
-import com.chrisfry.nerdnews.model.ArticleListsModel
+import com.chrisfry.nerdnews.model.IArticleListsModel
 
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.LogUtils
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 /**
  * Presenter for displaying a view that displays a paging list for news article types.
- * This presenters handles article refresh events that will come form the UI.
+ * This presenters handles article refresh events that will come from the UI.
  */
 class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresenter.INewsPagingView>(),
     INewsPagingPresenter, ArticleRefreshCompleteEventReceiver {
@@ -29,7 +29,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
 
     // Instance for model containing article lists to be displayed
     @Inject
-    lateinit var articleModelInstance: ArticleListsModel
+    lateinit var articleModelInstance: IArticleListsModel
     // Instance for news api to make data requests
     @Inject
     lateinit var newsApiInstance: NewsApi
@@ -37,6 +37,7 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     private var refreshInProgressFlag = false
 
     init {
+        // TODO: Replace event handler
         // Add presenter to event receiver list (RequestMoreArticleEventReceiver)
         EventHandler.addEventReceiver(this)
     }

@@ -38,7 +38,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
 
     // Instance of article model
     @Inject
-    lateinit var articleModelInstance: ArticleListsModel
+    lateinit var articleModelInstance: IArticleListsModel
     // Instance of news api to make data requests
     @Inject
     lateinit var newsApiInstance: NewsApi
@@ -49,6 +49,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     private var cachedArticleCount = 0
 
     init {
+        // TODO: Replace event handler
         // Register for refresh events
         EventHandler.addEventReceiver(this)
     }
