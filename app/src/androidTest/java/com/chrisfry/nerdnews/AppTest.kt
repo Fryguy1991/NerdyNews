@@ -132,7 +132,7 @@ class AppTest {
     }
 
     @Test
-    fun testViewFullArticle() {
+    fun testViewFullArticleIntent() {
         // Ensure our fragment is displayed
         onView(withId(R.id.frag_placeholder)).check(matches(isDisplayed()))
 

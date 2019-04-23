@@ -133,51 +133,61 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
      */
     private fun convertArticlesToArticleDisplayModel(articlesToConvert: List<Article>): List<ArticleDisplayModel> {
 
-        val articleDisplayModelList = mutableListOf<ArticleDisplayModel>()
+        return articlesToConvert.map {
+            var title = it.title ?: AppConstants.EMPTY_STRING
+            var publishedAt = it.publishedAt ?: AppConstants.EMPTY_STRING
 
-        for (article: Article in articlesToConvert) {
-            var title = article.title ?: AppConstants.EMPTY_STRING
-            val sourceName = article.source.name ?: AppConstants.EMPTY_STRING
-            val imageUrl = article.urlToImage ?: AppConstants.EMPTY_STRING
-            val author = article.author ?: AppConstants.EMPTY_STRING
-            val articleUrl = article.url ?: AppConstants.EMPTY_STRING
-            val articleContent = article.content ?: AppConstants.EMPTY_STRING
-
-            // TODO: If date format is changed (Locale) when on ArticleItemFragment this value will still be displayed
-            // in the old format
-            var publishedAt: Date? = null
-            try {
-                // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
-                @SuppressLint("SimpleDateFormat")
-                val dateFormat = SimpleDateFormat(AppConstants.PUBLISHED_AT_TIME_FORMAT)
-                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-
-                publishedAt = dateFormat.parse(article.publishedAt)
-            } catch (exception: ParseException) {
-                LogUtils.error(TAG, "Failed to parse published at date")
+            // If the article title is not empty and contains a dash (-), it may have the source
+            // name at the end of the title. Attempt to trim it (if source name is not null and not empty).
+            if (!it.source.name.isNullOrEmpty() && title.isNotEmpty() && title.contains('-')) {
+                title = trimSourceFromArticleTitle(title, it.source.name)
             }
 
-            // If the article title contains a dash (-) it may have the source
-            // name at the end of the title. Attempt to trim it.
-            if (sourceName.isNotEmpty() && title.isNotEmpty() && title.contains('-')) {
-                title = trimSourceFromArticleTitle(title, sourceName)
+            // If published at is not empty, attempt to parse it to local date format
+            if (publishedAt.isNotEmpty()) {
+                publishedAt = getLocalPublishedAtString(publishedAt)
             }
 
-            // Change published at date to local format
-            val publishedAtString = if (publishedAt == null) {
-                AppConstants.EMPTY_STRING
-            } else {
-                val dateFormat = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
-                dateFormat.timeZone = TimeZone.getDefault()
-                dateFormat.format(publishedAt)
-            }
+            ArticleDisplayModel(title,
+                it.source.name ?: AppConstants.EMPTY_STRING,
+                it.urlToImage ?: AppConstants.EMPTY_STRING,
+                it.author ?: AppConstants.EMPTY_STRING,
+                it.url ?: AppConstants.EMPTY_STRING,
+                it.content ?: AppConstants.EMPTY_STRING,
+                publishedAt)
+        }
+    }
 
-            articleDisplayModelList.add(
-                ArticleDisplayModel(title, sourceName, imageUrl, author, articleUrl, articleContent, publishedAtString)
-            )
+    /**
+     * Attempts to convert raw published at format (see AppConstants.PUBLISHED_AT_TIME_FORMAT) to local format
+     *
+     * @param rawPublishedAt: Raw published at string retrieved from NewsAPI
+     * @return: Local formatted string of published at time, or empty string if parse fails
+     */
+    private fun getLocalPublishedAtString(rawPublishedAt: String): String {
+        // TODO: If date format is changed (Locale) when on ArticleItemFragment this value will still be displayed
+        // in the old format
+        var publishedAt: Date? = null
+
+        try {
+            // Suppressed because we are retrieving a UTC time. Lint was warning how to get local time format
+            @SuppressLint("SimpleDateFormat")
+            val dateFormat = SimpleDateFormat(AppConstants.PUBLISHED_AT_TIME_FORMAT)
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            publishedAt = dateFormat.parse(rawPublishedAt)
+        } catch (exception: ParseException) {
+            LogUtils.error(TAG, "Failed to parse published at date")
         }
 
-        return articleDisplayModelList.toList()
+        // Change published at date to local format
+        return if (publishedAt == null) {
+            AppConstants.EMPTY_STRING
+        } else {
+            val dateFormat = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
+            dateFormat.timeZone = TimeZone.getDefault()
+            dateFormat.format(publishedAt)
+        }
     }
 
 
@@ -186,6 +196,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
      *
      * @param title: Article title
      * @param source: Name of the article source
+     * @return: Title trimmed of it's source name, or original title if not detectable
      */
     private fun trimSourceFromArticleTitle(title: String, source: String): String {
         // Check if title ends with direct source name
@@ -222,6 +233,7 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
      *
      * @param sourceName: Source name that we are checking.
      * @param title: Full title of article
+     * @return: Character index of the dash before a source name
      */
     private fun getSourceDashIndex(sourceName: String, title: String): Int {
         val dashesInSource = sourceName.count { it == '-' }
