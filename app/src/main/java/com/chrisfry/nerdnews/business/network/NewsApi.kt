@@ -22,7 +22,7 @@ import javax.inject.Singleton
  * Api class for requesting article data from NewsAPI
  */
 @Singleton
-class NewsApi @Inject constructor() : INewsApi {
+class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
     companion object {
         private val TAG = NewsApi::class.java.simpleName
 
@@ -33,6 +33,7 @@ class NewsApi @Inject constructor() : INewsApi {
             )
         private val GAMING_DOMAINS_EXCLUDE = listOf("mashable.com")
     }
+
     // Instance of service class for retrieving article data
     private val service: NewsService
     // Instance of model class for storing article data
@@ -86,7 +87,7 @@ class NewsApi @Inject constructor() : INewsApi {
         LogUtils.debug(TAG, "Requesting more $articleType articles")
 
         when (articleType) {
-            ArticleDisplayType.TECH ->  {
+            ArticleDisplayType.TECH -> {
                 // Request more technology articles
                 service.getTopHeadlines(getCallParams(ArticleDisplayType.TECH))
                     .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.TECH))
@@ -165,8 +166,7 @@ class NewsApi @Inject constructor() : INewsApi {
 
         if (!refreshInProgressFlagList.contains(true)) {
             // Notify other presenters (articles lists) that the article refresh is complete
-            // TODO: Inject event bus
-            EventBus.getDefault().post(RefreshCompleteEvent())
+            eventBus.post(RefreshCompleteEvent())
         }
     }
 
@@ -213,8 +213,8 @@ class NewsApi @Inject constructor() : INewsApi {
             // Store page count into model (old page count + 1)
             articleModelInstance.setPageCount(articleDisplayType, articleModelInstance.getPageCount(articleDisplayType) + 1)
 
-            // TODO: Inject event bus
-            EventBus.getDefault().post(MoreArticleEvent(articleDisplayType))
+            // Broadcast that more articles have been retrieved
+            eventBus.post(MoreArticleEvent(articleDisplayType))
         }
 
         override fun onFailure(error: ResponseError) {
@@ -222,8 +222,7 @@ class NewsApi @Inject constructor() : INewsApi {
             LogUtils.error(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
 
             // Broadcast that more articles have been retrieved (actual check for this is in ArticleListPresenter)
-            // TODO: Inject event bus
-            EventBus.getDefault().post(MoreArticleEvent(articleDisplayType))
+            eventBus.post(MoreArticleEvent(articleDisplayType))
         }
     }
 }
