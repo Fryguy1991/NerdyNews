@@ -57,6 +57,9 @@ class ArticleListPresenter(private val articleType: ArticleDisplayType) :
     }
 
     override fun requestArticles() {
+        // TODO: This always displays "no article data" first on screen. If we can detect when a refresh is in progress
+        // we can not display this text during that time.
+
         // Pull articles from model and convert them for display
         val modelArticles = articleModelInstance.getArticleList(articleType)
         // Cache article count
