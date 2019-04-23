@@ -7,14 +7,13 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
-import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import com.chrisfry.nerdnews.userinterface.interfaces.IMainActivity
 import kotlinx.android.synthetic.main.fragment_news_pager.*
 import java.lang.Exception
 
@@ -37,8 +36,8 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
     private var presenter: INewsPagingPresenter? = null
     // ViewPager adapter
     private lateinit var newsPagerAdapter: NewsPagerAdapter
-    // Reference responsible for providing tabs to the ViewPager
-    private var tabsProvider: ITabsProvider? = null
+    // Reference to communicate with the activity
+    private var mainActivity: IMainActivity? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -48,30 +47,32 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
 
         val parentActivity = activity
 
-        if (parentActivity == null || parentActivity !is ITabsProvider) {
+        if (parentActivity == null || parentActivity !is IMainActivity) {
             throw Exception("Error invalid activity provided")
         } else {
-            // Create presenter and inject news component for NewsAPI elements
-            val newPresenter = NewsPagingPresenter()
-            (parentActivity.application as App).appComponent.inject(newPresenter)
-
-            presenter = newPresenter
-            presenter?.postDependencyInitiation()
-            presenter?.initialArticleCheck()
-
-            tabsProvider = parentActivity
+            mainActivity = parentActivity
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val parentActivity = activity
-        if (parentActivity == null || parentActivity !is AppCompatActivity) {
-            throw Exception("Error invalid activity provided")
-        } else {
-            // Reset toolbar appearance
-            parentActivity.supportActionBar?.title = getString(R.string.app_name)
-            parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+
+        // Create presenter and inject dependencies
+        val newPresenter = NewsPagingPresenter()
+        if (parentActivity != null) {
+            (parentActivity.application as App).appComponent.inject(newPresenter)
         }
+
+        presenter = newPresenter
+        presenter?.postDependencyInitiation()
+        presenter?.initialArticleCheck()
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        mainActivity?.setAppTitle(getString(R.string.app_name))
+        mainActivity?.showHomeAsUpEnabled(false)
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_news_pager, container, false)
@@ -121,7 +122,7 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
 
             // Inform Activity tabs to setup with viewpager
             // TODO: These tabs should be in the fragment but due to shadow issues (elevation) tabs are in MainActivity layout
-            tabsProvider?.setupTabs(view_pager_news)
+            mainActivity?.setupTabs(view_pager_news)
 
             // Fragment view has been created, attach to presenter
             presenter?.attach(this)
@@ -137,9 +138,9 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
     }
 
     override fun onDestroy() {
-        tabsProvider = null
         presenter?.breakDown()
         presenter = null
+        mainActivity = null
         super.onDestroy()
     }
 
