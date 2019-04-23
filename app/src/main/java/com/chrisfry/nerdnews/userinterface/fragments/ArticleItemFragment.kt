@@ -47,12 +47,6 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
     // Reference to presenter that provides data
     private var presenter: IArticleItemPresenter? = null
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        presenter = ArticleItemPresenter.getInstance()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -60,12 +54,14 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
 
         // Setup presenter with article argument (or null if not sent one)
         val args = arguments
-        if (args == null) {
+        presenter = if (args == null) {
             LogUtils.error(TAG, "Error article item fragment has no arguments")
-            presenter?.setArticleData(null)
+            // This should not be possible as our getInstance method
+            // requires an article model that will be used for args
+            ArticleItemPresenter(null)
         } else {
             val articleToDisplay: ArticleDisplayModel? = args.getParcelable(AppConstants.KEY_ARGS_ARTICLE)
-            presenter?.setArticleData(articleToDisplay)
+            ArticleItemPresenter(articleToDisplay)
         }
     }
 

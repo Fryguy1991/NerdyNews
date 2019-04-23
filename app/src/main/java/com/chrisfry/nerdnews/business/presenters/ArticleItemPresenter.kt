@@ -1,7 +1,6 @@
 package com.chrisfry.nerdnews.business.presenters
 
 import com.chrisfry.nerdnews.AppConstants
-import com.chrisfry.nerdnews.business.exceptions.LateArticleLoadException
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
@@ -9,19 +8,14 @@ import com.chrisfry.nerdnews.utils.LogUtils
 
 /**
  * Presenter for displaying one article to a view
+ *
+ * @param articleDisplayModel: Article model that should be displayed in the item view
  */
-class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPresenter.IArticleItemView>(),
+class ArticleItemPresenter (private val articleDisplayModel: ArticleDisplayModel?) : BasePresenter<ArticleItemPresenter.IArticleItemView>(),
     IArticleItemPresenter {
     companion object {
         private val TAG = ArticleItemPresenter::class.java.simpleName
-
-        fun getInstance(): ArticleItemPresenter {
-            return ArticleItemPresenter()
-        }
     }
-
-    // Article data to display
-    private var articleDisplayModel: ArticleDisplayModel? = null
 
     override fun attach(view: IArticleItemView) {
         super.attach(view)
@@ -55,15 +49,6 @@ class ArticleItemPresenter private constructor() : BasePresenter<ArticleItemPres
         LogUtils.debug(TAG, "ArticleItemPresenter is detaching from view")
 
         super.detach()
-    }
-
-    override fun setArticleData(articleToDisplay: ArticleDisplayModel?) {
-        val view = getView()
-        if (view == null) {
-            articleDisplayModel = articleToDisplay
-        } else {
-            throw LateArticleLoadException("Article was loaded AFTER view was attached. Data will not be displayed")
-        }
     }
 
     override fun goToArticleClicked() {
