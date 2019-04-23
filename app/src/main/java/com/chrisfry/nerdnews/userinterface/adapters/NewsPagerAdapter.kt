@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.chrisfry.nerdnews.business.exceptions.InvalidPositionException
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.userinterface.fragments.ArticleListFragment
 
@@ -24,11 +23,7 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
     }
 
     override fun getItem(position: Int): Fragment {
-        if (position < 0 || position >= ArticleDisplayType.values().size) {
-            throw InvalidPositionException("$TAG: Invalid position in getItem")
-        } else {
-            return fragmentList[position]
-        }
+        return fragmentList[position]
     }
 
     override fun getCount(): Int {
@@ -36,10 +31,6 @@ class NewsPagerAdapter(fragmentManager: FragmentManager, private val context: Co
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
-        if (position < 0 || position >= ArticleDisplayType.values().size) {
-            throw InvalidPositionException("$TAG: Invalid position in getPageTitle")
-        } else {
-            return context.getString(ArticleDisplayType.values()[position].stringResourceId)
-        }
+        return context.getString(ArticleDisplayType.values()[position].stringResourceId)
     }
 }

@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,13 +17,14 @@ import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.ArticleRecyclerViewAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
+import com.chrisfry.nerdnews.userinterface.interfaces.IMainActivity
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 import com.chrisfry.nerdnews.utils.LogUtils
 import kotlinx.android.synthetic.main.fragment_news_list.*
 import java.lang.Exception
 
-class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener{
+class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener {
     companion object {
         private val TAG = ArticleListFragment::class.java.simpleName
         const val KEY_ARTICLE_TYPE = "key_article_type"
@@ -34,7 +34,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
          *
          * @param articleType: The article type that the fragment will display
          */
-        fun getInstance (articleType: ArticleDisplayType): ArticleListFragment {
+        fun getInstance(articleType: ArticleDisplayType): ArticleListFragment {
             // Add article type as an argument (used for presenter retrieval)
             val fragment = ArticleListFragment()
             val args = Bundle()
@@ -54,9 +54,11 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
 
     // Article type displayed by this fragment
     private lateinit var articleType: ArticleDisplayType
+    // Reference to communicate with the activity
+    private var mainActivity: IMainActivity? = null
 
     // Reference to object that will listen to recycler view scrolling
-    inner class NewsScrollListener: RecyclerView.OnScrollListener() {
+    inner class NewsScrollListener : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
 
@@ -84,26 +86,35 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
         }
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        val parentActivity = activity
+        if (parentActivity == null || parentActivity !is IMainActivity) {
+            throw Exception("Error invalid activity provided")
+        } else {
+            mainActivity = parentActivity
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val args = arguments
         if (args == null) {
+            // This should not be possible as our getInstance method requires an article type
             throw Exception("$TAG: Error fragment was not provided an article type")
         } else {
+            // Create presenter and inject dependencies
             val typeOrdinal = args.getInt(KEY_ARTICLE_TYPE, -1)
-            if (typeOrdinal < 0 || typeOrdinal >= ArticleDisplayType.values().size) {
-                throw Exception("$TAG: Error invalid article type ordinal provided")
-            } else {
-                articleType = ArticleDisplayType.values()[typeOrdinal]
-                val newPresenter = ArticleListPresenter(articleType)
-                val parentActivity = activity
-                if (parentActivity != null) {
-                    (parentActivity.application as App).appComponent.inject(newPresenter)
-                }
-                presenter = newPresenter
-                presenter?.postDependencyInitiation()
+            articleType = ArticleDisplayType.values()[typeOrdinal]
+            val newPresenter = ArticleListPresenter(articleType)
+            val parentActivity = activity
+            if (parentActivity != null) {
+                (parentActivity.application as App).appComponent.inject(newPresenter)
             }
+            presenter = newPresenter
+            presenter?.postDependencyInitiation()
         }
     }
 
@@ -166,6 +177,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     override fun onDestroy() {
         presenter?.breakDown()
         presenter = null
+        mainActivity = null
         super.onDestroy()
     }
 
@@ -191,16 +203,6 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     override fun onArticleSelected(article: ArticleDisplayModel) {
         LogUtils.debug(TAG, "Article selected with title: \"${article.title}\"")
 
-        // Launch article item fragment to display selected article
-        val itemFragment = ArticleItemFragment.getInstance(article)
-
-        val parentActivity = activity
-        if (parentActivity != null) {
-            val transaction = parentActivity.supportFragmentManager.beginTransaction()
-            transaction.replace(R.id.frag_placeholder, itemFragment)
-            transaction.addToBackStack(null)
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-            transaction.commit()
-        }
+        mainActivity?.navigateToArticle(article)
     }
 }

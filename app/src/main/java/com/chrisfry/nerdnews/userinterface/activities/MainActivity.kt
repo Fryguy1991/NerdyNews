@@ -4,17 +4,19 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.userinterface.fragments.NewsPagingFragment
 import com.chrisfry.nerdnews.R
-import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import com.chrisfry.nerdnews.model.ArticleDisplayModel
+import com.chrisfry.nerdnews.userinterface.fragments.ArticleItemFragment
+import com.chrisfry.nerdnews.userinterface.interfaces.IMainActivity
 import com.chrisfry.nerdnews.utils.LogUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.toolbar_layout.*
 import java.lang.Exception
 
-class MainActivity : AppCompatActivity(), ITabsProvider {
+class MainActivity : AppCompatActivity(), IMainActivity {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
     }
@@ -22,8 +24,6 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
     // FRAGMENT ELEMENTS
     // Fragments
     private val newsPagingFragment = NewsPagingFragment.getInstance()
-    // Reference to fragment manager
-    private lateinit var fragmentManager: FragmentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,8 +45,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
             }
 
             // Start app on news list fragment
-            fragmentManager = supportFragmentManager
-            fragmentManager.beginTransaction().add(R.id.frag_placeholder, newsPagingFragment).commit()
+            supportFragmentManager.beginTransaction().add(R.id.frag_placeholder, newsPagingFragment).commit()
         }
     }
 
@@ -58,6 +57,25 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
 
     override fun hideTabs() {
         tab_layout_article_types.visibility = View.GONE
+    }
+
+    override fun showHomeAsUpEnabled(isEnabled: Boolean) {
+        supportActionBar?.setDisplayHomeAsUpEnabled(isEnabled)
+    }
+
+    override fun setAppTitle(title: String) {
+        supportActionBar?.title = title
+    }
+
+    override fun navigateToArticle(articleToDisplay: ArticleDisplayModel) {
+        // Launch article item fragment to display selected article
+        val itemFragment = ArticleItemFragment.getInstance(articleToDisplay)
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.frag_placeholder, itemFragment)
+        transaction.addToBackStack(null)
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        transaction.commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

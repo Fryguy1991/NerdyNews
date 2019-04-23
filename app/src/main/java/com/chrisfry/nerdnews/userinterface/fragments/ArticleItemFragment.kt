@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -18,9 +17,10 @@ import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.presenters.ArticleItemPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
-import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import com.chrisfry.nerdnews.userinterface.interfaces.IMainActivity
 import com.chrisfry.nerdnews.utils.LogUtils
 import kotlinx.android.synthetic.main.fragment_article_item.*
+import java.lang.Exception
 
 /**
  * Fragment for displaying a single article
@@ -46,6 +46,19 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
 
     // Reference to presenter that provides data
     private var presenter: IArticleItemPresenter? = null
+    // Reference to communicate with the activity
+    private var mainActivity: IMainActivity? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        val parentActivity = activity
+        if (parentActivity == null || parentActivity !is IMainActivity) {
+            throw Exception("Error invalid activity provided")
+        } else {
+            mainActivity = parentActivity
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,15 +84,9 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Setup toolbar for current fragment
-        val parentActivity = activity
-        if (parentActivity == null || parentActivity !is ITabsProvider || parentActivity !is AppCompatActivity) {
-            LogUtils.error(TAG, "Invalid activity to change support action bar title")
-        } else {
-            // Display back arrow and hide tabs below toolbar
-            parentActivity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            parentActivity.hideTabs()
-        }
+        // Hide tabs and ensure up arrow is displayed
+        mainActivity?.showHomeAsUpEnabled(true)
+        mainActivity?.hideTabs()
 
         // Add click listener to button to view full article
         btn_go_to_article.setOnClickListener(this)
@@ -94,17 +101,12 @@ class ArticleItemFragment : Fragment(), ArticleItemPresenter.IArticleItemView, V
 
     override fun onDestroy() {
         presenter = null
+        mainActivity = null
         super.onDestroy()
     }
 
     override fun displaySourceName(sourceName: String) {
-        val parentActivity = activity
-        if (parentActivity == null || parentActivity !is AppCompatActivity) {
-            LogUtils.error(TAG, "Error invalid activity to change support action bar title")
-        } else {
-            // Set source into title
-            parentActivity.supportActionBar?.title = sourceName
-        }
+        mainActivity?.setAppTitle(sourceName)
     }
 
     override fun displayTitle(title: String) {
