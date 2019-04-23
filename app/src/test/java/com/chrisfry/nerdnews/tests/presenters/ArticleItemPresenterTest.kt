@@ -8,6 +8,7 @@ import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.tests.BaseTest
 import com.chrisfry.nerdnews.utils.LogUtils
 import com.nhaarman.mockitokotlin2.*
+import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -65,9 +66,8 @@ class ArticleItemPresenterTest : BaseTest() {
         articleItemPresenter = ArticleItemPresenter.getInstance()
     }
 
-    override fun tearDown() {
-        super.tearDown()
-
+    @After
+    fun tearDown() {
         articleItemPresenter?.detach()
     }
 

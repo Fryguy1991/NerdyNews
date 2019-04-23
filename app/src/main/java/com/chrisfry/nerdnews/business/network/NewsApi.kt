@@ -4,14 +4,14 @@ import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
-import com.chrisfry.nerdnews.business.eventhandling.EventHandler
-import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.model.ArticleListsModel
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.utils.LogUtils
 import okhttp3.OkHttpClient
+import org.greenrobot.eventbus.EventBus
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
@@ -165,7 +165,8 @@ class NewsApi @Inject constructor() : INewsApi {
 
         if (!refreshInProgressFlagList.contains(true)) {
             // Notify other presenters (articles lists) that the article refresh is complete
-            EventHandler.broadcast(ArticleRefreshCompleteEvent())
+            // TODO: Inject event bus
+            EventBus.getDefault().post(RefreshCompleteEvent())
         }
     }
 
@@ -212,7 +213,8 @@ class NewsApi @Inject constructor() : INewsApi {
             // Store page count into model (old page count + 1)
             articleModelInstance.setPageCount(articleDisplayType, articleModelInstance.getPageCount(articleDisplayType) + 1)
 
-            EventHandler.broadcast(MoreArticleEvent(articleDisplayType))
+            // TODO: Inject event bus
+            EventBus.getDefault().post(MoreArticleEvent(articleDisplayType))
         }
 
         override fun onFailure(error: ResponseError) {
@@ -220,7 +222,8 @@ class NewsApi @Inject constructor() : INewsApi {
             LogUtils.error(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
 
             // Broadcast that more articles have been retrieved (actual check for this is in ArticleListPresenter)
-            EventHandler.broadcast(MoreArticleEvent(articleDisplayType))
+            // TODO: Inject event bus
+            EventBus.getDefault().post(MoreArticleEvent(articleDisplayType))
         }
     }
 }

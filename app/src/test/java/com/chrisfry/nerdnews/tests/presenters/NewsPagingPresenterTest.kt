@@ -1,8 +1,7 @@
 package com.chrisfry.nerdnews.tests.presenters
 
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.eventhandling.EventHandler
-import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
@@ -10,6 +9,7 @@ import com.chrisfry.nerdnews.model.Article
 import com.chrisfry.nerdnews.model.ArticleSource
 import com.chrisfry.nerdnews.model.IArticleListsModel
 import com.chrisfry.nerdnews.tests.BaseTest
+import org.greenrobot.eventbus.EventBus
 import org.junit.*
 import org.mockito.*
 import org.mockito.Mockito.*
@@ -37,6 +37,8 @@ class NewsPagingPresenterTest : BaseTest() {
     // Mock model that presenter will use
     @Mock
     private lateinit var mockArticleListsModel: IArticleListsModel
+    // Mock for interacting with event handler
+    private var mockEventBus = EventBus.getDefault()
 
     override fun setUp() {
         super.setUp()
@@ -45,19 +47,22 @@ class NewsPagingPresenterTest : BaseTest() {
         MockitoAnnotations.initMocks(this)
 
         // Create presenter
-        val presenter = NewsPagingPresenter.getInstance()
+        val presenter = NewsPagingPresenter()
 
         // Inject mocks into presenter
         presenter.newsApiInstance = mockNewsApi
         presenter.articleModelInstance = mockArticleListsModel
+        presenter.eventBus = mockEventBus
+        presenter.postDependencyInitiation()
+
 
         newsPagingPresenter = presenter
     }
 
-    override fun tearDown() {
-        super.tearDown()
-
+    @After
+    fun tearDown() {
         newsPagingPresenter?.detach()
+        newsPagingPresenter?.breakDown()
     }
 
     @Test
@@ -82,7 +87,7 @@ class NewsPagingPresenterTest : BaseTest() {
         Assert.assertTrue(booleanCaptor.value)
 
         // Simulate a refresh completing
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(2)).displayRefreshing(booleanCaptor.capture())
@@ -106,7 +111,7 @@ class NewsPagingPresenterTest : BaseTest() {
 
         // Simulate a refresh completing
         setupDummyArticles()
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(2)).displayRefreshing(booleanCaptor.capture())
@@ -122,7 +127,7 @@ class NewsPagingPresenterTest : BaseTest() {
         Assert.assertTrue(booleanCaptor.value)
 
         // Simulate a refresh complete event
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(4)).displayRefreshing(booleanCaptor.capture())
@@ -146,7 +151,7 @@ class NewsPagingPresenterTest : BaseTest() {
 
         // Simulate a refresh completing
         setupDummyArticles()
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(2)).displayRefreshing(booleanCaptor.capture())
@@ -179,7 +184,7 @@ class NewsPagingPresenterTest : BaseTest() {
         }
 
         // Simulate a refresh complete event
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(4)).displayRefreshing(booleanCaptor.capture())
         verify(mockNewsPagingView, times(2)).refreshingComplete()
@@ -227,7 +232,7 @@ class NewsPagingPresenterTest : BaseTest() {
         Assert.assertTrue(booleanCaptor.value)
 
         // Simulate a refresh completing without setting up dummy data
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(2)).displayRefreshing(booleanCaptor.capture())
@@ -246,7 +251,7 @@ class NewsPagingPresenterTest : BaseTest() {
 
         // Simulate a refresh complete event
         setupDummyArticles()
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
         verify(mockNewsPagingView, times(4)).displayRefreshing(booleanCaptor.capture())
@@ -269,7 +274,7 @@ class NewsPagingPresenterTest : BaseTest() {
         `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(mutableListOf())
 
         // Simulate a refresh complete event
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state, and should have called refreshing failed
         verify(mockNewsPagingView, times(6)).displayRefreshing(booleanCaptor.capture())

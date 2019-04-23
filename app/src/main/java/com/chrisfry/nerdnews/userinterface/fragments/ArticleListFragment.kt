@@ -96,12 +96,13 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
                 throw Exception("$TAG: Error invalid article type ordinal provided")
             } else {
                 articleType = ArticleDisplayType.values()[typeOrdinal]
-                val newPresenter = ArticleListPresenter.getInstance(articleType)
+                val newPresenter = ArticleListPresenter(articleType)
                 val parentActivity = activity
                 if (parentActivity != null) {
                     (parentActivity.application as App).appComponent.inject(newPresenter)
                 }
                 presenter = newPresenter
+                presenter?.postDependencyInitiation()
             }
         }
     }
@@ -163,6 +164,7 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     }
 
     override fun onDestroy() {
+        presenter?.breakDown()
         presenter = null
         super.onDestroy()
     }

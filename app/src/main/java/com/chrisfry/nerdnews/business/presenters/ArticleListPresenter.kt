@@ -3,17 +3,16 @@ package com.chrisfry.nerdnews.business.presenters
 import android.annotation.SuppressLint
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.eventhandling.BaseEvent
-import com.chrisfry.nerdnews.business.eventhandling.EventHandler
-import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
-import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
-import com.chrisfry.nerdnews.business.eventhandling.receivers.MoreArticleEventReceiver
 import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.LogUtils
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -25,15 +24,10 @@ import javax.inject.Inject
  *
  * @param articleType: Type of article to be displayed by the presenter instance
  */
-class ArticleListPresenter private constructor(private val articleType: ArticleDisplayType) :
-    BasePresenter<ArticleListPresenter.IArticleListView>(), IArticleListPresenter, ArticleRefreshCompleteEventReceiver,
-    MoreArticleEventReceiver {
+class ArticleListPresenter(private val articleType: ArticleDisplayType) :
+    BasePresenter<ArticleListPresenter.IArticleListView>(), IArticleListPresenter {
     companion object {
         private val TAG = ArticleListPresenter::class.java.simpleName
-
-        fun getInstance(articleType: ArticleDisplayType): ArticleListPresenter {
-            return ArticleListPresenter(articleType)
-        }
     }
 
     // Instance of article model
@@ -42,16 +36,18 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
     // Instance of news api to make data requests
     @Inject
     lateinit var newsApiInstance: INewsApi
+    // Event bus for receiving events from changed data
+    @Inject
+    lateinit var eventBus: EventBus
 
     // Flag to indicate if a request for more articles is in progress
     private var isMoreArticleRequestInProgress = false
     // Cached value of article count (to see if article list has actually changed)
     private var cachedArticleCount = 0
 
-    init {
-        // TODO: Replace event handler
-        // Register for refresh events
-        EventHandler.addEventReceiver(this)
+    override fun postDependencyInitiation() {
+        // Register for events
+        eventBus.register(this)
     }
 
     override fun attach(view: IArticleListView) {
@@ -72,43 +68,49 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
         }
     }
 
-    override fun onReceive(event: BaseEvent) {
-        when (event) {
-            is ArticleRefreshCompleteEvent -> {
-                // If view is not null (visible) send updated article list to view
-                val modelArticles = articleModelInstance.getArticleList(articleType)
+    /**
+     * Method for handling RefreshCompleteEvents
+     *
+     * @param event: Event notifying us that article data has been refreshed
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onRefreshEvent(event: RefreshCompleteEvent) {
+        // If view is not null (visible) send updated article list to view
+        val modelArticles = articleModelInstance.getArticleList(articleType)
+        // Cache article count
+        cachedArticleCount = modelArticles.size
+        if (modelArticles.isEmpty()) {
+            getView()?.displayNoArticles()
+        } else {
+            getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles))
+        }
+
+        // Reset flag for more article requests
+        isMoreArticleRequestInProgress = false
+    }
+
+    /**
+     * Method for handling MoreArticleEvents
+     *
+     * @param event: Event notfying us that we have received more articles. Event object contains article type.
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMoreArticleEvent(event: MoreArticleEvent) {
+        if (event.articleType == articleType) {
+            // If view is not null (visible) send updated article list to view
+            val modelArticles = articleModelInstance.getArticleList(articleType)
+
+            if (modelArticles.size == cachedArticleCount) {
+                LogUtils.debug(TAG, "No more articles to pull for $articleType category")
+                getView()?.noMoreArticlesAvailable()
+            } else {
                 // Cache article count
                 cachedArticleCount = modelArticles.size
-                if (modelArticles.isEmpty()) {
-                    getView()?.displayNoArticles()
-                } else {
-                    getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles))
-                }
-
-                // Reset flag for more article requests
                 isMoreArticleRequestInProgress = false
+                getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles))
             }
-            is MoreArticleEvent -> {
-                if (event.articleType == articleType) {
-                    // If view is not null (visible) send updated article list to view
-                    val modelArticles = articleModelInstance.getArticleList(articleType)
-
-                    if (modelArticles.size == cachedArticleCount) {
-                        LogUtils.debug(TAG, "No more articles to pull for $articleType category")
-                        getView()?.noMoreArticlesAvailable()
-                    } else {
-                        // Cache article count
-                        cachedArticleCount = modelArticles.size
-                        isMoreArticleRequestInProgress = false
-                        getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles))
-                    }
-                } else {
-                    LogUtils.debug(TAG, "More article event was not for this presenter")
-                }
-            }
-            else -> {
-                LogUtils.error(TAG, "Not handling event here: ${event::class.java.simpleName}")
-            }
+        } else {
+            LogUtils.debug(TAG, "More article event was not for this presenter $articleType")
         }
     }
 
@@ -116,6 +118,10 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
         LogUtils.debug(TAG, "ArticleListPresenter is detaching from view")
 
         super.detach()
+    }
+
+    override fun breakDown() {
+        eventBus.unregister(this)
     }
 
     override fun requestMoreArticles() {
@@ -148,13 +154,15 @@ class ArticleListPresenter private constructor(private val articleType: ArticleD
                 publishedAt = getLocalPublishedAtString(publishedAt)
             }
 
-            ArticleDisplayModel(title,
+            ArticleDisplayModel(
+                title,
                 it.source.name ?: AppConstants.EMPTY_STRING,
                 it.urlToImage ?: AppConstants.EMPTY_STRING,
                 it.author ?: AppConstants.EMPTY_STRING,
                 it.url ?: AppConstants.EMPTY_STRING,
                 it.content ?: AppConstants.EMPTY_STRING,
-                publishedAt)
+                publishedAt
+            )
         }
     }
 

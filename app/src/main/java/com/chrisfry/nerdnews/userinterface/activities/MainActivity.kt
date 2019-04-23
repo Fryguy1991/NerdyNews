@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.userinterface.fragments.NewsPagingFragment
 import com.chrisfry.nerdnews.R
-import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,7 +19,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         private val TAG = MainActivity::class.java.simpleName
     }
 
-    // UI ELEMENTS
+    // FRAGMENT ELEMENTS
     // Fragments
     private val newsPagingFragment = NewsPagingFragment.getInstance()
     // Reference to fragment manager
@@ -72,11 +71,5 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onDestroy() {
-        // Ensure we have no event receivers referenced anymore
-        EventHandler.clearAllReceivers()
-        super.onDestroy()
     }
 }

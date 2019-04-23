@@ -52,10 +52,11 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
             throw Exception("Error invalid activity provided")
         } else {
             // Create presenter and inject news component for NewsAPI elements
-            val newPresenter = NewsPagingPresenter.getInstance()
+            val newPresenter = NewsPagingPresenter()
             (parentActivity.application as App).appComponent.inject(newPresenter)
 
             presenter = newPresenter
+            presenter?.postDependencyInitiation()
             presenter?.initialArticleCheck()
 
             tabsProvider = parentActivity
@@ -137,6 +138,7 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
 
     override fun onDestroy() {
         tabsProvider = null
+        presenter?.breakDown()
         presenter = null
         super.onDestroy()
     }

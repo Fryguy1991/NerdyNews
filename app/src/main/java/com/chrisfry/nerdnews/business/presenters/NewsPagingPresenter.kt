@@ -1,9 +1,7 @@
 package com.chrisfry.nerdnews.business.presenters
 
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.eventhandling.*
-import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
-import com.chrisfry.nerdnews.business.eventhandling.receivers.ArticleRefreshCompleteEventReceiver
+import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.network.INewsApi
 
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
@@ -11,20 +9,18 @@ import com.chrisfry.nerdnews.model.IArticleListsModel
 
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
 import com.chrisfry.nerdnews.utils.LogUtils
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import javax.inject.Inject
 
 /**
  * Presenter for displaying a view that displays a paging list for news article types.
  * This presenters handles article refresh events that will come from the UI.
  */
-class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresenter.INewsPagingView>(),
-    INewsPagingPresenter, ArticleRefreshCompleteEventReceiver {
+class NewsPagingPresenter : BasePresenter<NewsPagingPresenter.INewsPagingView>(), INewsPagingPresenter {
     companion object {
         private val TAG = NewsPagingPresenter::class.java.simpleName
-
-        fun getInstance(): NewsPagingPresenter {
-            return NewsPagingPresenter()
-        }
     }
 
     // Instance for model containing article lists to be displayed
@@ -35,11 +31,13 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     lateinit var newsApiInstance: INewsApi
     // Flag indicating if an article refresh is in progress
     private var refreshInProgressFlag = false
+    // Event bus for receiving events from changed data
+    @Inject
+    lateinit var eventBus: EventBus
 
-    init {
-        // TODO: Replace event handler
-        // Add presenter to event receiver list (RequestMoreArticleEventReceiver)
-        EventHandler.addEventReceiver(this)
+    override fun postDependencyInitiation() {
+        // Register for events
+        eventBus.register(this)
     }
 
     override fun initialArticleCheck() {
@@ -65,6 +63,11 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         super.detach()
     }
 
+    override fun breakDown() {
+        eventBus.unregister(this)
+    }
+
+
     override fun requestArticleRefresh() {
         LogUtils.debug(TAG, "View requested article refresh")
 
@@ -74,26 +77,25 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
         }
     }
 
-    override fun onReceive(event: BaseEvent) {
-        when (event) {
-            is ArticleRefreshCompleteEvent -> {
-                refreshInProgressFlag = false
-                getView()?.displayRefreshing(false)
+    /**
+     * Method for handling RefreshCompleteEvents
+     *
+     * @param event: Event notifying us that article data has been refreshed
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onRefreshEvent(event: RefreshCompleteEvent) {
+        refreshInProgressFlag = false
+        getView()?.displayRefreshing(false)
 
-                // If any of our model lists are not empty consider refresh as "successful"
-                for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-                    if (articleModelInstance.getArticleList(articleType).isNotEmpty()) {
-                        getView()?.refreshingComplete()
-                        return
-                    }
-                }
-                // If all our model lists are empty consider our refresh as "failed"
-                getView()?.refreshingFailed()
-            }
-            else -> {
-                LogUtils.error(TAG, "Not handling this event here: ${event::class.java.simpleName}")
+        // If any of our model lists are not empty consider refresh as "successful"
+        for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+            if (articleModelInstance.getArticleList(articleType).isNotEmpty()) {
+                getView()?.refreshingComplete()
+                return
             }
         }
+        // If all our model lists are empty consider our refresh as "failed"
+        getView()?.refreshingFailed()
     }
 
     private fun isRefreshInProgress(): Boolean {

@@ -1,6 +1,7 @@
 package com.chrisfry.nerdnews.business.dagger.components
 
 import com.chrisfry.nerdnews.business.dagger.modules.ArticleModelModule
+import com.chrisfry.nerdnews.business.dagger.modules.EventModule
 import com.chrisfry.nerdnews.business.dagger.modules.NewsModule
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
 import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
@@ -9,7 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 @Component (
-    modules = [NewsModule::class, ArticleModelModule::class]
+    modules = [NewsModule::class, ArticleModelModule::class, EventModule::class]
 )
 interface AppComponent {
     fun inject(newsPagingPresenter: NewsPagingPresenter)

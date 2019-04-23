@@ -28,4 +28,12 @@ open class BasePresenter<T : IView> : IBasePresenter<T> {
     protected fun getView(): T? {
         return presenterView
     }
+
+    override fun postDependencyInitiation() {
+        // Nothing to do here, but allow children to override
+    }
+
+    override fun breakDown() {
+        // Nothing to do here, but allow children to override
+    }
 }
