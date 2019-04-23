@@ -4,15 +4,14 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentManager
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.userinterface.fragments.NewsPagingFragment
 import com.chrisfry.nerdnews.R
-import com.chrisfry.nerdnews.business.eventhandling.EventHandler
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
 import com.chrisfry.nerdnews.utils.LogUtils
-import com.google.android.material.tabs.TabLayout
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.toolbar_layout.*
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity(), ITabsProvider {
@@ -20,13 +19,9 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         private val TAG = MainActivity::class.java.simpleName
     }
 
-    // UI ELEMENTS
+    // FRAGMENT ELEMENTS
     // Fragments
     private val newsPagingFragment = NewsPagingFragment.getInstance()
-    // Reference to app toolbar
-    private lateinit var toolbar: Toolbar
-    // Tabs for displaying article type
-    private lateinit var tabLayout: TabLayout
     // Reference to fragment manager
     private lateinit var fragmentManager: FragmentManager
 
@@ -36,10 +31,7 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         setContentView(R.layout.activity_main)
 
         // Set toolbar as app action bar
-        toolbar = findViewById(R.id.app_toolbar)
-        setSupportActionBar(toolbar)
-
-        tabLayout = findViewById(R.id.tab_layout_article_types)
+        setSupportActionBar(app_toolbar)
 
         // Ensure we have the correct layout before attempting to add fragment
         if (findViewById<View>(R.id.frag_placeholder) == null) {
@@ -60,12 +52,12 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
 
     override fun setupTabs(viewPager: ViewPager) {
         LogUtils.debug(TAG, "Setting up tabs with fragment view pager")
-        tabLayout.setupWithViewPager(viewPager)
-        tabLayout.visibility = View.VISIBLE
+        tab_layout_article_types.setupWithViewPager(viewPager)
+        tab_layout_article_types.visibility = View.VISIBLE
     }
 
     override fun hideTabs() {
-        tabLayout.visibility = View.GONE
+        tab_layout_article_types.visibility = View.GONE
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -79,11 +71,5 @@ class MainActivity : AppCompatActivity(), ITabsProvider {
         }
 
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onDestroy() {
-        // Ensure we have no event receivers referenced anymore
-        EventHandler.clearAllReceivers()
-        super.onDestroy()
     }
 }

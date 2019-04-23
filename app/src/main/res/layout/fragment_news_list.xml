@@ -3,6 +3,19 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
+    <TextView
+            android:id="@+id/tv_no_articles_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/medium_text"
+            android:textStyle="bold"
+            android:text="@string/no_articles_message"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="@dimen/default_margin"
+            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:visibility="gone"/>
+
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_news_list"
             android:layout_width="match_parent"

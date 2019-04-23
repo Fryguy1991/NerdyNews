@@ -2,8 +2,7 @@ package com.chrisfry.nerdnews.tests.presenters
 
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.eventhandling.EventHandler
-import com.chrisfry.nerdnews.business.eventhandling.events.ArticleRefreshCompleteEvent
+import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
 import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.ArticleListPresenter
@@ -14,6 +13,8 @@ import com.chrisfry.nerdnews.model.ArticleSource
 import com.chrisfry.nerdnews.model.IArticleListsModel
 import com.chrisfry.nerdnews.tests.BaseTest
 import com.nhaarman.mockitokotlin2.capture
+import org.greenrobot.eventbus.EventBus
+import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.*
@@ -41,6 +42,8 @@ class ArticleListPresenterTest : BaseTest() {
     // Capture object for seeing what articles are passed to view
     @Captor
     private lateinit var articleListCaptor: ArgumentCaptor<List<ArticleDisplayModel>>
+    // Mock for interacting with event bus
+    private var mockEventBus = EventBus.getDefault()
 
     override fun setUp() {
         super.setUp()
@@ -52,17 +55,19 @@ class ArticleListPresenterTest : BaseTest() {
         // Not priority tho as function is the same no matter the article type
 
         // Instantiate presenter
-        val presenter = ArticleListPresenter.getInstance(ArticleDisplayType.TECH)
+        val presenter = ArticleListPresenter(ArticleDisplayType.TECH)
         presenter.articleModelInstance = mockArticleModel
         presenter.newsApiInstance = mockNewsApi
+        presenter.eventBus = mockEventBus
+        presenter.postDependencyInitiation()
 
         articleListPresenter = presenter
     }
 
-    override fun tearDown() {
-        super.tearDown()
-
+    @After
+    fun tearDown() {
         articleListPresenter?.detach()
+        articleListPresenter?.breakDown()
     }
 
     @Test
@@ -158,7 +163,7 @@ class ArticleListPresenterTest : BaseTest() {
         presenter.requestMoreArticles()
 
         // Notify presenter more articles are available
-        EventHandler.broadcast(MoreArticleEvent(ArticleDisplayType.TECH))
+        mockEventBus.post(MoreArticleEvent(ArticleDisplayType.TECH))
 
         // View should be displaying 100 articles
         verify(mockArticleListView, never()).noMoreArticlesAvailable()
@@ -174,7 +179,7 @@ class ArticleListPresenterTest : BaseTest() {
             // Simulate view requesting more articles
             presenter.requestMoreArticles()
             // Notify presenter more articles are available
-            EventHandler.broadcast(MoreArticleEvent(ArticleDisplayType.TECH))
+            mockEventBus.post(MoreArticleEvent(ArticleDisplayType.TECH))
 
             // View should be displaying i * 50 articles
             verify(mockArticleListView, never()).noMoreArticlesAvailable()
@@ -212,7 +217,7 @@ class ArticleListPresenterTest : BaseTest() {
         `when`(mockArticleModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(fakeArticleList)
 
         // Simulate refresh complete event
-        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+        mockEventBus.post(RefreshCompleteEvent())
 
         // View should be displaying the 20 new fake articles
         // (presenter receives event and since the view is attached pushes data to view)
@@ -253,7 +258,7 @@ class ArticleListPresenterTest : BaseTest() {
         // Simulate view requesting more articles
         presenter.requestMoreArticles()
         // Notify presenter more articles are available
-        EventHandler.broadcast(MoreArticleEvent(ArticleDisplayType.TECH))
+        mockEventBus.post(MoreArticleEvent(ArticleDisplayType.TECH))
 
         // View should be displaying 100 articles
         verify(mockArticleListView, never()).noMoreArticlesAvailable()
@@ -264,7 +269,7 @@ class ArticleListPresenterTest : BaseTest() {
         // Simulate view requesting more articles
         presenter.requestMoreArticles()
         // Notify presenter more articles are available (even though there aren't)
-        EventHandler.broadcast(MoreArticleEvent(ArticleDisplayType.TECH))
+        mockEventBus.post(MoreArticleEvent(ArticleDisplayType.TECH))
 
         // View should still be displaying 100 articles, no more articles available should have been called
         verify(mockArticleListView, times(1)).noMoreArticlesAvailable()
@@ -278,7 +283,7 @@ class ArticleListPresenterTest : BaseTest() {
             // Simulate view requesting more articles
             presenter.requestMoreArticles()
             // Notify presenter more articles are available (even though there aren't)
-            EventHandler.broadcast(MoreArticleEvent(ArticleDisplayType.TECH))
+            mockEventBus.post(MoreArticleEvent(ArticleDisplayType.TECH))
 
             // View should still be displaying 100 articles, no more articles available should have been called
             verify(mockArticleListView, times(i)).noMoreArticlesAvailable()
@@ -366,29 +371,5 @@ class ArticleListPresenterTest : BaseTest() {
                 Assert.assertNotEquals(demoData.publishedAt, viewData.publishedAt)
             }
         }
-    }
-
-    /**
-     * Function for getting a fake list of articles
-     *
-     * @param count: Number of fake articles we want
-     */
-    private fun getFakeArticleModelList(count: Int): MutableList<Article> {
-        val articleList = mutableListOf<Article>()
-        for (i: Int in 0 until count) {
-            val articleModel = Article(
-                ArticleSource(i.toString(), "Source $i"),
-                "Author $i",
-                "Title $i",
-                "Description $i",
-                "URL $i",
-                "Image URL $i",
-                "Published At $i",
-                "Article Content $i"
-            )
-            articleList.add(articleModel)
-        }
-
-        return articleList
     }
 }

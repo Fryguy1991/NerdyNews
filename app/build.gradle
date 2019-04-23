@@ -73,4 +73,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.27.0'
     // Mockito with Kotlin
     testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0'
+
+    // GreenRobot (Event Bus)
+    implementation 'org.greenrobot:eventbus:3.1.1'
 }

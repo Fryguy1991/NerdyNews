@@ -21,6 +21,7 @@ import com.chrisfry.nerdnews.userinterface.interfaces.ArticleSelectionListener
 import com.chrisfry.nerdnews.userinterface.widgets.GridLayoutDecorator
 import com.chrisfry.nerdnews.userinterface.widgets.LinearLayoutDecorator
 import com.chrisfry.nerdnews.utils.LogUtils
+import kotlinx.android.synthetic.main.fragment_news_list.*
 import java.lang.Exception
 
 class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, ArticleSelectionListener{
@@ -48,7 +49,6 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     private var presenter: IArticleListPresenter? = null
 
     // RecyclerView elements
-    private lateinit var newsRecyclerView: RecyclerView
     private val articleAdapter = ArticleRecyclerViewAdapter(this)
     private lateinit var layoutManager: RecyclerView.LayoutManager
 
@@ -96,12 +96,13 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
                 throw Exception("$TAG: Error invalid article type ordinal provided")
             } else {
                 articleType = ArticleDisplayType.values()[typeOrdinal]
-                val newPresenter = ArticleListPresenter.getInstance(articleType)
+                val newPresenter = ArticleListPresenter(articleType)
                 val parentActivity = activity
                 if (parentActivity != null) {
                     (parentActivity.application as App).appComponent.inject(newPresenter)
                 }
                 presenter = newPresenter
+                presenter?.postDependencyInitiation()
             }
         }
     }
@@ -112,17 +113,14 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Initiate UI elements
-        newsRecyclerView = view.findViewById(R.id.recycler_view_news_list)
-
         // Set adapter to recycler view
         articleAdapter.listener = this
-        newsRecyclerView.adapter = articleAdapter
+        recycler_view_news_list.adapter = articleAdapter
 
         // Add listener for scroll events
-        newsRecyclerView.addOnScrollListener(NewsScrollListener())
+        recycler_view_news_list.addOnScrollListener(NewsScrollListener())
         // Set contentDescription (used for testing)
-        newsRecyclerView.contentDescription = "${articleType}_recycler_view"
+        recycler_view_news_list.contentDescription = "${articleType}_recycler_view"
 
         val currentContext = context
         if (currentContext != null) {
@@ -150,14 +148,14 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
 
     private fun setupLinearRecyclerView(currentContext: Context) {
         layoutManager = LinearLayoutManager(currentContext, RecyclerView.VERTICAL, false)
-        newsRecyclerView.layoutManager = layoutManager
-        newsRecyclerView.addItemDecoration(LinearLayoutDecorator())
+        recycler_view_news_list.layoutManager = layoutManager
+        recycler_view_news_list.addItemDecoration(LinearLayoutDecorator())
     }
 
     private fun setupGridRecyclerView(currentContext: Context) {
         layoutManager = GridLayoutManager(currentContext, AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT)
-        newsRecyclerView.layoutManager = layoutManager
-        newsRecyclerView.addItemDecoration(GridLayoutDecorator())
+        recycler_view_news_list.layoutManager = layoutManager
+        recycler_view_news_list.addItemDecoration(GridLayoutDecorator())
     }
 
     override fun onDestroyView() {
@@ -166,16 +164,21 @@ class ArticleListFragment : Fragment(), ArticleListPresenter.IArticleListView, A
     }
 
     override fun onDestroy() {
+        presenter?.breakDown()
         presenter = null
         super.onDestroy()
     }
 
     override fun displayArticles(articles: List<ArticleDisplayModel>) {
         articleAdapter.updateAdapter(articles)
+
+        recycler_view_news_list.visibility = View.VISIBLE
+        tv_no_articles_message.visibility = View.GONE
     }
 
     override fun displayNoArticles() {
-        articleAdapter.updateAdapter(listOf())
+        recycler_view_news_list.visibility = View.GONE
+        tv_no_articles_message.visibility = View.VISIBLE
     }
 
     override fun noMoreArticlesAvailable() {

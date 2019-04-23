@@ -8,7 +8,6 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import com.chrisfry.nerdnews.R
 import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
@@ -16,6 +15,7 @@ import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.userinterface.App
 import com.chrisfry.nerdnews.userinterface.adapters.NewsPagerAdapter
 import com.chrisfry.nerdnews.userinterface.interfaces.ITabsProvider
+import kotlinx.android.synthetic.main.fragment_news_pager.*
 import java.lang.Exception
 
 /**
@@ -35,13 +35,10 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
 
     // Presenter that provides list of news articles
     private var presenter: INewsPagingPresenter? = null
-    // ViewPager elements
-    private lateinit var newsListViewPager: ViewPager
+    // ViewPager adapter
     private lateinit var newsPagerAdapter: NewsPagerAdapter
     // Reference responsible for providing tabs to the ViewPager
     private var tabsProvider: ITabsProvider? = null
-    // Swipe refresh layout containing ViewPager
-    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -55,10 +52,11 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
             throw Exception("Error invalid activity provided")
         } else {
             // Create presenter and inject news component for NewsAPI elements
-            val newPresenter = NewsPagingPresenter.getInstance()
+            val newPresenter = NewsPagingPresenter()
             (parentActivity.application as App).appComponent.inject(newPresenter)
 
             presenter = newPresenter
+            presenter?.postDependencyInitiation()
             presenter?.initialArticleCheck()
 
             tabsProvider = parentActivity
@@ -98,10 +96,6 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Retrieve UI elements
-        newsListViewPager = view.findViewById(R.id.view_pager_news)
-        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_news_pager)
-
         // Set swipe refresh color
         val currentContext = context
         val colorResoureId: Int
@@ -110,10 +104,10 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
         } else {
             resources.getColor(R.color.colorAccent)
         }
-        swipeRefreshLayout.setColorSchemeColors(colorResoureId)
+        swipe_refresh_news_pager.setColorSchemeColors(colorResoureId)
 
         // When swipe down to refresh is activated request article refresh from presenter
-        swipeRefreshLayout.setOnRefreshListener {
+        swipe_refresh_news_pager.setOnRefreshListener {
             presenter?.requestArticleRefresh()
         }
 
@@ -121,13 +115,13 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
         val fragManager = childFragmentManager
         if (currentContext != null) {
             newsPagerAdapter = NewsPagerAdapter(fragManager, currentContext)
-            newsListViewPager.adapter = newsPagerAdapter
+            view_pager_news.adapter = newsPagerAdapter
 
-            newsListViewPager.addOnPageChangeListener(this)
+            view_pager_news.addOnPageChangeListener(this)
 
             // Inform Activity tabs to setup with viewpager
             // TODO: These tabs should be in the fragment but due to shadow issues (elevation) tabs are in MainActivity layout
-            tabsProvider?.setupTabs(newsListViewPager)
+            tabsProvider?.setupTabs(view_pager_news)
 
             // Fragment view has been created, attach to presenter
             presenter?.attach(this)
@@ -144,6 +138,7 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
 
     override fun onDestroy() {
         tabsProvider = null
+        presenter?.breakDown()
         presenter = null
         super.onDestroy()
     }
@@ -151,7 +146,7 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
     // PAGE CHANGE LISTENER METHODS
     override fun onPageScrollStateChanged(state: Int) {
         // Don't allow swipe to refresh if paging
-        swipeRefreshLayout.isEnabled = state == ViewPager.SCROLL_STATE_IDLE
+        swipe_refresh_news_pager.isEnabled = state == ViewPager.SCROLL_STATE_IDLE
     }
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
@@ -163,13 +158,20 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
     }
 
     override fun displayRefreshing(isRefreshing: Boolean) {
-        swipeRefreshLayout.isRefreshing = isRefreshing
+        swipe_refresh_news_pager.isRefreshing = isRefreshing
     }
 
     override fun refreshingComplete() {
         val currentContext = context
         if (currentContext != null) {
             Toast.makeText(currentContext, R.string.toast_articles_refreshed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun refreshingFailed() {
+        val currentContext = context
+        if (currentContext != null) {
+            Toast.makeText(currentContext, R.string.toast_refresh_failed, Toast.LENGTH_LONG).show()
         }
     }
 }

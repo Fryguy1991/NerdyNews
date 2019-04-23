@@ -20,4 +20,14 @@ interface IBasePresenter<T: IView> {
      * Removes references of view object from presenter
      */
     fun detach()
+
+    /**
+     * Informs presenter that dependency injection is complete. Allows for any further initiation
+     */
+    fun postDependencyInitiation()
+
+    /**
+     * Informs the presenter that it is about to be destroyed and should start to close
+     */
+    fun breakDown()
 }
