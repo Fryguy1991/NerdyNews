@@ -26,15 +26,17 @@ class LinearLayoutDecorator : RecyclerView.ItemDecoration() {
             }
 
             // Use default margin for top when first item in the adapter, else use half default margin
-            outRect.top = when (childIndex) {
-                0 -> defaultMarginPixels
-                else -> halfDefaultMarginPixels
+            outRect.top = if (childIndex == 0) {
+                defaultMarginPixels
+            } else {
+                halfDefaultMarginPixels
             }
 
             // Use default margin for bottom when last item in the adapter, else use half default margin
-            outRect.bottom = when {
-                totalChildCount > 0 && childIndex == totalChildCount - 1 -> defaultMarginPixels
-                else -> halfDefaultMarginPixels
+            outRect.bottom = if (totalChildCount > 0 && childIndex == totalChildCount - 1) {
+                defaultMarginPixels
+            } else {
+                halfDefaultMarginPixels
             }
         }
     }

@@ -75,8 +75,8 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
     }
 
     override fun onReceive(event: BaseEvent) {
-        when (event is ArticleRefreshCompleteEvent) {
-            true -> {
+        when (event) {
+            is ArticleRefreshCompleteEvent -> {
                 refreshInProgressFlag = false
                 getView()?.displayRefreshing(false)
                 getView()?.refreshingComplete()

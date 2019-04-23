@@ -29,9 +29,10 @@ class GridLayoutDecorator : RecyclerView.ItemDecoration() {
             }
 
             // Use default margin for top items in the adapter, else use half default margin
-            outRect.top = when (childIndex < AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT) {
-                true -> defaultMarginPixels
-                else -> halfDefaultMarginPixels
+            outRect.top = if (childIndex < AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT) {
+                defaultMarginPixels
+            } else {
+                halfDefaultMarginPixels
             }
 
             // Total number of rows
@@ -45,9 +46,10 @@ class GridLayoutDecorator : RecyclerView.ItemDecoration() {
             val firstIndexInLastRow = (rowCount - 1) * AppConstants.LANDSCAPE_ARTICLE_COLUMN_COUNT
 
             // Use default margin for bottom items in the adapter, else use half default margin
-            outRect.bottom = when (childIndex >= firstIndexInLastRow) {
-                true -> defaultMarginPixels
-                false -> halfDefaultMarginPixels
+            outRect.bottom = if (childIndex >= firstIndexInLastRow) {
+                defaultMarginPixels
+            } else {
+                halfDefaultMarginPixels
             }
 
             // Assign left margin to default. Last column right margin is handled by recycler view layout padding
