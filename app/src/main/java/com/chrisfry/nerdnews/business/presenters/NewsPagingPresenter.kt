@@ -41,6 +41,8 @@ class NewsPagingPresenter : BasePresenter<NewsPagingPresenter.INewsPagingView>()
     }
 
     override fun initialArticleCheck() {
+        // TODO: On orientation change if refresh has previously failed this method will be called and a refresh will
+        // be attempted. Suggest adding a variable to the model to indicate that our last refresh failed.
         for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
             // If a list in the model model is empty request article refresh
             if (articleModelInstance.getArticleList(articleType).isEmpty()) {

@@ -15,6 +15,7 @@ class App : Application() {
         super.onCreate()
 
         val articleModelModule = ArticleModelModule()
+        // TODO: Should look into replace event bus pattern (Look into using RxJava)
         val eventModule = EventModule()
         val newsModule = NewsModule(eventModule.provideEventBus())
 
