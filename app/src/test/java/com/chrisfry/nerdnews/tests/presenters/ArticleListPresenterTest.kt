@@ -367,28 +367,4 @@ class ArticleListPresenterTest : BaseTest() {
             }
         }
     }
-
-    /**
-     * Function for getting a fake list of articles
-     *
-     * @param count: Number of fake articles we want
-     */
-    private fun getFakeArticleModelList(count: Int): MutableList<Article> {
-        val articleList = mutableListOf<Article>()
-        for (i: Int in 0 until count) {
-            val articleModel = Article(
-                ArticleSource(i.toString(), "Source $i"),
-                "Author $i",
-                "Title $i",
-                "Description $i",
-                "URL $i",
-                "Image URL $i",
-                "Published At $i",
-                "Article Content $i"
-            )
-            articleList.add(articleModel)
-        }
-
-        return articleList
-    }
 }

@@ -71,6 +71,8 @@ class NewsPagingPresenterTest : BaseTest() {
         val presenter = newsPagingPresenter!!
         presenter.initialArticleCheck()
 
+        setupDummyArticles()
+
         // Attach mock view to presenter
         newsPagingPresenter?.attach(mockNewsPagingView)
 
@@ -103,6 +105,7 @@ class NewsPagingPresenterTest : BaseTest() {
         Assert.assertTrue(booleanCaptor.value)
 
         // Simulate a refresh completing
+        setupDummyArticles()
         EventHandler.broadcast(ArticleRefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
@@ -142,6 +145,7 @@ class NewsPagingPresenterTest : BaseTest() {
         Assert.assertTrue(booleanCaptor.value)
 
         // Simulate a refresh completing
+        setupDummyArticles()
         EventHandler.broadcast(ArticleRefreshCompleteEvent())
 
         // View should no longer be in "refreshing" state
@@ -205,5 +209,81 @@ class NewsPagingPresenterTest : BaseTest() {
         verify(mockNewsPagingView, times(1)).displayRefreshing(booleanCaptor.capture())
         verify(mockNewsPagingView, never()).refreshingComplete()
         Assert.assertFalse(booleanCaptor.value)
+    }
+
+    @Test
+    fun testRefreshFailed() {
+        // Tell presenter to pull initial article list
+        val presenter = newsPagingPresenter!!
+        presenter.initialArticleCheck()
+
+        // Attach mock view to presenter
+        newsPagingPresenter?.attach(mockNewsPagingView)
+
+        // Haven't simulated refresh complete, view should still be in refreshing state
+        verify(mockNewsPagingView, times(1)).displayRefreshing(booleanCaptor.capture())
+        verify(mockNewsPagingView, never()).refreshingComplete()
+        verify(mockNewsPagingView, never()).refreshingFailed()
+        Assert.assertTrue(booleanCaptor.value)
+
+        // Simulate a refresh completing without setting up dummy data
+        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+
+        // View should no longer be in "refreshing" state
+        verify(mockNewsPagingView, times(2)).displayRefreshing(booleanCaptor.capture())
+        verify(mockNewsPagingView, never()).refreshingComplete()
+        verify(mockNewsPagingView, times(1)).refreshingFailed()
+        Assert.assertFalse(booleanCaptor.value)
+
+        // Now let's simulate the view requesting a refresh successfully
+        presenter.requestArticleRefresh()
+
+        // Haven't simulated refresh complete, view should be in refreshing state
+        verify(mockNewsPagingView, times(3)).displayRefreshing(booleanCaptor.capture())
+        verify(mockNewsPagingView, never()).refreshingComplete()
+        verify(mockNewsPagingView, times(1)).refreshingFailed()
+        Assert.assertTrue(booleanCaptor.value)
+
+        // Simulate a refresh complete event
+        setupDummyArticles()
+        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+
+        // View should no longer be in "refreshing" state
+        verify(mockNewsPagingView, times(4)).displayRefreshing(booleanCaptor.capture())
+        verify(mockNewsPagingView, times(1)).refreshingComplete()
+        verify(mockNewsPagingView, times(1)).refreshingFailed()
+        Assert.assertFalse(booleanCaptor.value)
+
+        // Now let's simulate the view requesting a refresh and it failing again
+        presenter.requestArticleRefresh()
+
+        // Haven't simulated refresh complete, view should be in refreshing state
+        verify(mockNewsPagingView, times(5)).displayRefreshing(booleanCaptor.capture())
+        verify(mockNewsPagingView, times(1)).refreshingComplete()
+        verify(mockNewsPagingView, times(1)).refreshingFailed()
+        Assert.assertTrue(booleanCaptor.value)
+
+        // Setup a failed refresh
+        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(mutableListOf())
+        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(mutableListOf())
+        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(mutableListOf())
+
+        // Simulate a refresh complete event
+        EventHandler.broadcast(ArticleRefreshCompleteEvent())
+
+        // View should no longer be in "refreshing" state, and should have called refreshing failed
+        verify(mockNewsPagingView, times(6)).displayRefreshing(booleanCaptor.capture())
+        verify(mockNewsPagingView, times(1)).refreshingComplete()
+        verify(mockNewsPagingView, times(2)).refreshingFailed()
+        Assert.assertFalse(booleanCaptor.value)
+    }
+
+
+    private fun setupDummyArticles() {
+        // Setup mock model to return some dummy data
+        val dummyArticles = getFakeArticleModelList(10)
+        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(dummyArticles)
+        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(dummyArticles)
+        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(dummyArticles)
     }
 }
