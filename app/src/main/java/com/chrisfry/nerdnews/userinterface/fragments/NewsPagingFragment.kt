@@ -172,4 +172,11 @@ class NewsPagingFragment : Fragment(), NewsPagingPresenter.INewsPagingView, View
             Toast.makeText(currentContext, R.string.toast_articles_refreshed, Toast.LENGTH_LONG).show()
         }
     }
+
+    override fun refreshingFailed() {
+        val currentContext = context
+        if (currentContext != null) {
+            Toast.makeText(currentContext, R.string.toast_refresh_failed, Toast.LENGTH_LONG).show()
+        }
+    }
 }

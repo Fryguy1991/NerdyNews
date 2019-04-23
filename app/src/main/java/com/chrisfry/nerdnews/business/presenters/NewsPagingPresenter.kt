@@ -79,7 +79,16 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
             is ArticleRefreshCompleteEvent -> {
                 refreshInProgressFlag = false
                 getView()?.displayRefreshing(false)
-                getView()?.refreshingComplete()
+
+                // If any of our model lists are not empty consider refresh as "successful"
+                for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                    if (articleModelInstance.getArticleList(articleType).isNotEmpty()) {
+                        getView()?.refreshingComplete()
+                        return
+                    }
+                }
+                // If all our model lists are empty consider our refresh as "failed"
+                getView()?.refreshingFailed()
             }
             else -> {
                 LogUtils.error(TAG, "Not handling this event here: ${event::class.java.simpleName}")
@@ -112,5 +121,10 @@ class NewsPagingPresenter private constructor() : BasePresenter<NewsPagingPresen
          * View should indicate that an article refresh has been completed
          */
         fun refreshingComplete()
+
+        /**
+         * View should indicate that an article refresh has failed
+         */
+        fun refreshingFailed()
     }
 }

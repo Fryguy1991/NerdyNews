@@ -1,5 +1,6 @@
 package com.chrisfry.nerdnews.business.network
 
+import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.model.ResponseError
 import com.chrisfry.nerdnews.utils.LogUtils
 import com.google.gson.Gson
@@ -50,6 +51,8 @@ abstract class NewsCallback<T> : Callback<T> {
 
     override fun onFailure(call: Call<T>, t: Throwable) {
         LogUtils.error(TAG, "Error: ${t.message}")
+
+        onFailure(ResponseError(AppConstants.ERROR_STATUS, AppConstants.ERROR_CODE, t.message.toString()))
     }
 
     abstract fun onResponse(response: T)

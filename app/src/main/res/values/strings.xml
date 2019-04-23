@@ -13,9 +13,12 @@
     <string name="toast_invalid_article_message">Article Can\'t Be Displayed</string>
     <string name="toast_articles_refreshed">Articles Refreshed</string>
     <string name="toast_no_more_articles_available">No More Articles, Refresh To Update</string>
+    <string name="toast_refresh_failed">Article Refresh Failed</string>
 
     <!-- Menu Item Strings -->
     <string name="menu_refresh_title">Refresh</string>
 
     <string name="view_full_article">View Full Article</string>
+
+    <string name="no_articles_message">No Articles To Display.\nTry Refreshing.</string>
 </resources>

@@ -7,5 +7,8 @@ class AppConstants {
 
         const val LANDSCAPE_ARTICLE_COLUMN_COUNT = 3
         const val KEY_ARGS_ARTICLE = "key_args_article"
+
+        const val ERROR_STATUS = "error"
+        const val ERROR_CODE = "ERR"
     }
 }
