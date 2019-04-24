@@ -90,36 +90,6 @@ class ArticleItemPresenterTest : BaseTest() {
     }
 
     @Test
-    fun testAttachWithEmptyArticle() {
-        // Create empty article model and load it into presenter
-        val emptyArticle = ArticleDisplayModel(
-            AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING,
-            AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING, AppConstants.EMPTY_STRING,
-            AppConstants.EMPTY_STRING
-        )
-
-        val presenter: IArticleItemPresenter = ArticleItemPresenter(emptyArticle)
-
-        // Attach view to presenter
-        presenter.attach(mockArticleItemView)
-
-        // Capture data that was sent to view
-        verify(mockArticleItemView, never()).displaySourceName(capture(stringCaptor))
-        verify(mockArticleItemView, never()).displayTitle(capture(stringCaptor))
-        verify(mockArticleItemView, never()).displayImage(capture(stringCaptor))
-        verify(mockArticleItemView, never()).displayAuthor(capture(stringCaptor))
-        verify(mockArticleItemView, never()).displayPublishedAt(capture(stringCaptor))
-        verify(mockArticleItemView, never()).displayContent(capture(stringCaptor))
-        verify(mockArticleItemView, never()).displayLinkToArticle(capture(stringCaptor))
-
-        // View should have only been sent empty strings since article model was not set, view should also be closing
-        for (value: String in stringCaptor.allValues) {
-            Assert.assertEquals(AppConstants.EMPTY_STRING, value)
-        }
-        verify(mockArticleItemView, times(1)).closeView()
-    }
-
-    @Test
     fun testAttachWithNormalArticles() {
         var presenter: IArticleItemPresenter = ArticleItemPresenter(normalArticle1)
 

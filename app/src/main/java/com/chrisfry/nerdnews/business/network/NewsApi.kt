@@ -6,6 +6,7 @@ import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
 import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.events.MoreArticleEvent
+import com.chrisfry.nerdnews.model.Article
 import com.chrisfry.nerdnews.model.ArticleListsModel
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError
@@ -180,8 +181,14 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
             LogUtils.debug(TAG, "Successfully retrieved $articleDisplayType articles")
+            // Pull out any empty articles (all null or empty values)
+            // Not sure if this case is possible, but there is no documentation in NewsAPI to suggest it is impossible
+            val nonNullArticles = response.articles.filter {
+                !isArticleEmpty(it)
+            }
+
             // Set articles into model
-            articleModelInstance.setArticleList(articleDisplayType, response.articles)
+            articleModelInstance.setArticleList(articleDisplayType, nonNullArticles)
             // Store page count into model (first page due to refresh)
             articleModelInstance.setPageCount(articleDisplayType, 1)
 
@@ -208,8 +215,14 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
             LogUtils.debug(TAG, "Successfully retrieved more $articleDisplayType articles")
+            // Pull out any empty articles (all null or empty values)
+            // Not sure if this case is possible, but there is no documentation in NewsAPI to suggest it is impossible
+            val nonNullArticles = response.articles.filter {
+                !isArticleEmpty(it)
+            }
+
             // Set articles into model
-            articleModelInstance.addToArticleList(articleDisplayType, response.articles)
+            articleModelInstance.addToArticleList(articleDisplayType, nonNullArticles)
             // Store page count into model (old page count + 1)
             articleModelInstance.setPageCount(articleDisplayType, articleModelInstance.getPageCount(articleDisplayType) + 1)
 
@@ -224,5 +237,19 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
             // Broadcast that more articles have been retrieved (actual check for this is in ArticleListPresenter)
             eventBus.post(MoreArticleEvent(articleDisplayType))
         }
+    }
+
+    /**
+     * Method to check if an article is empty
+     *
+     * @param modelToCheck: Model we want to verify is null or not
+     * @return: Boolean indicating if the model is empty (true) or not (false)
+     */
+    private fun isArticleEmpty(modelToCheck: Article): Boolean {
+        return modelToCheck.author.isNullOrEmpty() && modelToCheck.source.name.isNullOrEmpty()
+                && modelToCheck.source.id.isNullOrEmpty() && modelToCheck.publishedAt.isNullOrEmpty()
+                && modelToCheck.title.isNullOrEmpty() && modelToCheck.content.isNullOrEmpty()
+                && modelToCheck.description.isNullOrEmpty() && modelToCheck.url.isNullOrEmpty()
+                && modelToCheck.urlToImage.isNullOrEmpty()
     }
 }
