@@ -1,6 +1,5 @@
 package com.chrisfry.nerdnews.business.presenters
 
-import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.IView

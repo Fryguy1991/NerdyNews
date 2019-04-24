@@ -10,7 +10,7 @@ import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresente
 import com.chrisfry.nerdnews.model.Article
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.model.ArticleSource
-import com.chrisfry.nerdnews.model.IArticleListsModel
+import com.chrisfry.nerdnews.model.IArticleDataModel
 import com.chrisfry.nerdnews.tests.BaseTest
 import com.nhaarman.mockitokotlin2.capture
 import org.greenrobot.eventbus.EventBus
@@ -32,8 +32,8 @@ class ArticleListPresenterTest : BaseTest() {
     private var articleListPresenter: IArticleListPresenter? = null
     // Mock model to test presenter with
     @Mock
-    private lateinit var mockArticleModel: IArticleListsModel
-    // Mock news api object presenter will interract with
+    private lateinit var mockArticleModel: IArticleDataModel
+    // Mock news api object presenter will interact with
     @Mock
     private lateinit var mockNewsApi: INewsApi
     // Mock view object to interact with presenter
@@ -371,5 +371,45 @@ class ArticleListPresenterTest : BaseTest() {
                 Assert.assertNotEquals(demoData.publishedAt, viewData.publishedAt)
             }
         }
+    }
+
+    @Test
+    fun testRefreshInProgress() {
+        // Setup model get article list method to return 50 fake articles and refresh in progress
+        val fakeArticleList = getFakeArticleModelList(50)
+        `when`(mockArticleModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(fakeArticleList)
+        `when`(mockArticleModel.isRefreshInProgress()).thenReturn(true)
+
+        val presenter = articleListPresenter!!
+        presenter.attach(mockArticleListView)
+
+        // Nothing happens on attach, values should be default
+        verify(mockArticleListView, never()).noMoreArticlesAvailable()
+        verify(mockArticleListView, never()).displayNoArticles()
+        verify(mockArticleListView, never()).displayArticles(capture(articleListCaptor))
+
+        // Simulate view requesting articles
+        presenter.requestArticles()
+
+        // Since refresh is in progress in the model our article request should be eaten
+        verify(mockArticleListView, never()).displayArticles(capture(articleListCaptor))
+
+        // Try ~1000 more times to ensure our calls aren't getting through
+        for(i in 0  until 1000) {
+            presenter.requestArticles()
+
+            // Since refresh is in progress in the model our article request should be eaten
+            verify(mockArticleListView, never()).displayArticles(capture(articleListCaptor))
+        }
+
+        // Change mock model to "not" have a refresh in progress
+        `when`(mockArticleModel.isRefreshInProgress()).thenReturn(false)
+
+        // Simulate view requesting articles
+        presenter.requestArticles()
+
+        // Since refresh is no longer in progress we view should receive the 50 fake articles to display
+        verify(mockArticleListView, times(1)).displayArticles(capture(articleListCaptor))
+        Assert.assertEquals(50, articleListCaptor.value.size)
     }
 }

@@ -6,10 +6,7 @@ import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
 import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.events.MoreArticleEvent
-import com.chrisfry.nerdnews.model.Article
-import com.chrisfry.nerdnews.model.ArticleListsModel
-import com.chrisfry.nerdnews.model.ArticleResponse
-import com.chrisfry.nerdnews.model.ResponseError
+import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.utils.LogUtils
 import okhttp3.OkHttpClient
 import org.greenrobot.eventbus.EventBus
@@ -21,6 +18,8 @@ import javax.inject.Singleton
 
 /**
  * Api class for requesting article data from NewsAPI
+ *
+ * @param eventBus: Instance of event bus for communicating to presenters
  */
 @Singleton
 class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
@@ -38,7 +37,8 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
     // Instance of service class for retrieving article data
     private val service: NewsService
     // Instance of model class for storing article data
-    private val articleModelInstance = ArticleListsModel.getInstance()
+    // Pulling non-interface as we want ONLY NewsAPI to be able to change refreshInProgress and refreshFailed flags
+    private val articleModelInstance = ArticleDataModel.getInstance()
     // Flags indicating if individual refreshes are in progress (used to determine if full refresh is complete)
     private val refreshInProgressFlagList: MutableList<Boolean> = mutableListOf()
 
@@ -60,6 +60,9 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
 
     override fun requestArticleRefresh() {
         LogUtils.debug(TAG, "Refreshing articles")
+
+        // Flag refresh as in progress in model
+        articleModelInstance.refreshInProgress = true
 
         // Flag all refreshes as in progress
         for (i in 0 until refreshInProgressFlagList.size) {
@@ -166,8 +169,17 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         refreshInProgressFlagList[articleDisplayType.ordinal] = false
 
         if (!refreshInProgressFlagList.contains(true)) {
+            // Flag refresh as complete in model
+            articleModelInstance.refreshInProgress = false
             // Notify other presenters (articles lists) that the article refresh is complete
             eventBus.post(RefreshCompleteEvent())
+
+            // Store if refresh failed in the model (if all of our models are empty refresh failed)
+            var didRefreshFail = true
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                didRefreshFail = didRefreshFail && articleModelInstance.getArticleList(articleType).isEmpty()
+            }
+            articleModelInstance.didLastRefreshFail = didRefreshFail
         }
     }
 

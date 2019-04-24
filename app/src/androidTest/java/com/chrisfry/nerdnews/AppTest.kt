@@ -25,7 +25,7 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.userinterface.adapters.holders.ArticleViewHolder
 import kotlinx.android.synthetic.main.fragment_news_list.*
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import com.chrisfry.nerdnews.model.ArticleListsModel
+import com.chrisfry.nerdnews.model.ArticleDataModel
 import org.junit.After
 import org.junit.Assert
 
@@ -48,7 +48,7 @@ class AppTest {
     fun tearDown() {
         // Ensure any pulled article data is erased between tests
         for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
-            ArticleListsModel.getInstance().setArticleList(articleType, listOf())
+            ArticleDataModel.getInstance().setArticleList(articleType, listOf())
         }
     }
 
