@@ -5,7 +5,7 @@ import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 /**
  * Interface for interactions with ArticleListsModel
  */
-interface IArticleListsModel {
+interface IArticleDataModel {
 
     /**
      * Gets a list of requested article data (Article) based on given type
@@ -45,6 +45,21 @@ interface IArticleListsModel {
      * THIS IS NOT ZERO INDEXED FOR NEWSAPI!!!!!!!!!!!!!!!!!!!!!!!!!!
      *
      * @param articleDisplayType: Requested type of article data to add to
+     * @return: Current page count for the given article type
      */
     fun getPageCount(articleDisplayType: ArticleDisplayType): Int
+
+    /**
+     * Gets if an article refresh is currently in progress
+     *
+     * @return: Flag indicating if a refresh is in progress (true) or not (false)
+     */
+    fun isRefreshInProgress(): Boolean
+
+    /**
+     * Gets if our last article refresh failed
+     *
+     * @return: Flag indicating if the last article refresh failed (true) or not (false)
+     */
+    fun didLastRefreshFail(): Boolean
 }

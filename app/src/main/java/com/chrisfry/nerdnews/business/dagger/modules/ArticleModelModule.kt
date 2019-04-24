@@ -1,7 +1,7 @@
 package com.chrisfry.nerdnews.business.dagger.modules
 
-import com.chrisfry.nerdnews.model.ArticleListsModel
-import com.chrisfry.nerdnews.model.IArticleListsModel
+import com.chrisfry.nerdnews.model.ArticleDataModel
+import com.chrisfry.nerdnews.model.IArticleDataModel
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -11,7 +11,7 @@ class ArticleModelModule {
 
     @Provides
     @Singleton
-    fun provideArticleModel(): IArticleListsModel {
-        return ArticleListsModel.getInstance()
+    fun provideArticleModel(): IArticleDataModel {
+        return ArticleDataModel.getInstance()
     }
 }

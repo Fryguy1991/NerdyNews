@@ -7,20 +7,20 @@ import java.lang.Exception
 /**
  * Model which contains lists of article data (based on ArticleDisplayType) to be displayed by the user interface
  */
-class ArticleListsModel: IArticleListsModel {
+class ArticleDataModel: IArticleDataModel {
     companion object {
-        private val TAG = ArticleListsModel::class.java.simpleName
+        private val TAG = ArticleDataModel::class.java.simpleName
 
         @Volatile
-        private var instance: ArticleListsModel? = null
+        private var instance: ArticleDataModel? = null
 
         @Synchronized
-        fun getInstance(): ArticleListsModel {
+        fun getInstance(): ArticleDataModel {
             var currentInstance = instance
             if (currentInstance == null) {
                 // Need to create a new instance of ArticleListModel
                 synchronized(this) {}
-                currentInstance = ArticleListsModel()
+                currentInstance = ArticleDataModel()
                 instance = currentInstance
             }
             return currentInstance
@@ -31,6 +31,10 @@ class ArticleListsModel: IArticleListsModel {
     private val articleLists: List<MutableList<Article>>
     // List of page counts for article lists
     private val pageCounts = mutableListOf<Int>()
+    // Flag indicating if a refresh is in progress
+    var refreshInProgress = false
+    // Flag indicating if the last refresh failed
+    var didLastRefreshFail = false
 
     init {
         val modelList = mutableListOf<MutableList<Article>>()
@@ -111,5 +115,23 @@ class ArticleListsModel: IArticleListsModel {
         } else {
             return pageCounts[articleDisplayType.ordinal]
         }
+    }
+
+    /**
+     * Gets if an article refresh is currently in progress
+     *
+     * @return: Flag indicating if a refresh is in progress (true) or not (false)
+     */
+    override fun isRefreshInProgress(): Boolean {
+        return refreshInProgress
+    }
+
+    /**
+     * Gets if our last article refresh failed
+     *
+     * @return: Flag indicating if the last article refresh failed (true) or not (false)
+     */
+    override fun didLastRefreshFail(): Boolean {
+        return didLastRefreshFail
     }
 }

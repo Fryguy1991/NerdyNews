@@ -1,6 +1,5 @@
 package com.chrisfry.nerdnews.business.presenters
 
-import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleItemPresenter
 import com.chrisfry.nerdnews.model.ArticleDisplayModel
 import com.chrisfry.nerdnews.userinterface.interfaces.IView
@@ -23,25 +22,19 @@ class ArticleItemPresenter (private val articleDisplayModel: ArticleDisplayModel
         LogUtils.debug(TAG, "ArticleItemPresenter is attaching to view")
 
         val articleData = articleDisplayModel
-        when {
-            articleData == null -> {
-                LogUtils.error(TAG, "Article is null, closing item view")
-                getView()?.closeView()
-            }
-            !doesArticleModelContainAnyData(articleData) -> {
-                LogUtils.error(TAG, "Article has no data, closing item view")
-                getView()?.closeView()
-            }
-            else -> {
-                LogUtils.debug(TAG, "Injecting article data into view")
-                getView()?.displaySourceName(articleData.sourceName)
-                getView()?.displayTitle(articleData.title)
-                getView()?.displayImage(articleData.imageUrl)
-                getView()?.displayAuthor(articleData.author)
-                getView()?.displayPublishedAt(articleData.publishedAt)
-                getView()?.displayContent(articleData.articleContent)
-                getView()?.displayLinkToArticle(articleData.articleUrl)
-            }
+
+        if (articleData == null) {
+            LogUtils.error(TAG, "Article is null, closing item view")
+            getView()?.closeView()
+        } else {
+            LogUtils.debug(TAG, "Injecting article data into view")
+            getView()?.displaySourceName(articleData.sourceName)
+            getView()?.displayTitle(articleData.title)
+            getView()?.displayImage(articleData.imageUrl)
+            getView()?.displayAuthor(articleData.author)
+            getView()?.displayPublishedAt(articleData.publishedAt)
+            getView()?.displayContent(articleData.articleContent)
+            getView()?.displayLinkToArticle(articleData.articleUrl)
         }
     }
 
@@ -56,22 +49,6 @@ class ArticleItemPresenter (private val articleDisplayModel: ArticleDisplayModel
         if (article != null) {
             getView()?.navigateToArticleSource(article.articleUrl)
         }
-    }
-
-    /**
-     * Methods that returns false if article object is completely empty (all empty strings)
-     *
-     * @param articleDisplayModel: Article model checking for data
-     * @return False if all elements in model are empty else true
-     */
-    private fun doesArticleModelContainAnyData(articleDisplayModel: ArticleDisplayModel): Boolean {
-        return articleDisplayModel.title != AppConstants.EMPTY_STRING
-                || articleDisplayModel.sourceName != AppConstants.EMPTY_STRING
-                || articleDisplayModel.author != AppConstants.EMPTY_STRING
-                || articleDisplayModel.publishedAt != AppConstants.EMPTY_STRING
-                || articleDisplayModel.imageUrl != AppConstants.EMPTY_STRING
-                || articleDisplayModel.articleUrl != AppConstants.EMPTY_STRING
-                || articleDisplayModel.articleContent != AppConstants.EMPTY_STRING
     }
 
     /**

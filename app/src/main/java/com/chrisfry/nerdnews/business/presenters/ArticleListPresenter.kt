@@ -32,7 +32,7 @@ class ArticleListPresenter(private val articleType: ArticleDisplayType) :
 
     // Instance of article model
     @Inject
-    lateinit var articleModelInstance: IArticleListsModel
+    lateinit var articleModelInstance: IArticleDataModel
     // Instance of news api to make data requests
     @Inject
     lateinit var newsApiInstance: INewsApi
@@ -57,17 +57,18 @@ class ArticleListPresenter(private val articleType: ArticleDisplayType) :
     }
 
     override fun requestArticles() {
-        // TODO: This always displays "no article data" first on screen. If we can detect when a refresh is in progress
-        // we can not display this text during that time.
-
-        // Pull articles from model and convert them for display
-        val modelArticles = articleModelInstance.getArticleList(articleType)
-        // Cache article count
-        cachedArticleCount = modelArticles.size
-        if (modelArticles.isEmpty()) {
-            getView()?.displayNoArticles()
-        } else {
-            getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles.toList()))
+        // Eat article request if refresh is in progress (data will be pushed to view when refresh is complete)
+        // This allows us to NOT show no article data message at app startup
+        if (!articleModelInstance.isRefreshInProgress()) {
+            // Pull articles from model and convert them for display
+            val modelArticles = articleModelInstance.getArticleList(articleType)
+            // Cache article count
+            cachedArticleCount = modelArticles.size
+            if (modelArticles.isEmpty()) {
+                getView()?.displayNoArticles()
+            } else {
+                getView()?.displayArticles(convertArticlesToArticleDisplayModel(modelArticles.toList()))
+            }
         }
     }
 

@@ -7,7 +7,7 @@ import com.chrisfry.nerdnews.business.presenters.NewsPagingPresenter
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
 import com.chrisfry.nerdnews.model.Article
 import com.chrisfry.nerdnews.model.ArticleSource
-import com.chrisfry.nerdnews.model.IArticleListsModel
+import com.chrisfry.nerdnews.model.IArticleDataModel
 import com.chrisfry.nerdnews.tests.BaseTest
 import org.greenrobot.eventbus.EventBus
 import org.junit.*
@@ -36,7 +36,7 @@ class NewsPagingPresenterTest : BaseTest() {
     private lateinit var mockNewsApi: INewsApi
     // Mock model that presenter will use
     @Mock
-    private lateinit var mockArticleListsModel: IArticleListsModel
+    private lateinit var mockArticleDataModel: IArticleDataModel
     // Mock for interacting with event handler
     private var mockEventBus = EventBus.getDefault()
 
@@ -51,7 +51,7 @@ class NewsPagingPresenterTest : BaseTest() {
 
         // Inject mocks into presenter
         presenter.newsApiInstance = mockNewsApi
-        presenter.articleModelInstance = mockArticleListsModel
+        presenter.articleModelInstance = mockArticleDataModel
         presenter.eventBus = mockEventBus
         presenter.postDependencyInitiation()
 
@@ -199,9 +199,9 @@ class NewsPagingPresenterTest : BaseTest() {
             mockArticleList.add(Article(ArticleSource("test", "test"), "test", "test", "test", "test", "test", "test", "test"))
         }
 
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(mockArticleList)
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(mockArticleList)
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(mockArticleList)
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(mockArticleList)
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(mockArticleList)
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(mockArticleList)
 
         // Tell presenter to pull initial article list, they are not empty so a refresh should NOT be started
         val presenter = newsPagingPresenter!!
@@ -269,9 +269,9 @@ class NewsPagingPresenterTest : BaseTest() {
         Assert.assertTrue(booleanCaptor.value)
 
         // Setup a failed refresh
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(mutableListOf())
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(mutableListOf())
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(mutableListOf())
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(mutableListOf())
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(mutableListOf())
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(mutableListOf())
 
         // Simulate a refresh complete event
         mockEventBus.post(RefreshCompleteEvent())
@@ -284,11 +284,48 @@ class NewsPagingPresenterTest : BaseTest() {
     }
 
 
+    @Test
+    fun testLastRefreshFailed() {
+        // Setup model get article list method to return that last refresh failed
+        `when`(mockArticleDataModel.didLastRefreshFail()).thenReturn(true)
+
+        val presenter = newsPagingPresenter!!
+
+        // Attach mock view to presenter
+        newsPagingPresenter?.attach(mockNewsPagingView)
+
+        // Simulate refresh complete
+        mockEventBus.post(RefreshCompleteEvent())
+
+        // Simulate an initial article check
+        presenter.initialArticleCheck()
+
+        // Since last refresh failed, our refresh request should be eaten
+        verify(mockNewsApi, never()).requestArticleRefresh()
+
+        // Try ~1000 more times to ensure our calls aren't getting through
+        for(i in 0  until 1000) {
+            presenter.initialArticleCheck()
+
+            // Since last refresh failed, our refresh request should be eaten
+            verify(mockNewsApi, never()).requestArticleRefresh()
+        }
+
+        // Simulate that our last article refresh was successful
+        `when`(mockArticleDataModel.didLastRefreshFail()).thenReturn(false)
+
+        // Simulate an initial article check
+        presenter.initialArticleCheck()
+
+        // Since last refresh failed, our refresh request should be eaten
+        verify(mockNewsApi, times(1)).requestArticleRefresh()
+    }
+
     private fun setupDummyArticles() {
         // Setup mock model to return some dummy data
         val dummyArticles = getFakeArticleModelList(10)
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(dummyArticles)
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(dummyArticles)
-        `when`(mockArticleListsModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(dummyArticles)
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.TECH)).thenReturn(dummyArticles)
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.SCIENCE)).thenReturn(dummyArticles)
+        `when`(mockArticleDataModel.getArticleList(ArticleDisplayType.GAMING)).thenReturn(dummyArticles)
     }
 }

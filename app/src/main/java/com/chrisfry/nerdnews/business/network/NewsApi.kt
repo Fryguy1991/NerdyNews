@@ -6,9 +6,7 @@ import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
 import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.events.MoreArticleEvent
-import com.chrisfry.nerdnews.model.ArticleListsModel
-import com.chrisfry.nerdnews.model.ArticleResponse
-import com.chrisfry.nerdnews.model.ResponseError
+import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.utils.LogUtils
 import okhttp3.OkHttpClient
 import org.greenrobot.eventbus.EventBus
@@ -20,6 +18,8 @@ import javax.inject.Singleton
 
 /**
  * Api class for requesting article data from NewsAPI
+ *
+ * @param eventBus: Instance of event bus for communicating to presenters
  */
 @Singleton
 class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
@@ -37,7 +37,8 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
     // Instance of service class for retrieving article data
     private val service: NewsService
     // Instance of model class for storing article data
-    private val articleModelInstance = ArticleListsModel.getInstance()
+    // Pulling non-interface as we want ONLY NewsAPI to be able to change refreshInProgress and refreshFailed flags
+    private val articleModelInstance = ArticleDataModel.getInstance()
     // Flags indicating if individual refreshes are in progress (used to determine if full refresh is complete)
     private val refreshInProgressFlagList: MutableList<Boolean> = mutableListOf()
 
@@ -59,6 +60,9 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
 
     override fun requestArticleRefresh() {
         LogUtils.debug(TAG, "Refreshing articles")
+
+        // Flag refresh as in progress in model
+        articleModelInstance.refreshInProgress = true
 
         // Flag all refreshes as in progress
         for (i in 0 until refreshInProgressFlagList.size) {
@@ -165,8 +169,17 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         refreshInProgressFlagList[articleDisplayType.ordinal] = false
 
         if (!refreshInProgressFlagList.contains(true)) {
+            // Flag refresh as complete in model
+            articleModelInstance.refreshInProgress = false
             // Notify other presenters (articles lists) that the article refresh is complete
             eventBus.post(RefreshCompleteEvent())
+
+            // Store if refresh failed in the model (if all of our models are empty refresh failed)
+            var didRefreshFail = true
+            for (articleType: ArticleDisplayType in ArticleDisplayType.values()) {
+                didRefreshFail = didRefreshFail && articleModelInstance.getArticleList(articleType).isEmpty()
+            }
+            articleModelInstance.didLastRefreshFail = didRefreshFail
         }
     }
 
@@ -180,8 +193,14 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
             LogUtils.debug(TAG, "Successfully retrieved $articleDisplayType articles")
+            // Pull out any empty articles (all null or empty values)
+            // Not sure if this case is possible, but there is no documentation in NewsAPI to suggest it is impossible
+            val nonNullArticles = response.articles.filter {
+                !isArticleEmpty(it)
+            }
+
             // Set articles into model
-            articleModelInstance.setArticleList(articleDisplayType, response.articles)
+            articleModelInstance.setArticleList(articleDisplayType, nonNullArticles)
             // Store page count into model (first page due to refresh)
             articleModelInstance.setPageCount(articleDisplayType, 1)
 
@@ -208,8 +227,14 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         NewsCallback<ArticleResponse>() {
         override fun onResponse(response: ArticleResponse) {
             LogUtils.debug(TAG, "Successfully retrieved more $articleDisplayType articles")
+            // Pull out any empty articles (all null or empty values)
+            // Not sure if this case is possible, but there is no documentation in NewsAPI to suggest it is impossible
+            val nonNullArticles = response.articles.filter {
+                !isArticleEmpty(it)
+            }
+
             // Set articles into model
-            articleModelInstance.addToArticleList(articleDisplayType, response.articles)
+            articleModelInstance.addToArticleList(articleDisplayType, nonNullArticles)
             // Store page count into model (old page count + 1)
             articleModelInstance.setPageCount(articleDisplayType, articleModelInstance.getPageCount(articleDisplayType) + 1)
 
@@ -224,5 +249,19 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
             // Broadcast that more articles have been retrieved (actual check for this is in ArticleListPresenter)
             eventBus.post(MoreArticleEvent(articleDisplayType))
         }
+    }
+
+    /**
+     * Method to check if an article is empty
+     *
+     * @param modelToCheck: Model we want to verify is null or not
+     * @return: Boolean indicating if the model is empty (true) or not (false)
+     */
+    private fun isArticleEmpty(modelToCheck: Article): Boolean {
+        return modelToCheck.author.isNullOrEmpty() && modelToCheck.source.name.isNullOrEmpty()
+                && modelToCheck.source.id.isNullOrEmpty() && modelToCheck.publishedAt.isNullOrEmpty()
+                && modelToCheck.title.isNullOrEmpty() && modelToCheck.content.isNullOrEmpty()
+                && modelToCheck.description.isNullOrEmpty() && modelToCheck.url.isNullOrEmpty()
+                && modelToCheck.urlToImage.isNullOrEmpty()
     }
 }
