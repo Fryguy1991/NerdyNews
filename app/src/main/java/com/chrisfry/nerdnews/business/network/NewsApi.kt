@@ -4,8 +4,8 @@ import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
-import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
+import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
+import com.chrisfry.nerdnews.business.events.MoreArticleEvent
 import com.chrisfry.nerdnews.model.ArticleListsModel
 import com.chrisfry.nerdnews.model.ArticleResponse
 import com.chrisfry.nerdnews.model.ResponseError

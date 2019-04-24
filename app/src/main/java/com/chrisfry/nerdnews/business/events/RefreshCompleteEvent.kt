@@ -1,4 +1,4 @@
-package com.chrisfry.nerdnews.business.eventhandling.events
+package com.chrisfry.nerdnews.business.events
 
 /**
  * Event for broadcasting when article data has been refreshed

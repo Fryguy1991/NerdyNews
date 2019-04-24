@@ -3,8 +3,8 @@ package com.chrisfry.nerdnews.business.presenters
 import android.annotation.SuppressLint
 import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
-import com.chrisfry.nerdnews.business.eventhandling.events.MoreArticleEvent
+import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
+import com.chrisfry.nerdnews.business.events.MoreArticleEvent
 import com.chrisfry.nerdnews.business.network.INewsApi
 import com.chrisfry.nerdnews.business.presenters.interfaces.IArticleListPresenter
 import com.chrisfry.nerdnews.model.*
@@ -95,7 +95,7 @@ class ArticleListPresenter(private val articleType: ArticleDisplayType) :
     /**
      * Method for handling MoreArticleEvents
      *
-     * @param event: Event notfying us that we have received more articles. Event object contains article type.
+     * @param event: Event notifying us that we have received more articles. Event object contains article type.
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMoreArticleEvent(event: MoreArticleEvent) {

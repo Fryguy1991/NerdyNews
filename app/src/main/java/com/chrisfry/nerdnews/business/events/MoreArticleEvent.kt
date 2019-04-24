@@ -1,4 +1,4 @@
-package com.chrisfry.nerdnews.business.eventhandling.events
+package com.chrisfry.nerdnews.business.events
 
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 

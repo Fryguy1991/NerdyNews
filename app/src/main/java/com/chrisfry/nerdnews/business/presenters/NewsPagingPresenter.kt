@@ -1,7 +1,7 @@
 package com.chrisfry.nerdnews.business.presenters
 
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
-import com.chrisfry.nerdnews.business.eventhandling.events.RefreshCompleteEvent
+import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.network.INewsApi
 
 import com.chrisfry.nerdnews.business.presenters.interfaces.INewsPagingPresenter
