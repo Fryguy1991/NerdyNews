@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 def daggerVersion = '2.17'
+def retrofitVersion = '2.5.0'
 
 android {
     compileSdkVersion 28
@@ -44,8 +45,9 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
 
     // Retrofit Elements
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
 
     // Dagger elements
     implementation "com.google.dagger:dagger:$daggerVersion"
@@ -76,4 +78,9 @@ dependencies {
 
     // GreenRobot (Event Bus)
     implementation 'org.greenrobot:eventbus:3.1.1'
+
+    // RxJava Elements
+    implementation "io.reactivex.rxjava2:rxjava:2.2.8"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.3.0'
 }
