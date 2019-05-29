@@ -4,13 +4,17 @@ import com.chrisfry.nerdnews.AppConstants
 import com.chrisfry.nerdnews.business.enums.ArticleDisplayType
 import com.chrisfry.nerdnews.business.enums.NewsApiCountrys
 import com.chrisfry.nerdnews.business.enums.NewsApiLanguages
-import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.business.events.MoreArticleEvent
+import com.chrisfry.nerdnews.business.events.RefreshCompleteEvent
 import com.chrisfry.nerdnews.model.*
 import com.chrisfry.nerdnews.utils.LogUtils
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import org.greenrobot.eventbus.EventBus
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import javax.inject.Inject
@@ -49,6 +53,7 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
             .client(client)
             .baseUrl(NewsService.NEWS_WEB_API_ENDPOINT)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
         service = retrofit.create(NewsService::class.java)
 
@@ -76,36 +81,73 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
 
         // Request technology articles
         service.getTopHeadlines(getCallParams(ArticleDisplayType.TECH))
-            .enqueue(ArticleRefreshCallback(ArticleDisplayType.TECH))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    verifyArticleRefreshResponse(it!!, ArticleDisplayType.TECH)
+                },
+                onError = {
+                    it.printStackTrace()
+                    // TODO: Notify refresh failed
+                },
+                onComplete = {
+                    LogUtils.debug(TAG, "Done getting TECH headlines")
+                })
 
         // Request science articles
         service.getTopHeadlines(getCallParams(ArticleDisplayType.SCIENCE))
-            .enqueue(ArticleRefreshCallback(ArticleDisplayType.SCIENCE))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    verifyArticleRefreshResponse(it!!, ArticleDisplayType.SCIENCE)
+                },
+                onError = {
+                    it.printStackTrace()
+                    // TODO: Notify refresh failed
+                },
+                onComplete = {
+                    LogUtils.debug(TAG, "Done getting SCIENCE headlines")
+                })
 
         // Request gaming articles
         service.getEverything(getCallParams(ArticleDisplayType.GAMING))
-            .enqueue(ArticleRefreshCallback(ArticleDisplayType.GAMING))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    verifyArticleRefreshResponse(it!!, ArticleDisplayType.GAMING)
+                },
+                onError = {
+                    it.printStackTrace()
+                    // TODO: Notify refresh failed
+                },
+                onComplete = {
+                    LogUtils.debug(TAG, "Done getting GAMING headlines")
+                })
     }
 
     override fun requestMoreArticles(articleType: ArticleDisplayType) {
         LogUtils.debug(TAG, "Requesting more $articleType articles")
 
         when (articleType) {
-            ArticleDisplayType.TECH -> {
-                // Request more technology articles
-                service.getTopHeadlines(getCallParams(ArticleDisplayType.TECH))
-                    .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.TECH))
-            }
-            ArticleDisplayType.SCIENCE -> {
-                // Request more science articles
-                service.getTopHeadlines(getCallParams(ArticleDisplayType.SCIENCE))
-                    .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.SCIENCE))
-            }
-            ArticleDisplayType.GAMING -> {
-                // Request more gaming articles
-                service.getEverything(getCallParams(ArticleDisplayType.GAMING))
-                    .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.GAMING))
-            }
+            // TODO: Replace with rxjava implementation (see refresh changes)
+//            ArticleDisplayType.TECH -> {
+//                // Request more technology articles
+//                service.getTopHeadlines(getCallParams(ArticleDisplayType.TECH))
+//                    .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.TECH))
+//            }
+//            ArticleDisplayType.SCIENCE -> {
+//                // Request more science articles
+//                service.getTopHeadlines(getCallParams(ArticleDisplayType.SCIENCE))
+//                    .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.SCIENCE))
+//            }
+//            ArticleDisplayType.GAMING -> {
+//                // Request more gaming articles
+//                service.getEverything(getCallParams(ArticleDisplayType.GAMING))
+//                    .enqueue(MoreArticleRefreshCallback(ArticleDisplayType.GAMING))
+//            }
         }
     }
 
@@ -183,41 +225,24 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         }
     }
 
-    // CALLBACK OBJECTS
-    /**
-     * Callback class for handling article refresh responses from NewsAPI
-     *
-     * @param articleDisplayType: The article type the callback is receiving
-     */
-    inner class ArticleRefreshCallback(private val articleDisplayType: ArticleDisplayType) :
-        NewsCallback<ArticleResponse>() {
-        override fun onResponse(response: ArticleResponse) {
-            LogUtils.debug(TAG, "Successfully retrieved $articleDisplayType articles")
-            // Pull out any empty articles (all null or empty values)
-            // Not sure if this case is possible, but there is no documentation in NewsAPI to suggest it is impossible
-            val nonNullArticles = response.articles.filter {
-                !isArticleEmpty(it)
-            }
-
-            // Set articles into model
-            articleModelInstance.setArticleList(articleDisplayType, nonNullArticles)
-            // Store page count into model (first page due to refresh)
-            articleModelInstance.setPageCount(articleDisplayType, 1)
-
-            handleArticleTypeRefreshCompleteEvent(articleDisplayType)
+    private fun verifyArticleRefreshResponse(response: ArticleResponse, articleType: ArticleDisplayType) {
+        LogUtils.debug(TAG, "Successfully retrieved $articleType articles")
+        // Pull out any empty articles (all null or empty values)
+        // Not sure if this case is possible, but there is no documentation in NewsAPI to suggest it is impossible
+        val nonNullArticles = response.articles.filter {
+            !isArticleEmpty(it)
         }
 
-        override fun onFailure(error: ResponseError) {
-            LogUtils.error(TAG, "Error refreshing $articleDisplayType articles")
-            LogUtils.error(TAG, "CODE: ${error.code}\nMESSAGE: ${error.message}")
+        // Set articles into model
+        articleModelInstance.setArticleList(articleType, nonNullArticles)
+        // Store page count into model (first page due to refresh)
+        articleModelInstance.setPageCount(articleType, 1)
 
-            // Clear articles and page count in model
-            articleModelInstance.setArticleList(articleDisplayType, listOf())
-            articleModelInstance.setPageCount(articleDisplayType, 0)
-            handleArticleTypeRefreshCompleteEvent(articleDisplayType)
-        }
+        handleArticleTypeRefreshCompleteEvent(articleType)
     }
 
+
+    // TODO: Remove this class when we've replaced it with RxJava calls
     /**
      * Callback class for pulling more articles from NewsAPI
      *
