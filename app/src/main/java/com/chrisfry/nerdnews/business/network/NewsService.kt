@@ -1,7 +1,7 @@
 package com.chrisfry.nerdnews.business.network
 
 import com.chrisfry.nerdnews.model.ArticleResponse
-import retrofit2.Call
+import io.reactivex.Observable
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
 
@@ -53,7 +53,7 @@ interface NewsService {
      * @param options: Map containing request parameters
      */
     @GET("top-headlines")
-    fun getTopHeadlines(@QueryMap options: Map<String, String>): Call<ArticleResponse>
+    fun getTopHeadlines(@QueryMap options: Map<String, String>): Observable<ArticleResponse>
 
     /**
      * Retrieves all articles depending on options provided
@@ -62,7 +62,7 @@ interface NewsService {
      * @param options: Map containing request parameters
      */
     @GET("everything")
-    fun getEverything(@QueryMap options: Map<String, String>): Call<ArticleResponse>
+    fun getEverything(@QueryMap options: Map<String, String>): Observable<ArticleResponse>
 
     // TODO: Currently don't need to get sources, in order to use will need to write SourcesResponse
     // When writing SourcesResponse see https://newsapi.org/docs/endpoints/sources
