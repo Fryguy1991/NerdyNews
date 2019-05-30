@@ -84,15 +84,12 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = {
+                onSuccess = {
                     verifyArticleRefreshResponse(it!!, ArticleDisplayType.TECH)
                 },
                 onError = {
                     it.printStackTrace()
                     // TODO: Notify refresh failed
-                },
-                onComplete = {
-                    LogUtils.debug(TAG, "Done getting TECH headlines")
                 })
 
         // Request science articles
@@ -100,15 +97,12 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = {
+                onSuccess = {
                     verifyArticleRefreshResponse(it!!, ArticleDisplayType.SCIENCE)
                 },
                 onError = {
                     it.printStackTrace()
                     // TODO: Notify refresh failed
-                },
-                onComplete = {
-                    LogUtils.debug(TAG, "Done getting SCIENCE headlines")
                 })
 
         // Request gaming articles
@@ -116,15 +110,12 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = {
+                onSuccess = {
                     verifyArticleRefreshResponse(it!!, ArticleDisplayType.GAMING)
                 },
                 onError = {
                     it.printStackTrace()
                     // TODO: Notify refresh failed
-                },
-                onComplete = {
-                    LogUtils.debug(TAG, "Done getting GAMING headlines")
                 })
     }
 
@@ -225,6 +216,13 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         }
     }
 
+    /**
+     * Method for handling article refresh responses (removes any invalid articles, stores articles in model,
+     * resets stored page count)
+     *
+     * @param response: Article response that will be verified
+     * @param articleType: The article type of the article response
+     */
     private fun verifyArticleRefreshResponse(response: ArticleResponse, articleType: ArticleDisplayType) {
         LogUtils.debug(TAG, "Successfully retrieved $articleType articles")
         // Pull out any empty articles (all null or empty values)
