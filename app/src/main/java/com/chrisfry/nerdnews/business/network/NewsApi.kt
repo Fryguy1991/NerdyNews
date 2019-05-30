@@ -214,7 +214,7 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
     }
 
     /**
-     * Method for handling article refresh responses (removes any invalid articles, stores articles in model,
+     * Function for handling article refresh responses (removes any invalid articles, stores articles in model,
      * resets stored page count)
      *
      * @param response: Article response that will be verified
@@ -233,6 +233,22 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
         // Store page count into model (first page due to refresh)
         articleModelInstance.setPageCount(articleType, 1)
 
+        handleArticleTypeRefreshCompleteEvent(articleType)
+    }
+
+    /**
+     * Function for handling article refresh errors (reset article list and page number of given article type)
+     *
+     * @param error: Throwable of the error that occurred
+     * @param articleType: Type of article that was attempting to be refreshed
+     */
+    private fun articleRefreshError(error: Throwable, articleType: ArticleDisplayType) {
+        LogUtils.error(TAG, "Error refreshing $articleType articles")
+        error.printStackTrace()
+
+        // Clear articles and page count in model
+        articleModelInstance.setArticleList(articleType, listOf())
+        articleModelInstance.setPageCount(articleType, 0)
         handleArticleTypeRefreshCompleteEvent(articleType)
     }
 
