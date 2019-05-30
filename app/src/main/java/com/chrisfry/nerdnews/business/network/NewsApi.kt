@@ -88,8 +88,7 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
                     verifyArticleRefreshResponse(it!!, ArticleDisplayType.TECH)
                 },
                 onError = {
-                    it.printStackTrace()
-                    // TODO: Notify refresh failed
+                    articleRefreshError(it, ArticleDisplayType.TECH)
                 })
 
         // Request science articles
@@ -101,8 +100,7 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
                     verifyArticleRefreshResponse(it!!, ArticleDisplayType.SCIENCE)
                 },
                 onError = {
-                    it.printStackTrace()
-                    // TODO: Notify refresh failed
+                    articleRefreshError(it, ArticleDisplayType.SCIENCE)
                 })
 
         // Request gaming articles
@@ -114,8 +112,7 @@ class NewsApi @Inject constructor(private val eventBus: EventBus) : INewsApi {
                     verifyArticleRefreshResponse(it!!, ArticleDisplayType.GAMING)
                 },
                 onError = {
-                    it.printStackTrace()
-                    // TODO: Notify refresh failed
+                    articleRefreshError(it, ArticleDisplayType.GAMING)
                 })
     }
 
